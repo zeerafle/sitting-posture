@@ -21,6 +21,7 @@ import numpy as np
 
 class BodyPart(enum.Enum):
     """Enum representing human body keypoints detected by pose estimation models."""
+
     NOSE = 0
     LEFT_EYE = 1
     RIGHT_EYE = 2
@@ -34,26 +35,18 @@ class BodyPart(enum.Enum):
     RIGHT_WRIST = 10
     LEFT_HIP = 11
     RIGHT_HIP = 12
-    LEFT_KNEE = 13
-    RIGHT_KNEE = 14
-    LEFT_ANKLE = 15
-    RIGHT_ANKLE = 16
 
 
 class Point(NamedTuple):
     """A point in 2D space."""
+
     x: float
     y: float
 
 
-class Rectangle(NamedTuple):
-    """A rectangle in 2D space."""
-    start_point: Point
-    end_point: Point
-
-
 class KeyPoint(NamedTuple):
     """A detected human keypoint."""
+
     body_part: BodyPart
     coordinate: Point
     score: float
@@ -61,19 +54,19 @@ class KeyPoint(NamedTuple):
 
 class Person(NamedTuple):
     """A pose detected by a pose estimation model."""
+
     keypoints: List[KeyPoint]
-    bounding_box: Rectangle
     score: float
     id: int = None
 
 
 def unnormalize_keypoints_from_padded(
-        keypoints_x: np.ndarray,
-        keypoints_y: np.ndarray,
-        padded_height: int,
-        padded_width: int,
-        original_height: float,
-        original_width: float
+    keypoints_x: np.ndarray,
+    keypoints_y: np.ndarray,
+    padded_height: int,
+    padded_width: int,
+    original_height: float,
+    original_width: float,
 ) -> Tuple[np.ndarray, np.ndarray]:
     """Unnormalizes keypoints from a padded resized image back to the original image size.
 
@@ -107,10 +100,11 @@ def unnormalize_keypoints_from_padded(
 
 
 def person_from_keypoints_with_scores(
-        keypoints_with_scores: np.ndarray,
-        image_height: float,
-        image_width: float,
-        keypoint_score_threshold: float = 0.1) -> Person:
+    keypoints_with_scores: np.ndarray,
+    image_height: float,
+    image_width: float,
+    keypoint_score_threshold: float = 0.1,
+) -> Person:
     """Creates a Person instance from single pose estimation model output.
 
     Args:
@@ -125,36 +119,34 @@ def person_from_keypoints_with_scores(
       A Person instance.
     """
 
-    kpts_x = keypoints_with_scores[:, 1]
-    kpts_y = keypoints_with_scores[:, 0]
-    scores = keypoints_with_scores[:, 2]
+    # only take the first 13 keypoints (legs not included)
+    kpts_x = keypoints_with_scores[:13, 1]
+    kpts_y = keypoints_with_scores[:13, 0]
+    scores = keypoints_with_scores[:13, 2]
 
     # Convert keypoints to the input image coordinate system.
     keypoints = []
-    ori_kpts_x, ori_kpts_y = unnormalize_keypoints_from_padded(kpts_x, kpts_y, 256, 256, image_height, image_width)
+    ori_kpts_x, ori_kpts_y = unnormalize_keypoints_from_padded(
+        kpts_x, kpts_y, 256, 256, image_height, image_width
+    )
     for i in range(scores.shape[0]):
         keypoints.append(
             KeyPoint(
-                BodyPart(i),
-                Point(int(ori_kpts_x[i]), int(ori_kpts_y[i])),
-                scores[i]))
-
-    # Calculate bounding box as SinglePose models don't return bounding box.
-    start_point = Point(
-        int(np.amin(ori_kpts_x)), int(np.amin(ori_kpts_y)))
-    end_point = Point(
-        int(np.amax(ori_kpts_x)), int(np.amax(ori_kpts_y)))
-    bounding_box = Rectangle(start_point, end_point)
+                BodyPart(i), Point(int(ori_kpts_x[i]), int(ori_kpts_y[i])), scores[i]
+            )
+        )
 
     # Calculate person score by averaging keypoint scores.
     scores_above_threshold = list(
-        filter(lambda x: x > keypoint_score_threshold, scores))
+        filter(lambda x: x > keypoint_score_threshold, scores)
+    )
     person_score = np.average(scores_above_threshold)
 
-    return Person(keypoints, bounding_box, person_score)
+    return Person(keypoints, person_score)
 
 
 class Category(NamedTuple):
     """A classification category."""
+
     label: str
     score: float
