@@ -1,0 +1,6 @@
+outs:
+- md5: 1cd349c7c5b3cc1543eb795dbc1fda20.dir
+  size: 4069184162
+  nfiles: 1495
+  hash: md5
+  path: poses_images_out
