@@ -250,5 +250,5 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
-/data/original
-/data/poses_images_out
+/data/original/
+/data/poses_images_out/
