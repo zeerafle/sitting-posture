@@ -1,0 +1,19 @@
+metrics:
+- ../../../dvclive/adaboost/metrics.json
+- ../../../dvclive/adaboost/metrics.json
+- ../../../dvclive/adaboost/metrics.json
+- ../../../dvclive/adaboost/metrics.json
+plots:
+- ../../../dvclive/adaboost/plots/metrics:
+    x: step
+- ../../../dvclive/adaboost/plots/metrics:
+    x: step
+- ../../../dvclive/adaboost/plots/metrics:
+    x: step
+- ../../../dvclive/adaboost/plots/metrics:
+    x: step
+- ../../../dvclive/adaboost/plots/images
+artifacts:
+  adaboost:
+    path: adaboost.joblib
+    type: model

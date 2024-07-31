@@ -95,23 +95,18 @@ df.head()
 
 X = df.drop(["file_name", "class_name", "class_no"])
 X_embedding = X.map_rows(landmarks_to_embedding)
-y = tf.keras.utils.to_categorical(df.select("class_no").to_numpy())
+df_to_split = X_embedding.with_columns(
+    df.select(
+        pl.col('class_no').alias('labels')
+    )
+)
 
-X_train, X_test, y_train, y_test = train_test_split(
-    X_embedding, y, test_size=0.2, random_state=42
-)
-X_val, X_test, y_val, y_test = train_test_split(
-    X_test, y_test, test_size=0.5, random_state=42
-)
+train, test = train_test_split(df_to_split, test_size=0.2, random_state=42)
+test, val = train_test_split(test, test_size=0.5, random_state=42)
 
 os.makedirs("data/processed", exist_ok=True)
 
-# Write numpy X and y to file
-X_train.write_csv("data/processed/X_train.csv")
-np.save("data/processed/y_train.npy", y_train)
-
-X_val.write_csv("data/processed/X_val.csv")
-np.save("data/processed/y_val.npy", y_val)
-
-X_test.write_csv("data/processed/X_test.csv")
-np.save("data/processed/y_test.npy", y_test)
+# write train, val and test
+train.write_csv("data/processed/train.csv")
+val.write_csv("data/processed/val.csv")
+test.write_csv("data/processed/test.csv")

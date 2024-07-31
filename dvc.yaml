@@ -1,4 +1,10 @@
 stages:
+  download:
+    cmd: kaggle datasets download -d zeerafle/sitting-posture -p data/original --unzip
+    outs:
+    - data/original:
+        persist: true
+        cache: false
   featurize:
     cmd: python src/featurize.py
     deps:
@@ -15,26 +21,28 @@ stages:
     - data/data.csv
     - src/prepare.py
     outs:
-    - data/processed:
-        persist: true
+    - data/processed
   train:
     foreach:
-    - nn
+      - name: nn
+        out: model.keras
+      - name: adaboost
+        out: adaboost.joblib
     do:
       cmd: python train.py
-      wdir: src/models/${item}
+      wdir: src/models/${item.name}
       deps:
       - train.py
       - ../../../data/processed
       - ../../evaluate.py
       outs:
-      - model.keras:
+      - ${item.out}:
           cache: false
       metrics:
-      - ../../../dvclive/${item}/metrics.json:
+      - ../../../dvclive/${item.name}/metrics.json:
           cache: false
       plots:
-      - ../../../dvclive/${item}/plots/metrics:
+      - ../../../dvclive/${item.name}/plots/metrics:
           cache: false
           x: step
-      - ../../../dvclive/${item}/plots/images
+      - ../../../dvclive/${item.name}/plots/images

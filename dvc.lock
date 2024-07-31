@@ -5,13 +5,13 @@ stages:
     deps:
     - path: data/original
       hash: md5
-      md5: 3c90c0f50b03a88352db921f33aea957.dir
-      size: 4736427720
+      md5: f458dc9b6943d40f2877b4f63078bd55.dir
+      size: 4931462708
       nfiles: 1725
     - path: src/featurize.py
       hash: md5
-      md5: e3522894fe325e882a314b9868df1096
-      size: 622
+      md5: 808dcdd571727624029edeef3f94b053
+      size: 630
     outs:
     - path: data/data.csv
       hash: md5
@@ -31,14 +31,14 @@ stages:
       size: 557776
     - path: src/prepare.py
       hash: md5
-      md5: 66bb74b61a6a1bbae71dd12a685c6b33
-      size: 3932
+      md5: 70d91993dc9cc3e1d6314fbe74afe6e3
+      size: 3749
     outs:
     - path: data/processed
       hash: md5
-      md5: 92fe0b359442e81d421014f2da0f3f00.dir
-      size: 843215
-      nfiles: 6
+      md5: 7983815f9ab4ca79cc3f24b754b71c7d.dir
+      size: 833552
+      nfiles: 3
   train@nn:
     cmd: python train.py
     deps:
@@ -74,3 +74,81 @@ stages:
       hash: md5
       md5: dded0cba44aaea12667cf0fdbe75a3b9
       size: 175992
+  download:
+    cmd: kaggle datasets download -d zeerafle/sitting-posture -p data/original --unzip
+    outs:
+    - path: data/original
+      hash: md5
+      md5: f458dc9b6943d40f2877b4f63078bd55.dir
+      size: 4931462708
+      nfiles: 1725
+  train@0:
+    cmd: python train.py
+    deps:
+    - path: ../../../data/processed
+      hash: md5
+      md5: 7983815f9ab4ca79cc3f24b754b71c7d.dir
+      size: 833552
+      nfiles: 3
+    - path: ../../evaluate.py
+      hash: md5
+      md5: 9750451b75fa9fd3133b164423b9adc9
+      size: 1044
+    - path: train.py
+      hash: md5
+      md5: de4cc961d34506a92c623e755dc746c0
+      size: 1741
+    outs:
+    - path: ../../../dvclive/nn/metrics.json
+      hash: md5
+      md5: 27eb163fc70ec295be20945fb2597b82
+      size: 425
+    - path: ../../../dvclive/nn/plots/images
+      hash: md5
+      md5: b45cdf9c0f72acfa78741bf8729331cd.dir
+      size: 194675
+      nfiles: 2
+    - path: ../../../dvclive/nn/plots/metrics
+      hash: md5
+      md5: 1d860435e9b4f153460e0804298b2b65.dir
+      size: 6234
+      nfiles: 9
+    - path: model.keras
+      hash: md5
+      md5: 563059d16b21dd7e536ff4c8fc466b6e
+      size: 176464
+  train@1:
+    cmd: python train.py
+    deps:
+    - path: ../../../data/processed
+      hash: md5
+      md5: 7983815f9ab4ca79cc3f24b754b71c7d.dir
+      size: 833552
+      nfiles: 3
+    - path: ../../evaluate.py
+      hash: md5
+      md5: 9750451b75fa9fd3133b164423b9adc9
+      size: 1044
+    - path: train.py
+      hash: md5
+      md5: e4280781cde58304dc460eda60b613e0
+      size: 1059
+    outs:
+    - path: ../../../dvclive/adaboost/metrics.json
+      hash: md5
+      md5: 194d211150fe8ce4b82f0d7a52bcca6b
+      size: 206
+    - path: ../../../dvclive/adaboost/plots/images
+      hash: md5
+      md5: 17380a8883a8cbda819ac00082996bbb.dir
+      size: 197922
+      nfiles: 2
+    - path: ../../../dvclive/adaboost/plots/metrics
+      hash: md5
+      md5: 35726495fef10f47fba7a4577bd7a3fb.dir
+      size: 201
+      nfiles: 5
+    - path: adaboost.joblib
+      hash: md5
+      md5: 100f35d8a8f60bd4e949c87bd0107f62
+      size: 322100
