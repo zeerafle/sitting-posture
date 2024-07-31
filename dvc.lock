@@ -152,3 +152,38 @@ stages:
       hash: md5
       md5: 100f35d8a8f60bd4e949c87bd0107f62
       size: 322100
+  train@2:
+    cmd: python train.py
+    deps:
+    - path: ../../../data/processed
+      hash: md5
+      md5: 7983815f9ab4ca79cc3f24b754b71c7d.dir
+      size: 833552
+      nfiles: 3
+    - path: ../../evaluate.py
+      hash: md5
+      md5: 9750451b75fa9fd3133b164423b9adc9
+      size: 1044
+    - path: train.py
+      hash: md5
+      md5: 2381f13ab30c03cdeb09ceeb8cf9cd44
+      size: 923
+    outs:
+    - path: ../../../dvclive/xgb/metrics.json
+      hash: md5
+      md5: a20ed80bc7dbe3eeac9485db99b5ed9f
+      size: 207
+    - path: ../../../dvclive/xgb/plots/images
+      hash: md5
+      md5: 1a8ae4b5437d2f189611e0af16a9fd52.dir
+      size: 194666
+      nfiles: 2
+    - path: ../../../dvclive/xgb/plots/metrics
+      hash: md5
+      md5: 397de00cdd392d05ebc33ecad8fce5a0.dir
+      size: 202
+      nfiles: 5
+    - path: model.json
+      hash: md5
+      md5: 9a9bb053aadd2642faf54282d72f8846
+      size: 204542

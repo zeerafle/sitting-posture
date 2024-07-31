@@ -1,0 +1,10 @@
+artifacts:
+  model:
+    path: model.json
+    type: model
+metrics:
+- ../../../dvclive/xgb/metrics.json
+plots:
+- ../../../dvclive/xgb/plots/metrics:
+    x: step
+- ../../../dvclive/xgb/plots/images

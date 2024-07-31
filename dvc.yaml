@@ -28,6 +28,8 @@ stages:
         out: model.keras
       - name: adaboost
         out: adaboost.joblib
+      - name: xgb
+        out: model.json
     do:
       cmd: python train.py
       wdir: src/models/${item.name}
