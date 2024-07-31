@@ -1,0 +1,259 @@
+metrics:
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/metrics.json
+plots:
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/images
+artifacts:
+  model:
+    path: model.keras
+    type: model

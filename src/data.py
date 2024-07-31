@@ -57,7 +57,7 @@ class Person(NamedTuple):
 
     keypoints: List[KeyPoint]
     score: float
-    id: int = None
+    id: int | None = None
 
 
 def unnormalize_keypoints_from_padded(

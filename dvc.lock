@@ -1,0 +1,76 @@
+schema: '2.0'
+stages:
+  featurize:
+    cmd: python src/featurize.py
+    deps:
+    - path: data/original
+      hash: md5
+      md5: 3c90c0f50b03a88352db921f33aea957.dir
+      size: 4736427720
+      nfiles: 1725
+    - path: src/featurize.py
+      hash: md5
+      md5: e3522894fe325e882a314b9868df1096
+      size: 622
+    outs:
+    - path: data/data.csv
+      hash: md5
+      md5: 8a5cd157216d40b300801c599f27f47d
+      size: 557776
+    - path: data/poses_images_out
+      hash: md5
+      md5: 415af67a136c371d08196624b6e7b8a1.dir
+      size: 2260318022
+      nfiles: 846
+  prepare:
+    cmd: python src/prepare.py
+    deps:
+    - path: data/data.csv
+      hash: md5
+      md5: 8a5cd157216d40b300801c599f27f47d
+      size: 557776
+    - path: src/prepare.py
+      hash: md5
+      md5: 66bb74b61a6a1bbae71dd12a685c6b33
+      size: 3932
+    outs:
+    - path: data/processed
+      hash: md5
+      md5: 92fe0b359442e81d421014f2da0f3f00.dir
+      size: 843215
+      nfiles: 6
+  train@nn:
+    cmd: python train.py
+    deps:
+    - path: ../../../data/processed
+      hash: md5
+      md5: 92fe0b359442e81d421014f2da0f3f00.dir
+      size: 843215
+      nfiles: 6
+    - path: ../../evaluate.py
+      hash: md5
+      md5: a44ec0acbe71967e5a1609f101d9ebad
+      size: 1621
+    - path: train.py
+      hash: md5
+      md5: fd5fcf5f513575b345bff66497384980
+      size: 1945
+    outs:
+    - path: ../../../dvclive/nn/metrics.json
+      hash: md5
+      md5: 9472e258e16145d3c6d186f152cd366a
+      size: 426
+    - path: ../../../dvclive/nn/plots/images
+      hash: md5
+      md5: 96dade627771b3e16c85f50c731086f4.dir
+      size: 279610
+      nfiles: 2
+    - path: ../../../dvclive/nn/plots/metrics
+      hash: md5
+      md5: 3613b6757e56d7e1c33e4cbb04036099.dir
+      size: 7916
+      nfiles: 9
+    - path: model.keras
+      hash: md5
+      md5: dded0cba44aaea12667cf0fdbe75a3b9
+      size: 175992

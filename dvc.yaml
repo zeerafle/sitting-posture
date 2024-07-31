@@ -1,10 +1,40 @@
-metrics:
-- dvclive/metrics.json
-plots:
-- dvclive/plots/metrics:
-    x: step
-- dvclive/plots/images
-artifacts:
-  mymodel:
-    path: dumps/mymodel.keras
-    type: model
+stages:
+  featurize:
+    cmd: python src/featurize.py
+    deps:
+    - data/original
+    - src/featurize.py
+    outs:
+    - data/data.csv:
+        persist: true
+    - data/poses_images_out:
+        persist: true
+  prepare:
+    cmd: python src/prepare.py
+    deps:
+    - data/data.csv
+    - src/prepare.py
+    outs:
+    - data/processed:
+        persist: true
+  train:
+    foreach:
+    - nn
+    do:
+      cmd: python train.py
+      wdir: src/models/${item}
+      deps:
+      - train.py
+      - ../../../data/processed
+      - ../../evaluate.py
+      outs:
+      - model.keras:
+          cache: false
+      metrics:
+      - ../../../dvclive/${item}/metrics.json:
+          cache: false
+      plots:
+      - ../../../dvclive/${item}/plots/metrics:
+          cache: false
+          x: step
+      - ../../../dvclive/${item}/plots/images
