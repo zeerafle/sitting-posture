@@ -24,22 +24,23 @@ stages:
       size: 6533685930
       nfiles: 2466
   prepare:
-    cmd: python src/prepare.py
+    cmd: uv run python src/prepare.py
     deps:
     - path: data/data.csv
       hash: md5
-      md5: 8a5cd157216d40b300801c599f27f47d
-      size: 557776
+      md5: 62594eb52e65c03d334c16e347e4dcfb
+      size: 602132
     - path: src/prepare.py
       hash: md5
-      md5: 70d91993dc9cc3e1d6314fbe74afe6e3
-      size: 3749
+      md5: 1afd29c3604afb94f942335de169fe6e
+      size: 6756
+      isexec: true
     outs:
     - path: data/processed
       hash: md5
-      md5: 7983815f9ab4ca79cc3f24b754b71c7d.dir
-      size: 833552
-      nfiles: 3
+      md5: 2855099348d74d1624e2b72f4a327974.dir
+      size: 859285
+      nfiles: 6
   train@nn:
     cmd: python train.py
     deps:
