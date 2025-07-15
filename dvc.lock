@@ -1,27 +1,28 @@
 schema: '2.0'
 stages:
   featurize:
-    cmd: python src/featurize.py
+    cmd: uv run python src/featurize.py
     deps:
     - path: data/original
       hash: md5
-      md5: f458dc9b6943d40f2877b4f63078bd55.dir
-      size: 4931462708
-      nfiles: 1725
+      md5: 2e48746054b3065a5dcb4c7da98abc9e.dir
+      size: 4410730947
+      nfiles: 1620
     - path: src/featurize.py
       hash: md5
-      md5: 808dcdd571727624029edeef3f94b053
-      size: 630
+      md5: a3c218bdbc7f80e4d3c963c788e95a73
+      size: 606
+      isexec: true
     outs:
     - path: data/data.csv
       hash: md5
-      md5: 8a5cd157216d40b300801c599f27f47d
-      size: 557776
+      md5: 62594eb52e65c03d334c16e347e4dcfb
+      size: 602132
     - path: data/poses_images_out
       hash: md5
-      md5: 415af67a136c371d08196624b6e7b8a1.dir
-      size: 2260318022
-      nfiles: 846
+      md5: a0a69b18d360cf189b99eb19cfde19a3.dir
+      size: 6533685930
+      nfiles: 2466
   prepare:
     cmd: python src/prepare.py
     deps:
@@ -75,7 +76,8 @@ stages:
       md5: dded0cba44aaea12667cf0fdbe75a3b9
       size: 175992
   download:
-    cmd: kaggle datasets download -d zeerafle/sitting-posture -p data/original --unzip
+    cmd: kaggle datasets download -d zeerafle/sitting-posture -p data/original 
+      --unzip
     outs:
     - path: data/original
       hash: md5

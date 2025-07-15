@@ -1,12 +1,12 @@
 stages:
-  download:
-    cmd: kaggle datasets download -d zeerafle/sitting-posture -p data/original --unzip
-    outs:
-    - data/original:
-        persist: true
-        cache: false
+  # download:
+  #   cmd: kaggle datasets download -d zeerafle/sitting-posture -p data/original --unzip
+  #   outs:
+  #   - data/original:
+  #       persist: true
+  #       cache: false
   featurize:
-    cmd: python src/featurize.py
+    cmd: uv run python src/featurize.py
     deps:
     - data/original
     - src/featurize.py
@@ -16,7 +16,7 @@ stages:
     - data/poses_images_out:
         persist: true
   prepare:
-    cmd: python src/prepare.py
+    cmd: uv run python src/prepare.py
     deps:
     - data/data.csv
     - src/prepare.py
@@ -31,7 +31,7 @@ stages:
       - name: xgb
         out: model.json
     do:
-      cmd: python train.py
+      cmd: uv run python train.py
       wdir: src/models/${item.name}
       deps:
       - train.py
