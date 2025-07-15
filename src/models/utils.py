@@ -11,7 +11,7 @@ def log_confusion_matrix(live, cm, class_names, title=None, cmap='Blues'):
     plt.rcParams["font.size"] = 10
     fig, ax = plt.subplots(figsize=(7, 6), dpi=300)
     sns.heatmap(cm, annot=True, cmap=cmap,
-                ax=ax, annot_kws={"fontsize": 11},
+                ax=ax, annot_kws={"fontsize": 13},
                 xticklabels=class_names, yticklabels=class_names)
     ax.set_xlabel('Predicted Class')
     ax.set_ylabel('Actual Class')
@@ -30,16 +30,22 @@ def log_roc_auc_curve(live, y_true, y_pred_proba):
 
 
 def load_data(base_path):
-    train = pl.read_csv(os.path.join(base_path, "train.csv"))
-    test = pl.read_csv(os.path.join(base_path, "test.csv"))
-    val = pl.read_csv(os.path.join(base_path, "val.csv"))
+    data = {
+        'front': {},
+        'left': {},
+        'right': {},
+    }
 
-    X_train = train.select(pl.exclude("labels"))
-    X_val = val.select(pl.exclude("labels"))
-    X_test = test.select(pl.exclude("labels"))
+    for view in os.listdir(base_path):
+        view_path = os.path.join(base_path, view)
 
-    y_train = train.select("labels")
-    y_val = val.select("labels")
-    y_test = test.select("labels")
+        train = pl.read_csv(os.path.join(view_path, "train.csv"))
+        test = pl.read_csv(os.path.join(view_path, "test.csv"))
 
-    return X_train, y_train, X_test, y_test, X_val, y_val
+        data[view]['X_train'] = train.select(pl.exclude("labels"))
+        data[view]['X_test'] = test.select(pl.exclude("labels"))
+
+        data[view]['y_train'] = train.select("labels")
+        data[view]['y_test'] = test.select("labels")
+
+    return data
