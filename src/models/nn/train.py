@@ -12,6 +12,7 @@ from dvclive import Live
 import dvc.api
 import json
 import joblib
+from codecarbon import OfflineEmissionsTracker
 
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -97,10 +98,30 @@ for view in ["front", "left", "right"]:
             json.dump(opt.cv_results_, f, indent=4, cls=NumpyEncoder)
         live.log_artifact(cv_results_json_path, type="cv_results")
 
+        # re-train the model with the best hyperparameters
+        with OfflineEmissionsTracker(
+            output_file=os.path.join(parent_dir, f"../dvclive/nn/{view}/emissions.csv")
+        ) as training_tracker:
+            mlp = MLPClassifier(
+                hidden_layer_sizes=(
+                    opt.best_params_["layer1"],
+                    opt.best_params_["layer2"],
+                ),
+                batch_size=params["nn"]["batch_size"],
+                max_iter=params["nn"]["epochs"],
+                random_state=params["random_state"],
+                learning_rate_init=opt.best_params_["learning_rate_init"],
+            )
+            model = mlp.fit(X_train, np.ravel(y_train))
+        live.log_artifact(
+            os.path.join(parent_dir, f"../dvclive/nn/{view}/emissions.csv"),
+            type="emissions",
+        )
+
         # log metrics
-        if hasattr(model, 'best_loss_') and model.best_loss_ is not None:
+        if hasattr(model, "best_loss_") and model.best_loss_ is not None:
             live.log_metric("best_loss", float(model.best_loss_))
-        if hasattr(model, 'loss_curve_') and model.loss_curve_ is not None:
+        if hasattr(model, "loss_curve_") and model.loss_curve_ is not None:
             for loss in model.loss_curve_:
                 live.log_metric("loss_curve", float(loss))
 
@@ -114,9 +135,15 @@ for view in ["front", "left", "right"]:
         # Classify pose in the TEST dataset using the trained model
         y_pred_proba = model.predict_proba(X_test)[:, 1]
 
-        start_time = time.time()
-        y_pred = model.predict(X_test)
-        end_time = time.time()
-        live.log_metric("inference_time", end_time - start_time)
+        with OfflineEmissionsTracker(
+            output_file=os.path.join(
+                parent_dir, f"../dvclive/nn/{view}/emissions_inference.csv"
+            )
+        ) as inference_tracker:
+            y_pred = model.predict(X_test)
+        live.log_artifact(
+            os.path.join(parent_dir, f"../dvclive/nn/{view}/emissions_inference.csv"),
+            type="emissions_inference",
+        )
 
         evaluate(model, X_train, X_test, y_train, y_test, y_pred, y_pred_proba, live)

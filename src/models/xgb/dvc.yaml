@@ -5,6 +5,12 @@ artifacts:
   cv_results:
     path: ../../../dvclive/xgb/right/cv_results.json
     type: cv_results
+  emissions:
+    path: ../../../dvclive/xgb/right/emissions.csv
+    type: emissions
+  emissions_inference:
+    path: ../../../dvclive/xgb/right/emissions_inference.csv
+    type: emissions_inference
 metrics:
 - ../../../dvclive/xgb/metrics.json
 - ../../../dvclive/xgb/front/metrics.json

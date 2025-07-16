@@ -42,40 +42,108 @@ stages:
       size: 859285
       nfiles: 6
   train@nn:
-    cmd: python train.py
+    cmd: uv run python train.py
     deps:
     - path: ../../../data/processed
       hash: md5
-      md5: 92fe0b359442e81d421014f2da0f3f00.dir
-      size: 843215
+      md5: 2855099348d74d1624e2b72f4a327974.dir
+      size: 859285
       nfiles: 6
-    - path: ../../evaluate.py
+    - path: ../evaluate.py
       hash: md5
-      md5: a44ec0acbe71967e5a1609f101d9ebad
-      size: 1621
+      md5: 78b2d97eb6a8b7354dff1c568d081c96
+      size: 2286
+      isexec: true
+    - path: ../utils.py
+      hash: md5
+      md5: 52fc3ce530bd068bba046c138b0a718d
+      size: 2354
+      isexec: true
     - path: train.py
       hash: md5
-      md5: fd5fcf5f513575b345bff66497384980
-      size: 1945
+      md5: d0029903bb8cec78e6a742d5376fd874
+      size: 5190
+    params:
+      ../../../params.yaml:
+        adaboost:
+          n_estimators_min: 10
+          n_estimators_max: 2000
+        cv: 5
+        n_iter: 30
+        nn:
+          first_hidden_layer_sizes_min: 128
+          first_hidden_layer_sizes_max: 512
+          second_hidden_layer_sizes_min: 256
+          second_hidden_layer_sizes_max: 1024
+          learning_rates:
+          - 0.0001
+          - 0.001
+          - 0.01
+          batch_size: 32
+          epochs: 50
+        random_state: 42
+        scoring: accuracy
+        xgb:
+          gamma_min: 5.0
+          gamma_max: 11.0
+          learning_rate_min: 0.07
+          learning_rate_max: 0.6
+          n_estimators:
+          - 50
+          - 100
+          - 150
+          regulation_alphas:
+          - 1e-05
+          - 0.01
+          - 0.75
+          regulation_lambdas:
+          - 1e-05
+          - 0.01
+          - 0.45
+          min_child_weights:
+          - 1.5
+          - 6
+          - 10
+          subsamples:
+          - 0.6
+          - 0.95
+          max_depths:
+          - 3
+          - 6
+          - 9
     outs:
-    - path: ../../../dvclive/nn/metrics.json
+    - path: ../../../dvclive/nn/front/metrics.json
       hash: md5
-      md5: 9472e258e16145d3c6d186f152cd366a
-      size: 426
-    - path: ../../../dvclive/nn/plots/images
+      md5: acb912450da95894f81e59e362403970
+      size: 704
+    - path: ../../../dvclive/nn/front/plots/metrics
       hash: md5
-      md5: 96dade627771b3e16c85f50c731086f4.dir
-      size: 279610
-      nfiles: 2
-    - path: ../../../dvclive/nn/plots/metrics
+      md5: 14fc2bd10fc220a81da5501d2fdee1eb.dir
+      size: 1748
+      nfiles: 17
+    - path: ../../../dvclive/nn/left/metrics.json
       hash: md5
-      md5: 3613b6757e56d7e1c33e4cbb04036099.dir
-      size: 7916
-      nfiles: 9
-    - path: model.keras
+      md5: 4eb98e6b2afe4f42c72277163f6c760c
+      size: 689
+    - path: ../../../dvclive/nn/left/plots/metrics
       hash: md5
-      md5: dded0cba44aaea12667cf0fdbe75a3b9
-      size: 175992
+      md5: 3c90164c58ee82563ae3b3351afb6115.dir
+      size: 1724
+      nfiles: 17
+    - path: ../../../dvclive/nn/right/metrics.json
+      hash: md5
+      md5: 1d4075a3012d0e3576c361e1f886ece8
+      size: 657
+    - path: ../../../dvclive/nn/right/plots/metrics
+      hash: md5
+      md5: 92ff7e9c40eb1e52cffd922ffbad5906.dir
+      size: 1698
+      nfiles: 17
+    - path: ../../../models/nn
+      hash: md5
+      md5: 49144455024036902d43200cef2dd6ff.dir
+      size: 12205352
+      nfiles: 3
   download:
     cmd: kaggle datasets download -d zeerafle/sitting-posture -p data/original 
       --unzip
@@ -202,14 +270,16 @@ stages:
       hash: md5
       md5: 78b2d97eb6a8b7354dff1c568d081c96
       size: 2286
+      isexec: true
     - path: ../utils.py
       hash: md5
       md5: 52fc3ce530bd068bba046c138b0a718d
       size: 2354
+      isexec: true
     - path: train.py
       hash: md5
-      md5: bed2e355cddd59f394cfb17b33ee6861
-      size: 3217
+      md5: 40c282f442124172c9c3b679b4087a45
+      size: 4599
     params:
       ../../../params.yaml:
         adaboost:
@@ -261,33 +331,136 @@ stages:
     outs:
     - path: ../../../dvclive/xgb/front/metrics.json
       hash: md5
-      md5: 31478599d66445c1e6e48777b7b63512
-      size: 725
+      md5: 3a30bb43ef7019a10ef7ff8869c74463
+      size: 681
     - path: ../../../dvclive/xgb/front/plots/metrics
       hash: md5
-      md5: e3465b191925046b2292c1e7c1b10aab.dir
-      size: 705
-      nfiles: 17
+      md5: 2479c90a34097828baee299bf9a368f4.dir
+      size: 662
+      nfiles: 16
     - path: ../../../dvclive/xgb/left/metrics.json
       hash: md5
-      md5: ccb588224085f90c1039051b01e2fc3f
-      size: 710
+      md5: 7a621ccec546302ac5503727a2c9c0e1
+      size: 667
     - path: ../../../dvclive/xgb/left/plots/metrics
       hash: md5
-      md5: 3e1277da118d7af1e5dce67f7f6dd28b.dir
-      size: 690
-      nfiles: 17
+      md5: cc1e5e1f7218a38ea4c85e49640c02dd.dir
+      size: 648
+      nfiles: 16
     - path: ../../../dvclive/xgb/right/metrics.json
       hash: md5
-      md5: d5dc23cb624612d7abe1aca2a06d75e3
-      size: 708
+      md5: f2ef0ea2334cdb958c3f847600056f24
+      size: 665
     - path: ../../../dvclive/xgb/right/plots/metrics
       hash: md5
-      md5: 095df559b2ce50073bb83633877adf8d.dir
-      size: 688
-      nfiles: 17
+      md5: e4683a5fdc92f0abb93a18278005aecc.dir
+      size: 646
+      nfiles: 16
     - path: ../../../models/xgb
       hash: md5
       md5: 43b54bcd0cf5e75b10a0d21daa1d0ff9.dir
       size: 178016
+      nfiles: 3
+  train@adaboost:
+    cmd: uv run python train.py
+    deps:
+    - path: ../../../data/processed
+      hash: md5
+      md5: 2855099348d74d1624e2b72f4a327974.dir
+      size: 859285
+      nfiles: 6
+    - path: ../evaluate.py
+      hash: md5
+      md5: 78b2d97eb6a8b7354dff1c568d081c96
+      size: 2286
+      isexec: true
+    - path: ../utils.py
+      hash: md5
+      md5: 52fc3ce530bd068bba046c138b0a718d
+      size: 2354
+      isexec: true
+    - path: train.py
+      hash: md5
+      md5: 2dbbd0154e7bfe9d92df15462e5eb80b
+      size: 3924
+    params:
+      ../../../params.yaml:
+        adaboost:
+          n_estimators_min: 10
+          n_estimators_max: 2000
+        cv: 5
+        n_iter: 30
+        nn:
+          first_hidden_layer_sizes_min: 128
+          first_hidden_layer_sizes_max: 512
+          second_hidden_layer_sizes_min: 256
+          second_hidden_layer_sizes_max: 1024
+          learning_rates:
+          - 0.0001
+          - 0.001
+          - 0.01
+          batch_size: 32
+          epochs: 50
+        random_state: 42
+        scoring: accuracy
+        xgb:
+          gamma_min: 5.0
+          gamma_max: 11.0
+          learning_rate_min: 0.07
+          learning_rate_max: 0.6
+          n_estimators:
+          - 50
+          - 100
+          - 150
+          regulation_alphas:
+          - 1e-05
+          - 0.01
+          - 0.75
+          regulation_lambdas:
+          - 1e-05
+          - 0.01
+          - 0.45
+          min_child_weights:
+          - 1.5
+          - 6
+          - 10
+          subsamples:
+          - 0.6
+          - 0.95
+          max_depths:
+          - 3
+          - 6
+          - 9
+    outs:
+    - path: ../../../dvclive/adaboost/front/metrics.json
+      hash: md5
+      md5: 56ae864483eed9466a0f7d3a1e65011b
+      size: 716
+    - path: ../../../dvclive/adaboost/front/plots/metrics
+      hash: md5
+      md5: eae08d1c848b44f9c93e19fedea14d5e.dir
+      size: 696
+      nfiles: 17
+    - path: ../../../dvclive/adaboost/left/metrics.json
+      hash: md5
+      md5: d3142fdb5d554ae3a286edf2d3394c66
+      size: 733
+    - path: ../../../dvclive/adaboost/left/plots/metrics
+      hash: md5
+      md5: c60ebb7b5395873d1c242d7ca92dcb23.dir
+      size: 713
+      nfiles: 17
+    - path: ../../../dvclive/adaboost/right/metrics.json
+      hash: md5
+      md5: 2e6523a804e9cf8f2b3cbbc83b00397f
+      size: 715
+    - path: ../../../dvclive/adaboost/right/plots/metrics
+      hash: md5
+      md5: d6d1108591babaa79952731beeeb4444.dir
+      size: 695
+      nfiles: 17
+    - path: ../../../models/adaboost
+      hash: md5
+      md5: 783c23866f7a7438a6423673971717ea.dir
+      size: 1446620
       nfiles: 3

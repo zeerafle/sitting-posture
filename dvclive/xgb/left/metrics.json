@@ -1,6 +1,5 @@
 {
     "feature_importance_mean": 0.03846153989434242,
-    "inference_time": 0.04163193702697754,
     "cv_accuracy_mean": 0.8669384981311588,
     "cv_f1_mean": 0.8631381886721693,
     "cv_precision_mean": 0.8877627050820328,

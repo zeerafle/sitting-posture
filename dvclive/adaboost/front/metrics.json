@@ -1,7 +1,6 @@
 {
     "estimator_weights_mean": 0.2090131533471748,
     "feature_importance_mean": 0.038461538461538464,
-    "inference_time": 0.2788407802581787,
     "cv_accuracy_mean": 0.8981481481481481,
     "cv_f1_mean": 0.8948409284982674,
     "cv_precision_mean": 0.9196421832136117,

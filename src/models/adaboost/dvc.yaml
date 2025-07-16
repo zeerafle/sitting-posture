@@ -26,3 +26,9 @@ artifacts:
   adaboost_left:
     path: ../../../models/adaboost/adaboost_left.joblib
     type: model
+  emissions:
+    path: ../../../dvclive/adaboost/right/emissions.csv
+    type: emissions
+  emissions_inference:
+    path: ../../../dvclive/adaboost/right/emissions_inference.csv
+    type: emissions_inference
