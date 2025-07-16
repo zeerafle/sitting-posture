@@ -2,9 +2,28 @@ artifacts:
   model:
     path: model.json
     type: model
+  cv_results:
+    path: ../../../dvclive/xgb/right/cv_results.json
+    type: cv_results
 metrics:
 - ../../../dvclive/xgb/metrics.json
+- ../../../dvclive/xgb/front/metrics.json
+- ../../../dvclive/xgb/left/metrics.json
+- ../../../dvclive/xgb/right/metrics.json
 plots:
 - ../../../dvclive/xgb/plots/metrics:
     x: step
 - ../../../dvclive/xgb/plots/images
+- ../../../dvclive/xgb/front/plots/metrics:
+    x: step
+- ../../../dvclive/xgb/front/plots/images
+- ../../../dvclive/xgb/left/plots/metrics:
+    x: step
+- ../../../dvclive/xgb/left/plots/images
+- ../../../dvclive/xgb/right/plots/metrics:
+    x: step
+- ../../../dvclive/xgb/right/plots/images
+params:
+- ../../../dvclive/xgb/front/params.yaml
+- ../../../dvclive/xgb/left/params.yaml
+- ../../../dvclive/xgb/right/params.yaml

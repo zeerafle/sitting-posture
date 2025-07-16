@@ -190,3 +190,104 @@ stages:
       hash: md5
       md5: 9a9bb053aadd2642faf54282d72f8846
       size: 204542
+  train@xgb:
+    cmd: uv run python train.py
+    deps:
+    - path: ../../../data/processed
+      hash: md5
+      md5: 2855099348d74d1624e2b72f4a327974.dir
+      size: 859285
+      nfiles: 6
+    - path: ../evaluate.py
+      hash: md5
+      md5: 78b2d97eb6a8b7354dff1c568d081c96
+      size: 2286
+    - path: ../utils.py
+      hash: md5
+      md5: 52fc3ce530bd068bba046c138b0a718d
+      size: 2354
+    - path: train.py
+      hash: md5
+      md5: bed2e355cddd59f394cfb17b33ee6861
+      size: 3217
+    params:
+      ../../../params.yaml:
+        adaboost:
+          n_estimators_min: 10
+          n_estimators_max: 2000
+        cv: 5
+        n_iter: 30
+        nn:
+          first_hidden_layer_sizes_min: 128
+          first_hidden_layer_sizes_max: 512
+          second_hidden_layer_sizes_min: 256
+          second_hidden_layer_sizes_max: 1024
+          learning_rates:
+          - 0.0001
+          - 0.001
+          - 0.01
+          batch_size: 32
+          epochs: 50
+        random_state: 42
+        scoring: accuracy
+        xgb:
+          gamma_min: 5.0
+          gamma_max: 11.0
+          learning_rate_min: 0.07
+          learning_rate_max: 0.6
+          n_estimators:
+          - 50
+          - 100
+          - 150
+          regulation_alphas:
+          - 1e-05
+          - 0.01
+          - 0.75
+          regulation_lambdas:
+          - 1e-05
+          - 0.01
+          - 0.45
+          min_child_weights:
+          - 1.5
+          - 6
+          - 10
+          subsamples:
+          - 0.6
+          - 0.95
+          max_depths:
+          - 3
+          - 6
+          - 9
+    outs:
+    - path: ../../../dvclive/xgb/front/metrics.json
+      hash: md5
+      md5: 31478599d66445c1e6e48777b7b63512
+      size: 725
+    - path: ../../../dvclive/xgb/front/plots/metrics
+      hash: md5
+      md5: e3465b191925046b2292c1e7c1b10aab.dir
+      size: 705
+      nfiles: 17
+    - path: ../../../dvclive/xgb/left/metrics.json
+      hash: md5
+      md5: ccb588224085f90c1039051b01e2fc3f
+      size: 710
+    - path: ../../../dvclive/xgb/left/plots/metrics
+      hash: md5
+      md5: 3e1277da118d7af1e5dce67f7f6dd28b.dir
+      size: 690
+      nfiles: 17
+    - path: ../../../dvclive/xgb/right/metrics.json
+      hash: md5
+      md5: d5dc23cb624612d7abe1aca2a06d75e3
+      size: 708
+    - path: ../../../dvclive/xgb/right/plots/metrics
+      hash: md5
+      md5: 095df559b2ce50073bb83633877adf8d.dir
+      size: 688
+      nfiles: 17
+    - path: ../../../models/xgb
+      hash: md5
+      md5: 43b54bcd0cf5e75b10a0d21daa1d0ff9.dir
+      size: 178016
+      nfiles: 3

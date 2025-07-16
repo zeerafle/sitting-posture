@@ -7,7 +7,7 @@ from sklearn.metrics import (
     recall_score,
     roc_auc_score,
 )
-from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import cross_validate
 import numpy as np
 import polars as pl
 
@@ -21,7 +21,7 @@ def evaluate(
 ):
     # log cross-validation for whole data (train + test)
     scoring = ['accuracy', 'f1', 'precision', 'recall', 'roc_auc']
-    cv_scores = cross_val_score(model,
+    cv_scores = cross_validate(model,
                                 pl.concat([X_train, X_test]),
                                 np.ravel(pl.concat([y_train, y_test])),
                                 cv=5,
@@ -33,6 +33,11 @@ def evaluate(
     live.log_metric('cv_recall_mean', np.mean(cv_scores['test_recall']))
     live.log_metric('cv_roc_auc_mean', np.mean(cv_scores['test_roc_auc']))
 
+    live.log_metric('cv_std_accuracy', np.std(cv_scores['test_accuracy']))
+    live.log_metric('cv_std_f1', np.std(cv_scores['test_f1']))
+    live.log_metric('cv_std_precision', np.std(cv_scores['test_precision']))
+    live.log_metric('cv_std_recall', np.std(cv_scores['test_recall']))
+    live.log_metric('cv_std_roc_auc', np.std(cv_scores['test_roc_auc']))
 
     # log test metric
     y_test = np.ravel(y_test)

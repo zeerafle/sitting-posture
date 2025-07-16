@@ -37,7 +37,7 @@ stages:
       - ../evaluate.py
       - ../utils.py
       params:
-        - ../../../params.yaml
+        - ../../../params.yaml:
       outs:
       - ../../../models/${item}:
           cache: false
