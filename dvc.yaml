@@ -22,29 +22,39 @@ stages:
     - src/prepare.py
     outs:
     - data/processed
+
   train:
     foreach:
-      - name: nn
-        out: model.keras
-      - name: adaboost
-        out: adaboost.joblib
-      - name: xgb
-        out: model.json
+      - adaboost
+      - nn
+      - xgb
     do:
       cmd: uv run python train.py
-      wdir: src/models/${item.name}
+      wdir: src/models/${item}
       deps:
       - train.py
       - ../../../data/processed
-      - ../../evaluate.py
+      - ../evaluate.py
+      - ../utils.py
+      params:
+        - ../../../params.yaml
       outs:
-      - ${item.out}:
+      - ../../../models/${item}:
           cache: false
       metrics:
-      - ../../../dvclive/${item.name}/metrics.json:
+      - ../../../dvclive/${item}/front/metrics.json:
+          cache: false
+      - ../../../dvclive/${item}/left/metrics.json:
+          cache: false
+      - ../../../dvclive/${item}/right/metrics.json:
           cache: false
       plots:
-      - ../../../dvclive/${item.name}/plots/metrics:
+      - ../../../dvclive/${item}/front/plots/metrics:
           cache: false
           x: step
-      - ../../../dvclive/${item.name}/plots/images
+      - ../../../dvclive/${item}/left/plots/metrics:
+          cache: false
+          x: step
+      - ../../../dvclive/${item}/right/plots/metrics:
+          cache: false
+          x: step
