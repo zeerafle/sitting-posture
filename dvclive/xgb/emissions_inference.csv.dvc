@@ -1,0 +1,5 @@
+outs:
+- md5: aba3c1baaf8604cd1f90f441b8fb115d
+  size: 745
+  hash: md5
+  path: emissions_inference.csv

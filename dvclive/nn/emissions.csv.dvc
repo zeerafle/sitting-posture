@@ -1,0 +1,5 @@
+outs:
+- md5: f2c6b45dcc8791a2843ba2a58865172d
+  size: 744
+  hash: md5
+  path: emissions.csv

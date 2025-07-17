@@ -53,3 +53,5 @@ def evaluate(
     cm = confusion_matrix(y_test, y_pred)
     log_confusion_matrix(live, cm, class_names=["ergonomic", "non-ergonomic"])
     log_roc_auc_curve(live, y_test, y_pred_proba)
+
+    return cv_scores

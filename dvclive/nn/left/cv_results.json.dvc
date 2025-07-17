@@ -1,6 +1,0 @@
-outs:
-- md5: f0b366172f2bc4e2d14490310889433b
-  size: 14920
-  hash: md5
-  path: cv_results.json
-  isexec: true

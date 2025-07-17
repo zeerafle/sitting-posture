@@ -1,6 +1,5 @@
 import os
 import sys
-import time
 
 from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.neural_network import MLPClassifier
@@ -24,9 +23,10 @@ sys.path.insert(0, parent_dir)
 from models.utils import NumpyEncoder, load_data
 from models.evaluate import evaluate
 
+dvclive_path = os.path.join(parent_dir, "../dvclive/nn")
 params = dvc.api.params_show()
 
-data = load_data(os.path.join(parent_dir, "../data/processed"))
+X_train, X_test, y_train, y_test = load_data(os.path.join(parent_dir, "../data/processed"))
 
 
 class MLPWrapper(BaseEstimator, ClassifierMixin):
@@ -54,96 +54,93 @@ class MLPWrapper(BaseEstimator, ClassifierMixin):
         return self.model.score(X, y)
 
 
-for view in ["front", "left", "right"]:
-    X_train = data[view]["X_train"]
-    y_train = data[view]["y_train"]
-    X_test = data[view]["X_test"]
-    y_test = data[view]["y_test"]
+with Live(dvclive_path) as live:
+    param_space = {
+        "layer1": Integer(
+            params["nn"]["first_hidden_layer_sizes_min"],
+            params["nn"]["first_hidden_layer_sizes_max"],
+        ),
+        "layer2": Integer(
+            params["nn"]["second_hidden_layer_sizes_min"],
+            params["nn"]["second_hidden_layer_sizes_max"],
+        ),
+        "learning_rate_init": Categorical(params["nn"]["learning_rates"]),
+    }
+    # Setup Bayesian optimization
+    opt = BayesSearchCV(
+        estimator=MLPWrapper(),
+        search_spaces=param_space,
+        n_iter=params["n_iter"],
+        cv=params["cv"],
+        scoring=params["scoring"],
+        random_state=params["random_state"],
+        n_jobs=-1,
+        verbose=1,
+    )
 
-    with Live(os.path.join(parent_dir, f"../dvclive/nn/{view}")) as live:
-        param_space = {
-            "layer1": Integer(
-                params["nn"]["first_hidden_layer_sizes_min"],
-                params["nn"]["first_hidden_layer_sizes_max"],
-            ),
-            "layer2": Integer(
-                params["nn"]["second_hidden_layer_sizes_min"],
-                params["nn"]["second_hidden_layer_sizes_max"],
-            ),
-            "learning_rate_init": Categorical(params["nn"]["learning_rates"]),
-        }
+    opt.fit(X_train, np.ravel(y_train))
 
-        # Setup Bayesian optimization
-        opt = BayesSearchCV(
-            estimator=MLPWrapper(),
-            search_spaces=param_space,
-            n_iter=params["n_iter"],
-            cv=params["cv"],
-            scoring=params["scoring"],
+    # log hyperparameters
+    live.log_params(opt.best_params_)
+    live.log_param("htcv_best_score", float(opt.best_score_))
+    htcv_results_json_path = os.path.join(
+        dvclive_path, "cv_results.json"
+    )
+    with open(htcv_results_json_path, "w") as f:
+        json.dump(opt.cv_results_, f, indent=4, cls=NumpyEncoder)
+    live.log_artifact(htcv_results_json_path, type="htcv_results")
+
+    # re-train the model with the best hyperparameters
+    with OfflineEmissionsTracker(
+        output_file=os.path.join(dvclive_path, "emissions.csv")
+    ) as training_tracker:
+        mlp = MLPClassifier(
+            hidden_layer_sizes=(
+                opt.best_params_["layer1"],
+                opt.best_params_["layer2"],
+            ),
+            batch_size=params["nn"]["batch_size"],
+            max_iter=params["nn"]["epochs"],
             random_state=params["random_state"],
-            n_jobs=-1,
-            verbose=1,
+            learning_rate_init=opt.best_params_["learning_rate_init"],
         )
+        model = mlp.fit(X_train, np.ravel(y_train))
+    live.log_artifact(
+        os.path.join(dvclive_path, "emissions.csv"),
+        type="emissions",
+    )
 
-        opt.fit(X_train, np.ravel(y_train))
-        model = opt.best_estimator_.model
+    # log metrics
+    if hasattr(model, "best_loss_") and model.best_loss_ is not None:
+        live.log_metric("best_loss", float(model.best_loss_))
+    if hasattr(model, "loss_curve_") and model.loss_curve_ is not None:
+        for loss in model.loss_curve_:
+            live.log_metric("loss_curve", float(loss))
 
-        # log hyperparameters
-        live.log_params(opt.best_params_)
-        live.log_param("htcv_best_score", float(opt.best_score_))
-        cv_results_json_path = os.path.join(
-            parent_dir, f"../dvclive/nn/{view}/cv_results.json"
+    # Save the trained model
+    models_dir = os.path.join(parent_dir, "../models/nn/")
+    os.makedirs(models_dir, exist_ok=True)
+    model_path = os.path.join(models_dir, f"nn.joblib")
+    with open(model_path, "wb") as f:
+        joblib.dump(model, f)
+
+   # Classify pose in the TEST dataset using the trained model
+    y_pred_proba = model.predict_proba(X_test)[:, 1]
+
+    with OfflineEmissionsTracker(
+        output_file=os.path.join(
+            dvclive_path, "emissions_inference.csv"
         )
-        with open(cv_results_json_path, "w") as f:
-            json.dump(opt.cv_results_, f, indent=4, cls=NumpyEncoder)
-        live.log_artifact(cv_results_json_path, type="cv_results")
+    ) as inference_tracker:
+        y_pred = model.predict(X_test)
+    live.log_artifact(
+        os.path.join(dvclive_path, "emissions_inference.csv"),
+        type="emissions_inference",
+    )
 
-        # re-train the model with the best hyperparameters
-        with OfflineEmissionsTracker(
-            output_file=os.path.join(parent_dir, f"../dvclive/nn/{view}/emissions.csv")
-        ) as training_tracker:
-            mlp = MLPClassifier(
-                hidden_layer_sizes=(
-                    opt.best_params_["layer1"],
-                    opt.best_params_["layer2"],
-                ),
-                batch_size=params["nn"]["batch_size"],
-                max_iter=params["nn"]["epochs"],
-                random_state=params["random_state"],
-                learning_rate_init=opt.best_params_["learning_rate_init"],
-            )
-            model = mlp.fit(X_train, np.ravel(y_train))
-        live.log_artifact(
-            os.path.join(parent_dir, f"../dvclive/nn/{view}/emissions.csv"),
-            type="emissions",
-        )
+    cv_scores = evaluate(model, X_train, X_test, y_train, y_test, y_pred, y_pred_proba, live)
 
-        # log metrics
-        if hasattr(model, "best_loss_") and model.best_loss_ is not None:
-            live.log_metric("best_loss", float(model.best_loss_))
-        if hasattr(model, "loss_curve_") and model.loss_curve_ is not None:
-            for loss in model.loss_curve_:
-                live.log_metric("loss_curve", float(loss))
-
-        # Save the trained model
-        models_dir = os.path.join(parent_dir, "../models/nn/")
-        os.makedirs(models_dir, exist_ok=True)
-        model_path = os.path.join(models_dir, f"nn_{view}.joblib")
-        with open(model_path, "wb") as f:
-            joblib.dump(model, f)
-
-        # Classify pose in the TEST dataset using the trained model
-        y_pred_proba = model.predict_proba(X_test)[:, 1]
-
-        with OfflineEmissionsTracker(
-            output_file=os.path.join(
-                parent_dir, f"../dvclive/nn/{view}/emissions_inference.csv"
-            )
-        ) as inference_tracker:
-            y_pred = model.predict(X_test)
-        live.log_artifact(
-            os.path.join(parent_dir, f"../dvclive/nn/{view}/emissions_inference.csv"),
-            type="emissions_inference",
-        )
-
-        evaluate(model, X_train, X_test, y_train, y_test, y_pred, y_pred_proba, live)
+    cv_results_json_path = os.path.join(dvclive_path, "cv_results.json")
+    with open(cv_results_json_path, "w") as f:
+        json.dump(cv_scores, f, indent=4, cls=NumpyEncoder)
+    live.log_artifact(cv_results_json_path, type="cv_results")

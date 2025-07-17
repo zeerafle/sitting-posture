@@ -1,34 +1,21 @@
 params:
-- ../../../dvclive/adaboost/front/params.yaml
-- ../../../dvclive/adaboost/left/params.yaml
-- ../../../dvclive/adaboost/right/params.yaml
+- ../../../dvclive/adaboost/params.yaml
 metrics:
-- ../../../dvclive/adaboost/front/metrics.json
-- ../../../dvclive/adaboost/left/metrics.json
-- ../../../dvclive/adaboost/right/metrics.json
+- ../../../dvclive/adaboost/metrics.json
 plots:
-- ../../../dvclive/adaboost/front/plots/metrics:
+- ../../../dvclive/adaboost/plots/metrics:
     x: step
-- ../../../dvclive/adaboost/front/plots/images
-- ../../../dvclive/adaboost/left/plots/metrics:
-    x: step
-- ../../../dvclive/adaboost/left/plots/images
-- ../../../dvclive/adaboost/right/plots/metrics:
-    x: step
-- ../../../dvclive/adaboost/right/plots/images
+- ../../../dvclive/adaboost/plots/images
 artifacts:
-  adaboost_front:
-    path: ../../../models/adaboost/adaboost_front.joblib
-    type: model
-  cv_results:
-    path: ../../../dvclive/adaboost/right/cv_results.json
-    type: cv_results
-  adaboost_left:
-    path: ../../../models/adaboost/adaboost_left.joblib
-    type: model
+  htcv_results:
+    path: ../../../dvclive/adaboost/htcv_results.json
+    type: htcv_results
   emissions:
-    path: ../../../dvclive/adaboost/right/emissions.csv
+    path: ../../../dvclive/adaboost/emissions.csv
     type: emissions
   emissions_inference:
-    path: ../../../dvclive/adaboost/right/emissions_inference.csv
+    path: ../../../dvclive/adaboost/emissions_inference.csv
     type: emissions_inference
+  cv_results:
+    path: ../../../dvclive/adaboost/cv_results.json
+    type: cv_results

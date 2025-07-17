@@ -5,7 +5,6 @@ from sklearn.ensemble import AdaBoostClassifier
 import numpy as np
 from skopt import BayesSearchCV
 from skopt.space import Integer
-import time
 
 from dvclive import Live
 import dvc.api
@@ -23,91 +22,89 @@ sys.path.insert(0, parent_dir)
 from models.evaluate import evaluate
 from models.utils import load_data, NumpyEncoder
 
+dvclive_path = os.path.join(parent_dir, "../dvclive/adaboost")
 params = dvc.api.params_show()
 
-data = load_data(os.path.join(parent_dir, "../data/processed"))
+X_train, X_test, y_train, y_test = load_data(os.path.join(parent_dir, "../data/processed"))
 
-for view in ["front", "left", "right"]:
-    X_train = data[view]["X_train"]
-    y_train = data[view]["y_train"]
-    X_test = data[view]["X_test"]
-    y_test = data[view]["y_test"]
+with Live(dvclive_path) as live:
+    param_space = {
+        "n_estimators": Integer(
+            params["adaboost"]["n_estimators_min"],
+            params["adaboost"]["n_estimators_max"],
+        ),  # like the paper: varies by dataset size
+    }
 
-    with Live(os.path.join(parent_dir, f"../dvclive/adaboost/{view}")) as live:
-        param_space = {
-            "n_estimators": Integer(
-                params["adaboost"]["n_estimators_min"],
-                params["adaboost"]["n_estimators_max"],
-            ),  # like the paper: varies by dataset size
-        }
+    # Setup Bayesian optimization
+    opt = BayesSearchCV(
+        estimator=AdaBoostClassifier(random_state=params["random_state"]),
+        search_spaces=param_space,
+        n_iter=params["n_iter"],
+        cv=params["cv"],
+        scoring=params["scoring"],
+        random_state=params["random_state"],
+        n_jobs=-1,
+        verbose=1,
+    )
 
-        # Setup Bayesian optimization
-        opt = BayesSearchCV(
-            estimator=AdaBoostClassifier(random_state=params["random_state"]),
-            search_spaces=param_space,
-            n_iter=params["n_iter"],
-            cv=params["cv"],
-            scoring=params["scoring"],
+    opt.fit(X_train, np.ravel(y_train))
+    model = opt.best_estimator_
+
+    # log hyperparameters
+    live.log_params(opt.best_params_)
+    live.log_param("htcv_best_score", float(opt.best_score_))
+    htcv_results_json_path = os.path.join(dvclive_path, "htcv_results.json")
+    with open(htcv_results_json_path, "w") as f:
+        json.dump(opt.cv_results_, f, indent=4, cls=NumpyEncoder)
+    live.log_artifact(htcv_results_json_path, type="htcv_results")
+
+    # re-train the model with the best hyperparameters
+    with OfflineEmissionsTracker(
+        output_file=os.path.join(dvclive_path, "emissions.csv")
+    ) as training_tracker:
+        adaboost = AdaBoostClassifier(
+            n_estimators=opt.best_params_["n_estimators"],
             random_state=params["random_state"],
-            n_jobs=-1,
-            verbose=1,
         )
+        model = adaboost.fit(X_train, np.ravel(y_train))
+    live.log_artifact(
+        os.path.join(dvclive_path, "emissions.csv"),
+        type="emissions",
+    )
 
-        opt.fit(X_train, np.ravel(y_train))
-        model = opt.best_estimator_
+    # log metrics
+    live.log_metric(
+        "estimator_weights_mean", float(np.mean(model.estimator_weights_))
+    )
+    live.log_metric(
+        "feature_importance_mean", float(np.mean(model.feature_importances_))
+    )
 
-        # log hyperparameters
-        live.log_params(opt.best_params_)
-        live.log_param("htcv_best_score", float(opt.best_score_))
-        cv_results_json_path = os.path.join(
-            parent_dir, f"../dvclive/adaboost/{view}/cv_results.json"
+    # Save the trained model
+    models_dir = os.path.join(parent_dir, "../models/adaboost/")
+    os.makedirs(models_dir, exist_ok=True)
+    model_path = os.path.join(models_dir, f"adaboost.joblib")
+    with open(model_path, "wb") as f:
+        joblib.dump(model, f)
+
+    # Classify pose in the TEST dataset using the trained model
+    y_pred_proba = model.decision_function(X_test)
+
+    # log emissions while inference
+    with OfflineEmissionsTracker(
+        output_file=os.path.join(
+            dvclive_path, "emissions_inference.csv"
         )
-        with open(cv_results_json_path, "w") as f:
-            json.dump(opt.cv_results_, f, indent=4, cls=NumpyEncoder)
-        live.log_artifact(cv_results_json_path, type="cv_results")
+    ) as inference_tracker:
+        y_pred = model.predict(X_test)
+    live.log_artifact(
+        os.path.join(dvclive_path, "emissions_inference.csv"),
+        type="emissions_inference",
+    )
 
-        # re-train the model with the best hyperparameters
-        with OfflineEmissionsTracker(
-            output_file=os.path.join(parent_dir, f"../dvclive/adaboost/{view}/emissions.csv")
-        ) as training_tracker:
-            adaboost = AdaBoostClassifier(
-                n_estimators=opt.best_params_["n_estimators"],
-                random_state=params["random_state"],
-            )
-            model = adaboost.fit(X_train, np.ravel(y_train))
-        live.log_artifact(
-            os.path.join(parent_dir, f"../dvclive/adaboost/{view}/emissions.csv"),
-            type="emissions",
-        )
+    cv_scores = evaluate(model, X_train, X_test, y_train, y_test, y_pred, y_pred_proba, live)
 
-        # log metrics
-        live.log_metric(
-            "estimator_weights_mean", float(np.mean(model.estimator_weights_))
-        )
-        live.log_metric(
-            "feature_importance_mean", float(np.mean(model.feature_importances_))
-        )
-
-        # Save the trained model
-        models_dir = os.path.join(parent_dir, "../models/adaboost/")
-        os.makedirs(models_dir, exist_ok=True)
-        model_path = os.path.join(models_dir, f"adaboost_{view}.joblib")
-        with open(model_path, "wb") as f:
-            joblib.dump(model, f)
-
-        # Classify pose in the TEST dataset using the trained model
-        y_pred_proba = model.decision_function(X_test)
-
-        # log emissions while inference
-        with OfflineEmissionsTracker(
-            output_file=os.path.join(
-                parent_dir, f"../dvclive/adaboost/{view}/emissions_inference.csv"
-            )
-        ) as inference_tracker:
-            y_pred = model.predict(X_test)
-        live.log_artifact(
-            os.path.join(parent_dir, f"../dvclive/adaboost/{view}/emissions_inference.csv"),
-            type="emissions_inference",
-        )
-
-        evaluate(model, X_train, X_test, y_train, y_test, y_pred, y_pred_proba, live)
+    cv_results_json_path = os.path.join(dvclive_path, "cv_results.json")
+    with open(cv_results_json_path, "w") as f:
+        json.dump(cv_scores, f, indent=4, cls=NumpyEncoder)
+    live.log_artifact(cv_results_json_path, type="cv_results")

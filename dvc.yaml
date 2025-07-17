@@ -42,19 +42,9 @@ stages:
       - ../../../models/${item}:
           cache: false
       metrics:
-      - ../../../dvclive/${item}/front/metrics.json:
-          cache: false
-      - ../../../dvclive/${item}/left/metrics.json:
-          cache: false
-      - ../../../dvclive/${item}/right/metrics.json:
+      - ../../../dvclive/${item}/metrics.json:
           cache: false
       plots:
-      - ../../../dvclive/${item}/front/plots/metrics:
-          cache: false
-          x: step
-      - ../../../dvclive/${item}/left/plots/metrics:
-          cache: false
-          x: step
-      - ../../../dvclive/${item}/right/plots/metrics:
+      - ../../../dvclive/${item}/plots/metrics:
           cache: false
           x: step

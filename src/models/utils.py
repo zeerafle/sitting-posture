@@ -10,14 +10,14 @@ import numpy as np
 def log_confusion_matrix(live, cm, class_names, title=None, cmap="Blues"):
     """Plots the confusion matrix."""
     plt.rcParams["font.family"] = "serif"
-    plt.rcParams["font.size"] = 10
+    plt.rcParams["font.size"] = 11
     fig, ax = plt.subplots(figsize=(7, 6), dpi=300)
     sns.heatmap(
         cm,
         annot=True,
         cmap=cmap,
         ax=ax,
-        annot_kws={"fontsize": 13},
+        annot_kws={"fontsize": 15},
         xticklabels=class_names,
         yticklabels=class_names,
     )
@@ -38,25 +38,15 @@ def log_roc_auc_curve(live, y_true, y_pred_proba):
 
 
 def load_data(base_path):
-    data = {
-        "front": {},
-        "left": {},
-        "right": {},
-    }
+    train = pl.read_csv(os.path.join(base_path, "train.csv"))
+    test = pl.read_csv(os.path.join(base_path, "test.csv"))
 
-    for view in os.listdir(base_path):
-        view_path = os.path.join(base_path, view)
+    X_train= train.select(pl.exclude("labels"))
+    X_test = test.select(pl.exclude("labels"))
+    y_train= train.select("labels")
+    y_test = test.select("labels")
 
-        train = pl.read_csv(os.path.join(view_path, "train.csv"))
-        test = pl.read_csv(os.path.join(view_path, "test.csv"))
-
-        data[view]["X_train"] = train.select(pl.exclude("labels"))
-        data[view]["X_test"] = test.select(pl.exclude("labels"))
-
-        data[view]["y_train"] = train.select("labels")
-        data[view]["y_test"] = test.select("labels")
-
-    return data
+    return X_train, X_test, y_train, y_test
 
 
 class NumpyEncoder(json.JSONEncoder):

@@ -1,0 +1,4 @@
+layer1: 440
+layer2: 388
+learning_rate_init: 0.001
+htcv_best_score: 0.9305435105435105

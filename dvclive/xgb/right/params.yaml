@@ -1,9 +1,0 @@
-alpha: 0.75
-gamma: 5.233686514510073
-lambda: 1e-05
-learning_rate: 0.45712337012883786
-max_depth: 6
-min_child_weight: 1.5
-n_estimators: 150
-subsample: 0.95
-htcv_best_score: 0.8515904838278535
