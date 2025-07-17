@@ -58,8 +58,8 @@ stages:
       size: 2127
     - path: train.py
       hash: md5
-      md5: 219a7a02f80879cc5f7feea10dc7510b
-      size: 4850
+      md5: 975d7bcea2318ec7880c2811da59528b
+      size: 4597
     params:
       ../../../params.yaml:
         adaboost:
@@ -111,17 +111,17 @@ stages:
     outs:
     - path: ../../../dvclive/nn/metrics.json
       hash: md5
-      md5: 98641cd9edea9c8481339416f09f43fc
+      md5: df6f9a69048966c0ed3c926e1bbfd2b8
       size: 701
     - path: ../../../dvclive/nn/plots/metrics
       hash: md5
-      md5: 8c168d417b1b6249e773d68e5b7c81e9.dir
-      size: 1745
+      md5: a620cdc477e541402b6a042cea8565ae.dir
+      size: 1732
       nfiles: 17
     - path: ../../../models/nn
       hash: md5
-      md5: 9346d20a882f69445e4fa54e6bdd899a.dir
-      size: 5877880
+      md5: 48c2e4a4cac3d81e275bafd308d15d8f.dir
+      size: 468152
       nfiles: 1
   download:
     cmd: kaggle datasets download -d zeerafle/sitting-posture -p data/original 

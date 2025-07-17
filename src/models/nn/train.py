@@ -30,14 +30,13 @@ X_train, X_test, y_train, y_test = load_data(os.path.join(parent_dir, "../data/p
 
 
 class MLPWrapper(BaseEstimator, ClassifierMixin):
-    def __init__(self, layer1=10, layer2=10, learning_rate_init=0.001):
+    def __init__(self, layer1=10, learning_rate_init=0.001):
         self.layer1 = layer1
-        self.layer2 = layer2
         self.learning_rate_init = learning_rate_init
 
     def fit(self, X, y):
         model = MLPClassifier(
-            hidden_layer_sizes=[self.layer1, self.layer2],
+            hidden_layer_sizes=[self.layer1],
             batch_size=params["nn"]["batch_size"],
             max_iter=params["nn"]["epochs"],
             random_state=params["random_state"],
@@ -59,10 +58,6 @@ with Live(dvclive_path) as live:
         "layer1": Integer(
             params["nn"]["first_hidden_layer_sizes_min"],
             params["nn"]["first_hidden_layer_sizes_max"],
-        ),
-        "layer2": Integer(
-            params["nn"]["second_hidden_layer_sizes_min"],
-            params["nn"]["second_hidden_layer_sizes_max"],
         ),
         "learning_rate_init": Categorical(params["nn"]["learning_rates"]),
     }
@@ -97,7 +92,6 @@ with Live(dvclive_path) as live:
         mlp = MLPClassifier(
             hidden_layer_sizes=(
                 opt.best_params_["layer1"],
-                opt.best_params_["layer2"],
             ),
             batch_size=params["nn"]["batch_size"],
             max_iter=params["nn"]["epochs"],

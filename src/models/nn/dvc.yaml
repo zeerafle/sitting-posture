@@ -1,11 +1,5 @@
 params:
 - ../../../dvclive/nn/params.yaml
-metrics:
-- ../../../dvclive/nn/metrics.json
-plots:
-- ../../../dvclive/nn/plots/metrics:
-    x: step
-- ../../../dvclive/nn/plots/images
 artifacts:
   cv_results:
     path: ../../../dvclive/nn/cv_results.json
@@ -16,3 +10,9 @@ artifacts:
   emissions_inference:
     path: ../../../dvclive/nn/emissions_inference.csv
     type: emissions_inference
+metrics:
+- ../../../dvclive/nn/metrics.json
+plots:
+- ../../../dvclive/nn/plots/metrics:
+    x: step
+- ../../../dvclive/nn/plots/images
