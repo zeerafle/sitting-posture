@@ -8,16 +8,29 @@ stages:
       md5: 2e48746054b3065a5dcb4c7da98abc9e.dir
       size: 4410730947
       nfiles: 1620
+    - path: src/feature_extraction/
+      hash: md5
+      md5: 17d1905520cc25698968aea00df56e6e.dir
+      size: 84284
+      nfiles: 8
     - path: src/featurize.py
       hash: md5
-      md5: a3c218bdbc7f80e4d3c963c788e95a73
-      size: 606
-      isexec: true
+      md5: 197f185a501db6ea9ac3824ee42f761d
+      size: 1878
+    - path: src/keypoints_extraction/
+      hash: md5
+      md5: 05530295325d012f8ee451f95291d965.dir
+      size: 33389
+      nfiles: 4
     outs:
     - path: data/data.csv
       hash: md5
       md5: 62594eb52e65c03d334c16e347e4dcfb
       size: 602132
+    - path: data/data_with_features.csv
+      hash: md5
+      md5: 6e511efb84f6737d44fe85f386046a78
+      size: 1679136
     - path: data/poses_images_out
       hash: md5
       md5: a0a69b18d360cf189b99eb19cfde19a3.dir

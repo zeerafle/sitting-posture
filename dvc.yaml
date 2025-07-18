@@ -10,15 +10,19 @@ stages:
     deps:
     - data/original
     - src/featurize.py
+    - src/keypoints_extraction/
+    - src/feature_extraction/
     outs:
     - data/data.csv:
+        persist: true
+    - data/data_with_features.csv:
         persist: true
     - data/poses_images_out:
         persist: true
   prepare:
     cmd: uv run python src/prepare.py
     deps:
-    - data/data.csv
+    - data/data_with_features.csv  # Updated to use enriched data
     - src/prepare.py
     outs:
     - data/processed
@@ -39,12 +43,44 @@ stages:
       params:
         - ../../../params.yaml:
       outs:
-      - ../../../models/${item}:
+      - ../../../models/${item}/front:
           cache: false
+      - ../../../models/${item}/left:
+          cache: false
+      - ../../../models/${item}/right:
+          cache: false
+      - ../../../dvclive/${item}/front/htcv_results.json:
+          cache: false
+          type: htcv_results
+      - ../../../dvclive/${item}/left/htcv_results.json:
+          cache: false
+          type: htcv_results
+      - ../../../dvclive/${item}/right/htcv_results.json:
+          cache: false
+          type: htcv_results
+      - ../../../dvclive/${item}/front/cv_results.json:
+          cache: false
+          type: cv_results
+      - ../../../dvclive/${item}/left/cv_results.json:
+          cache: false
+          type: cv_results
+      - ../../../dvclive/${item}/right/cv_results.json:
+          cache: false
+          type: cv_results
       metrics:
-      - ../../../dvclive/${item}/metrics.json:
+      - ../../../dvclive/${item}/front/metrics.json:
+          cache: false
+      - ../../../dvclive/${item}/left/metrics.json:
+          cache: false
+      - ../../../dvclive/${item}/right/metrics.json:
           cache: false
       plots:
-      - ../../../dvclive/${item}/plots/metrics:
+      - ../../../dvclive/${item}/front/plots/metrics:
+          cache: false
+          x: step
+      - ../../../dvclive/${item}/left/plots/metrics:
+          cache: false
+          x: step
+      - ../../../dvclive/${item}/right/plots/metrics:
           cache: false
           x: step
