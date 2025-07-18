@@ -7,42 +7,39 @@ base_path = Path("/teamspace/studios/this_studio/sitting-posture/dvclive")
 
 def read_metrics_from_dvclive():
     """
-    Read metrics from all model/view combinations in the dvclive folder
+    Read metrics from all model combinations in the dvclive folder
     and return a structured DataFrame
     """
 
-    # Define the models and views available
+    # Define the models available
     models = ["adaboost", "nn", "xgb"]
-    views = ["front", "left", "right"]
 
     data = []
 
     for model in models:
-        for view in views:
-            metrics_file = base_path / model / view / "metrics.json"
+        metrics_file = base_path / model / "metrics.json"
 
-            if metrics_file.exists():
-                try:
-                    with open(metrics_file, 'r') as f:
-                        metrics = json.load(f)
+        if metrics_file.exists():
+            try:
+                with open(metrics_file, 'r') as f:
+                    metrics = json.load(f)
 
-                    # Extract test metrics (using test_ prefix for final evaluation)
-                    row = {
-                        'classifier': model,
-                        'view': view,
-                        'acc': metrics.get('test_accuracy', 'N/A'),
-                        'prec': metrics.get('test_precision', 'N/A'),
-                        'rec': metrics.get('test_recall', 'N/A'),
-                        'f1': metrics.get('test_f1', 'N/A'),
-                        'roc_auc': metrics.get('test_roc_auc', 'N/A')
-                    }
-                    data.append(row)
+                # Extract test metrics (using test_ prefix for final evaluation)
+                row = {
+                    'Classifier': model,
+                    'acc': metrics.get('test_accuracy', 'N/A'),
+                    'prec': metrics.get('test_precision', 'N/A'),
+                    'rec': metrics.get('test_recall', 'N/A'),
+                    'f1': metrics.get('test_f1', 'N/A'),
+                    'ROC-AUC': metrics.get('test_roc_auc', 'N/A')
+                }
+                data.append(row)
 
-                except (json.JSONDecodeError, FileNotFoundError) as e:
-                    print(f"Error reading {metrics_file}: {e}")
-                    continue
-            else:
-                print(f"Metrics file not found: {metrics_file}")
+            except (json.JSONDecodeError, FileNotFoundError) as e:
+                print(f"Error reading {metrics_file}: {e}")
+                continue
+        else:
+            print(f"Metrics file not found: {metrics_file}")
 
     return pd.DataFrame(data)
 
@@ -50,11 +47,11 @@ def main():
     # Read all metrics
     df = read_metrics_from_dvclive()
 
-    # Sort by classifier and view for better readability
-    df = df.sort_values(['classifier', 'view'])
+    # Sort by classifier for better readability
+    df = df.sort_values(['Classifier'])
 
     # Format numerical columns to percentages with 2 decimal places (without % symbol)
-    numeric_cols = ['acc', 'prec', 'rec', 'f1', 'roc_auc']
+    numeric_cols = ['acc', 'prec', 'rec', 'f1', 'ROC-AUC']
     for col in numeric_cols:
         df[col] = df[col].apply(lambda x: f"{x*100:.2f}" if isinstance(x, (int, float)) else x)
 
@@ -83,7 +80,7 @@ def main():
         best_idx = df_numeric[metric].idxmax()
         if pd.notna(best_idx):
             best_model = df.loc[best_idx]
-            print(f"{metric.upper()}: {best_model['classifier']} ({best_model['view']}) - {best_model[metric]}")
+            print(f"{metric.upper()}: {best_model['Classifier']} - {best_model[metric]}")
 
 if __name__ == "__main__":
     main()
