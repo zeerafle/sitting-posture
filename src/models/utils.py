@@ -27,14 +27,14 @@ def log_confusion_matrix(live, cm, class_names, title=None, cmap="Blues"):
         ax.set_title(title)
     # log the confusion matrix
     plt.tight_layout()
-    live.log_image("confusion_matrix.png", fig)
+    live.log_image("test/confusion_matrix.png", fig)
 
 
 def log_roc_auc_curve(live, y_true, y_pred_proba):
     fig, ax = plt.subplots(figsize=(7, 6), dpi=300)
     plot.ROC.from_raw_data(y_true, y_pred_proba, ax=ax)
     plt.tight_layout()
-    live.log_image("roc_auc_curve.png", fig)
+    live.log_image("test/roc_auc_curve.png", fig)
 
 
 def load_data(base_path):

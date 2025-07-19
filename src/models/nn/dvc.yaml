@@ -1,18 +1,18 @@
 params:
-- ../../../dvclive/nn/params.yaml
-artifacts:
-  cv_results:
-    path: ../../../dvclive/nn/cv_results.json
-    type: cv_results
-  emissions:
-    path: ../../../dvclive/nn/emissions.csv
-    type: emissions
-  emissions_inference:
-    path: ../../../dvclive/nn/emissions_inference.csv
-    type: emissions_inference
+- ../../../dvclive/nn/front/params.yaml
+- ../../../dvclive/nn/left/params.yaml
+- ../../../dvclive/nn/right/params.yaml
 metrics:
-- ../../../dvclive/nn/metrics.json
+- ../../../dvclive/nn/front/metrics.json
+- ../../../dvclive/nn/left/metrics.json
+- ../../../dvclive/nn/right/metrics.json
 plots:
-- ../../../dvclive/nn/plots/metrics:
+- ../../../dvclive/nn/front/plots/metrics:
     x: step
-- ../../../dvclive/nn/plots/images
+- ../../../dvclive/nn/front/plots/images
+- ../../../dvclive/nn/left/plots/metrics:
+    x: step
+- ../../../dvclive/nn/left/plots/images
+- ../../../dvclive/nn/right/plots/metrics:
+    x: step
+- ../../../dvclive/nn/right/plots/images

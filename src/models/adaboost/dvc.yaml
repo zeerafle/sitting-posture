@@ -1,21 +1,12 @@
 params:
-- ../../../dvclive/adaboost/params.yaml
+- ../../../dvclive/adaboost/front/params.yaml
+- ../../../dvclive/adaboost/left/params.yaml
+- ../../../dvclive/adaboost/right/params.yaml
 metrics:
-- ../../../dvclive/adaboost/metrics.json
+- ../../../dvclive/adaboost/front/metrics.json
+- ../../../dvclive/adaboost/left/metrics.json
+- ../../../dvclive/adaboost/right/metrics.json
 plots:
-- ../../../dvclive/adaboost/plots/metrics:
-    x: step
-- ../../../dvclive/adaboost/plots/images
-artifacts:
-  htcv_results:
-    path: ../../../dvclive/adaboost/htcv_results.json
-    type: htcv_results
-  emissions:
-    path: ../../../dvclive/adaboost/emissions.csv
-    type: emissions
-  emissions_inference:
-    path: ../../../dvclive/adaboost/emissions_inference.csv
-    type: emissions_inference
-  cv_results:
-    path: ../../../dvclive/adaboost/cv_results.json
-    type: cv_results
+- ../../../dvclive/adaboost/front/plots/images
+- ../../../dvclive/adaboost/left/plots/images
+- ../../../dvclive/adaboost/right/plots/images

@@ -27,27 +27,27 @@ def evaluate(
                                 cv=5,
                                 scoring=scoring,
                                 n_jobs=-1)
-    live.log_metric('cv_accuracy_mean', np.mean(cv_scores['test_accuracy']))
-    live.log_metric('cv_f1_mean', np.mean(cv_scores['test_f1']))
-    live.log_metric('cv_precision_mean', np.mean(cv_scores['test_precision']))
-    live.log_metric('cv_recall_mean', np.mean(cv_scores['test_recall']))
-    live.log_metric('cv_roc_auc_mean', np.mean(cv_scores['test_roc_auc']))
+    live.log_metric('cv_accuracy_mean', np.mean(cv_scores['test_accuracy']), plot=False)
+    live.log_metric('cv_f1_mean', np.mean(cv_scores['test_f1']), plot=False)
+    live.log_metric('cv_precision_mean', np.mean(cv_scores['test_precision']), plot=False)
+    live.log_metric('cv_recall_mean', np.mean(cv_scores['test_recall']), plot=False)
+    live.log_metric('cv_roc_auc_mean', np.mean(cv_scores['test_roc_auc']), plot=False)
 
-    live.log_metric('cv_std_accuracy', np.std(cv_scores['test_accuracy']))
-    live.log_metric('cv_std_f1', np.std(cv_scores['test_f1']))
-    live.log_metric('cv_std_precision', np.std(cv_scores['test_precision']))
-    live.log_metric('cv_std_recall', np.std(cv_scores['test_recall']))
-    live.log_metric('cv_std_roc_auc', np.std(cv_scores['test_roc_auc']))
+    live.log_metric('cv_std_accuracy', np.std(cv_scores['test_accuracy']), plot=False)
+    live.log_metric('cv_std_f1', np.std(cv_scores['test_f1']), plot=False)
+    live.log_metric('cv_std_precision', np.std(cv_scores['test_precision']), plot=False)
+    live.log_metric('cv_std_recall', np.std(cv_scores['test_recall']), plot=False)
+    live.log_metric('cv_std_roc_auc', np.std(cv_scores['test_roc_auc']), plot=False)
 
     # log test metric
     y_test = np.ravel(y_test)
     y_pred = np.ravel(y_pred)
 
-    live.log_metric("test_accuracy", accuracy_score(y_test, y_pred))
-    live.log_metric("test_recall", recall_score(y_test, y_pred))
-    live.log_metric("test_precision", precision_score(y_test, y_pred))
-    live.log_metric("test_f1", f1_score(y_test, y_pred))
-    live.log_metric("test_roc_auc", roc_auc_score(y_test, y_pred_proba))
+    live.log_metric("test/accuracy", accuracy_score(y_test, y_pred), plot=False)
+    live.log_metric("test/recall", recall_score(y_test, y_pred), plot=False)
+    live.log_metric("test/precision", precision_score(y_test, y_pred), plot=False)
+    live.log_metric("test/f1", f1_score(y_test, y_pred), plot=False)
+    live.log_metric("test/roc_auc", roc_auc_score(y_test, y_pred_proba), plot=False)
 
     # Plot the confusion matrix
     cm = confusion_matrix(y_test, y_pred)

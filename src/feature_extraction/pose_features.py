@@ -48,6 +48,10 @@ class AngleFeatureExtractor(FeatureExtractor):
         """Calculate Euclidean distance between two points."""
         return np.sqrt((x2 - x1)**2 + (y2 - y1)**2)
 
+    def _safe_arccos(self, x):
+        """Safely compute arccos to avoid NaN values."""
+        return np.arccos(np.clip(x, -1.0, 1.0))
+
     def _calculate_spine_angle(self, row) -> float:
         """Calculate spine curvature angle."""
         # Extract spine points (adjust based on your BodyPart enum)
@@ -118,11 +122,11 @@ class AngleFeatureExtractor(FeatureExtractor):
             # shoulder to wrist distance
             c = self._euclidean_distance(left_shoulder_x, left_shoulder_y, left_wrist_x, left_wrist_y)
 
-            sewangle_B = np.arccos(
+            sewangle_B = self._safe_arccos(
                 (a**2 + b**2 - c**2) / (2 * a * b)
             )
 
-            sewangle_A = np.arccos(
+            sewangle_A = self._safe_arccos(
                 (b**2 + c**2 - a**2) / (2 * b * c)
             )
 
@@ -147,11 +151,11 @@ class AngleFeatureExtractor(FeatureExtractor):
             # shoulder to wrist distance
             c = self._euclidean_distance(right_shoulder_x, right_shoulder_y, right_wrist_x, right_wrist_y)
 
-            sewangle_B = np.arccos(
+            sewangle_B = self._safe_arccos(
                 (a**2 + b**2 - c**2) / (2 * a * b)
             )
 
-            sewangle_A = np.arccos(
+            sewangle_A = self._safe_arccos(
                 (b**2 + c**2 - a**2) / (2 * b * c)
             )
 
@@ -391,9 +395,7 @@ class DistanceFeatureExtractor(FeatureExtractor):
 
             # Key distance measurements
             row_features['head_to_shoulder_distance'] = self._head_to_shoulder_distance(row)
-            row_features['shoulder_width'] = self._shoulder_width(row)
             row_features['torso_length'] = self._torso_length(row)
-            row_features['hip_width'] = self._hip_width(row)
             # estrada et al.
             row_features['nose_to_shoulder_left_distance'] = self._nose_to_shoulder_left_distance(row)
             row_features['nose_to_shoulder_right_distance'] = self._nose_to_shoulder_right_distance(row)
@@ -416,7 +418,7 @@ class DistanceFeatureExtractor(FeatureExtractor):
 
     def get_feature_names(self) -> List[str]:
         return [
-            'head_to_shoulder_distance', 'shoulder_width', 'torso_length', 'hip_width',
+            'head_to_shoulder_distance', 'torso_length',
             'nose_to_shoulder_left_distance', 'nose_to_shoulder_right_distance',
             'shoulder_to_elbow_left_distance', 'shoulder_to_elbow_right_distance',
             'elbow_to_wrist_left_distance', 'elbow_to_wrist_right_distance',
@@ -774,14 +776,9 @@ class SpineAlignmentFeatureExtractor(FeatureExtractor):
             row_features['tl_l_diff_y'] = abs(tl_y - l_y)  # Difference between TL and L
             row_features['t_l_diff_y'] = abs(t_y - l_y)    # Difference between T and L
 
-            # Calculate spine curvature metric (can indicate posture problems)
-            # This measures how much the middle point (TL) deviates from a straight line between T and L
-            expected_tl_y = (t_y + l_y) / 2
-            row_features['spine_curvature'] = abs(tl_y - expected_tl_y)
-
             features.append(row_features)
 
         return pl.DataFrame(features)
 
     def get_feature_names(self) -> List[str]:
-        return ['t_tl_diff_y', 'tl_l_diff_y', 't_l_diff_y', 'spine_curvature']
+        return ['t_tl_diff_y', 'tl_l_diff_y', 't_l_diff_y']
