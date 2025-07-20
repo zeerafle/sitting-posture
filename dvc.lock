@@ -7,45 +7,47 @@ stages:
       hash: md5
       md5: 62594eb52e65c03d334c16e347e4dcfb
       size: 602132
+      isexec: true
     - path: src/feature_extraction/
       hash: md5
-      md5: 1db8b83ff6a7558dd77d499f0f0c850d.dir
-      size: 83969
+      md5: 8b3f74291f032557708ea9f180ef9778.dir
+      size: 78992
       nfiles: 8
     - path: src/featurize.py
       hash: md5
       md5: 53de9237d3df698d08aaa3c5d51eb90c
       size: 1012
+      isexec: true
     outs:
     - path: data/data_with_features.csv
       hash: md5
-      md5: 18e2696eeec4b7952e77442c8383b932
-      size: 1539213
+      md5: 2e2f2c9a64f2d703b50ccfaeeb35a2a2
+      size: 1468562
   prepare:
     cmd: uv run python src/prepare.py
     deps:
     - path: data/data_with_features.csv
       hash: md5
-      md5: 18e2696eeec4b7952e77442c8383b932
-      size: 1539213
-      isexec: true
+      md5: 2e2f2c9a64f2d703b50ccfaeeb35a2a2
+      size: 1468562
     - path: src/prepare.py
       hash: md5
       md5: 2e386586d3caadc2d5f1b4193160b6ff
       size: 5852
+      isexec: true
     outs:
     - path: data/processed
       hash: md5
-      md5: a39e8e59a9d7b21b2a76b2c866c7c53f.dir
-      size: 1960779
+      md5: 1a2640393c2285ce36038d232642b95a.dir
+      size: 1865332
       nfiles: 9
   train@nn:
     cmd: uv run python train.py
     deps:
     - path: ../../../data/processed
       hash: md5
-      md5: a39e8e59a9d7b21b2a76b2c866c7c53f.dir
-      size: 1960779
+      md5: 1a2640393c2285ce36038d232642b95a.dir
+      size: 1865332
       nfiles: 9
     - path: ../base_trainer.py
       hash: md5
@@ -56,14 +58,17 @@ stages:
       hash: md5
       md5: 4a50127036509085f409814f01cdf66d
       size: 2488
+      isexec: true
     - path: ../utils.py
       hash: md5
       md5: fadcde095187d68c2698b49dd67fa6ec
       size: 2137
+      isexec: true
     - path: train.py
       hash: md5
       md5: 14480d542440bf1c98ad8e4909a7f3c5
       size: 2382
+      isexec: true
     params:
       ../../../params.yaml:
         adaboost:
@@ -115,44 +120,44 @@ stages:
     outs:
     - path: ../../../dvclive/nn/front/cv_results.json
       hash: md5
-      md5: 9ee7a51b1d547e08d4bc23492f8d22e9
-      size: 1173
+      md5: 8b16d2cb4b7fe86a310ed9aa84ef9bc5
+      size: 1178
     - path: ../../../dvclive/nn/front/htcv_results.json
       hash: md5
-      md5: 33ebc1f482ad50fc0335e8603c03a495
-      size: 13763
+      md5: 9d9b3f66d54355efb64c7418f470c96c
+      size: 13732
     - path: ../../../dvclive/nn/front/metrics.json
       hash: md5
-      md5: 63fc150a6158e90bc7e68e57f34813d7
-      size: 1216
+      md5: 6b6a6f16838c7e0d3dbb3e4bfa9c263d
+      size: 1220
     - path: ../../../dvclive/nn/left/cv_results.json
       hash: md5
-      md5: 257d6289de9ce952db0d92ba4af3d881
-      size: 1159
+      md5: 39331360275dcd11d4750cbb753233d0
+      size: 1119
     - path: ../../../dvclive/nn/left/htcv_results.json
       hash: md5
-      md5: 3c8c7f642d551451b9822c6b96a5ed77
-      size: 13772
+      md5: 8b6945ca7e899c5663c01f2fab83bc85
+      size: 13768
     - path: ../../../dvclive/nn/left/metrics.json
       hash: md5
-      md5: 97a4bb5b3df400148dcf0b58e4f24982
-      size: 1163
+      md5: 886d7c5b8a80b0e0d040e2b28ed55f32
+      size: 1225
     - path: ../../../dvclive/nn/right/cv_results.json
       hash: md5
-      md5: d89038d93e82354e44e2569a95c2ea03
-      size: 1146
+      md5: 341eca7b5da04a6108ae9a195cc7f922
+      size: 1178
     - path: ../../../dvclive/nn/right/htcv_results.json
       hash: md5
-      md5: 42081799f4d41bb994133fba7c61bff7
-      size: 13767
+      md5: d4b51f675c48fbfe3d33935dc7977a7d
+      size: 13745
     - path: ../../../dvclive/nn/right/metrics.json
       hash: md5
-      md5: 38899d1bdaeabddc729984948a83d954
-      size: 1200
+      md5: 3fe55b7f44d0b5d73206f61ce99a22c5
+      size: 1210
     - path: ../../../models/nn/
       hash: md5
-      md5: 8845e39487d44a1ddc931105b6f24052.dir
-      size: 1727112
+      md5: 07f240de0e529f5ffdd2094fb16f1cee.dir
+      size: 1644792
       nfiles: 3
   download:
     cmd: kaggle datasets download -d zeerafle/sitting-posture -p data/original 
@@ -273,8 +278,8 @@ stages:
     deps:
     - path: ../../../data/processed
       hash: md5
-      md5: a39e8e59a9d7b21b2a76b2c866c7c53f.dir
-      size: 1960779
+      md5: 1a2640393c2285ce36038d232642b95a.dir
+      size: 1865332
       nfiles: 9
     - path: ../base_trainer.py
       hash: md5
@@ -285,14 +290,17 @@ stages:
       hash: md5
       md5: 4a50127036509085f409814f01cdf66d
       size: 2488
+      isexec: true
     - path: ../utils.py
       hash: md5
       md5: fadcde095187d68c2698b49dd67fa6ec
       size: 2137
+      isexec: true
     - path: train.py
       hash: md5
       md5: fa6d3533d9e53431de4b0fd6c162babe
       size: 1632
+      isexec: true
     params:
       ../../../params.yaml:
         adaboost:
@@ -344,52 +352,52 @@ stages:
     outs:
     - path: ../../../dvclive/xgb/front/cv_results.json
       hash: md5
-      md5: e2031d2f2a1bd4b031a3e1ef77df242d
-      size: 1164
+      md5: 03228d8bf5ad28b73da8f045240b128a
+      size: 1176
     - path: ../../../dvclive/xgb/front/htcv_results.json
       hash: md5
-      md5: fbf463663ffa943cdb1faf4784686c77
-      size: 23135
+      md5: 2888ea3cc410142c31d42edc9b611ada
+      size: 23129
     - path: ../../../dvclive/xgb/front/metrics.json
       hash: md5
-      md5: b3ebaef64496d08e9887fef439220942
-      size: 1213
+      md5: ef9df0f24ffab9b3e68ff6862fd50a15
+      size: 1206
     - path: ../../../dvclive/xgb/left/cv_results.json
       hash: md5
-      md5: 8ade5a16d64a6f005ae6519d78868750
-      size: 1159
+      md5: 6adf60abcd8bc2ce7bc714c32f13c00d
+      size: 1176
     - path: ../../../dvclive/xgb/left/htcv_results.json
       hash: md5
-      md5: fc278f3f9667b4c38d1e949e07fb474e
-      size: 23113
+      md5: cd82a9e50129f02e3604c16b6f91ddbf
+      size: 23117
     - path: ../../../dvclive/xgb/left/metrics.json
       hash: md5
-      md5: 41b4f547b0692ca6758d2cbfc45b9d94
-      size: 1178
+      md5: 1f05ae85d091d39a8e008af0d3ecacd9
+      size: 1215
     - path: ../../../dvclive/xgb/right/cv_results.json
       hash: md5
-      md5: 539640848668b77babd3f03765a575bf
-      size: 1161
+      md5: feb02141a81610f8373faef5673efda4
+      size: 1163
     - path: ../../../dvclive/xgb/right/htcv_results.json
       hash: md5
-      md5: f4f04adf06ef5fce4d0278a8859e88e2
-      size: 23013
+      md5: f4762a79e80268d0b70831440099f571
+      size: 22776
     - path: ../../../dvclive/xgb/right/metrics.json
       hash: md5
-      md5: 4aee491ecf1315f4964eaab9095ab7bb
-      size: 1158
+      md5: 3bc4e8d812b0726d361a51303a93ffbc
+      size: 1199
     - path: ../../../models/xgb/
       hash: md5
-      md5: b05339564d02dbb18eaa72d9986ce536.dir
-      size: 126338
+      md5: e688ba96f73eec2852a41fe2d29c7f53.dir
+      size: 157129
       nfiles: 3
   train@adaboost:
     cmd: uv run python train.py
     deps:
     - path: ../../../data/processed
       hash: md5
-      md5: a39e8e59a9d7b21b2a76b2c866c7c53f.dir
-      size: 1960779
+      md5: 1a2640393c2285ce36038d232642b95a.dir
+      size: 1865332
       nfiles: 9
     - path: ../base_trainer.py
       hash: md5
@@ -400,14 +408,17 @@ stages:
       hash: md5
       md5: 4a50127036509085f409814f01cdf66d
       size: 2488
+      isexec: true
     - path: ../utils.py
       hash: md5
       md5: fadcde095187d68c2698b49dd67fa6ec
       size: 2137
+      isexec: true
     - path: train.py
       hash: md5
       md5: 05a3361fca778c01e2a31147fd968ddb
       size: 1160
+      isexec: true
     params:
       ../../../params.yaml:
         adaboost:
@@ -459,44 +470,44 @@ stages:
     outs:
     - path: ../../../dvclive/adaboost/front/cv_results.json
       hash: md5
-      md5: c77f5aa9e50f047325ba78b73fe7e5c3
-      size: 1138
+      md5: f9b5365b63b036b5c5c81fa3eeee99d5
+      size: 1166
     - path: ../../../dvclive/adaboost/front/htcv_results.json
       hash: md5
-      md5: aaaa475846e7fe57da6a107c98cf959d
-      size: 12132
+      md5: 1f8414558d295efd89c2ea767b329d65
+      size: 12115
     - path: ../../../dvclive/adaboost/front/metrics.json
       hash: md5
-      md5: 8087988743faff63d1bb56798675dcba
-      size: 1234
+      md5: 032084e8f1e9184fc5c94c183247dfcb
+      size: 1252
     - path: ../../../dvclive/adaboost/left/cv_results.json
       hash: md5
-      md5: 0a049c95ee27ddc36ac9f3665af6aaf8
-      size: 1153
+      md5: 02d7e724048e9fe5260cb9653b7db9b0
+      size: 1152
     - path: ../../../dvclive/adaboost/left/htcv_results.json
       hash: md5
-      md5: 0df2b867f2336ad5ace237febf3cfcfe
-      size: 12095
+      md5: 750a421c45575bc7cd6a710defbe9a2c
+      size: 12128
     - path: ../../../dvclive/adaboost/left/metrics.json
       hash: md5
-      md5: 0722f0863e04c01c40deb4bbf0df3edd
-      size: 1205
+      md5: 2799cc8efe44147374521840bf0bc53e
+      size: 1229
     - path: ../../../dvclive/adaboost/right/cv_results.json
       hash: md5
-      md5: 487b8b09689223b9cbc60c7235aa3d47
-      size: 1168
+      md5: 7d6f951d2a7671f6c734bd99f46f2527
+      size: 1150
     - path: ../../../dvclive/adaboost/right/htcv_results.json
       hash: md5
-      md5: cc5a3876af7e409bb9b5cec0caa611db
-      size: 12123
+      md5: 657a19524cccb101f2d1c31a0eea218c
+      size: 12121
     - path: ../../../dvclive/adaboost/right/metrics.json
       hash: md5
-      md5: 84e378b45564e8dba2d3ad39933403fc
-      size: 1230
+      md5: 6c4f188319ef51f50e5bdff51c20e786
+      size: 1235
     - path: ../../../models/adaboost/
       hash: md5
-      md5: 1b0ec623710bb1922b1905ee418a85fe.dir
-      size: 1897164
+      md5: e4fd5558126922c6034cd9a02b86bcdf.dir
+      size: 1236492
       nfiles: 3
   extract_keypoints:
     cmd: uv run python src/extract_keypoints.py
@@ -525,3 +536,137 @@ stages:
       md5: 34b689bb07e49240cb14a4c08a2befed.dir
       size: 4273367908
       nfiles: 1620
+  summarize:
+    cmd: uv run python src/model_comparison.py && uv run python 
+      src/hyperparameter_analysis.py
+    deps:
+    - path: dvclive/adaboost/front/htcv_results.json
+      hash: md5
+      md5: 1f8414558d295efd89c2ea767b329d65
+      size: 12115
+    - path: dvclive/adaboost/front/metrics.json
+      hash: md5
+      md5: 032084e8f1e9184fc5c94c183247dfcb
+      size: 1252
+    - path: dvclive/adaboost/front/params.yaml
+      hash: md5
+      md5: 4766dcd740918db95139c9d83e08f467
+      size: 53
+    - path: dvclive/adaboost/left/htcv_results.json
+      hash: md5
+      md5: 750a421c45575bc7cd6a710defbe9a2c
+      size: 12128
+    - path: dvclive/adaboost/left/metrics.json
+      hash: md5
+      md5: 2799cc8efe44147374521840bf0bc53e
+      size: 1229
+    - path: dvclive/adaboost/left/params.yaml
+      hash: md5
+      md5: 894d8173385f3d8339b42825fab76d0a
+      size: 54
+    - path: dvclive/adaboost/right/htcv_results.json
+      hash: md5
+      md5: 657a19524cccb101f2d1c31a0eea218c
+      size: 12121
+    - path: dvclive/adaboost/right/metrics.json
+      hash: md5
+      md5: 6c4f188319ef51f50e5bdff51c20e786
+      size: 1235
+    - path: dvclive/adaboost/right/params.yaml
+      hash: md5
+      md5: 4989f0aefa3d9f12c145d581f310fa21
+      size: 55
+    - path: dvclive/nn/front/htcv_results.json
+      hash: md5
+      md5: 9d9b3f66d54355efb64c7418f470c96c
+      size: 13732
+    - path: dvclive/nn/front/metrics.json
+      hash: md5
+      md5: 6b6a6f16838c7e0d3dbb3e4bfa9c263d
+      size: 1220
+    - path: dvclive/nn/front/params.yaml
+      hash: md5
+      md5: ba82b8ec46fa9cb0d09bc057de4f9ed2
+      size: 73
+    - path: dvclive/nn/left/htcv_results.json
+      hash: md5
+      md5: 8b6945ca7e899c5663c01f2fab83bc85
+      size: 13768
+    - path: dvclive/nn/left/metrics.json
+      hash: md5
+      md5: 886d7c5b8a80b0e0d040e2b28ed55f32
+      size: 1225
+    - path: dvclive/nn/left/params.yaml
+      hash: md5
+      md5: a4a11b9faae06c1257036e36f70a038c
+      size: 73
+    - path: dvclive/nn/right/htcv_results.json
+      hash: md5
+      md5: d4b51f675c48fbfe3d33935dc7977a7d
+      size: 13745
+    - path: dvclive/nn/right/metrics.json
+      hash: md5
+      md5: 3fe55b7f44d0b5d73206f61ce99a22c5
+      size: 1210
+    - path: dvclive/nn/right/params.yaml
+      hash: md5
+      md5: 82ceb2f4ab7168f309b4d5b33a865360
+      size: 73
+    - path: dvclive/xgb/front/htcv_results.json
+      hash: md5
+      md5: 2888ea3cc410142c31d42edc9b611ada
+      size: 23129
+    - path: dvclive/xgb/front/metrics.json
+      hash: md5
+      md5: ef9df0f24ffab9b3e68ff6862fd50a15
+      size: 1206
+    - path: dvclive/xgb/front/params.yaml
+      hash: md5
+      md5: 668bdd18603b421385594719fa164e7d
+      size: 161
+    - path: dvclive/xgb/left/htcv_results.json
+      hash: md5
+      md5: cd82a9e50129f02e3604c16b6f91ddbf
+      size: 23117
+    - path: dvclive/xgb/left/metrics.json
+      hash: md5
+      md5: 1f05ae85d091d39a8e008af0d3ecacd9
+      size: 1215
+    - path: dvclive/xgb/left/params.yaml
+      hash: md5
+      md5: e726b8d868a638458b0e12d47935eaaf
+      size: 162
+    - path: dvclive/xgb/right/htcv_results.json
+      hash: md5
+      md5: f4762a79e80268d0b70831440099f571
+      size: 22776
+    - path: dvclive/xgb/right/metrics.json
+      hash: md5
+      md5: 3bc4e8d812b0726d361a51303a93ffbc
+      size: 1199
+    - path: dvclive/xgb/right/params.yaml
+      hash: md5
+      md5: ab2c4e8680dc7e7d1a2072bcb5c16c4f
+      size: 161
+    - path: src/hyperparameter_analysis.py
+      hash: md5
+      md5: 5cbb56192d1027891a43f9d286c0956c
+      size: 10391
+    - path: src/model_comparison.py
+      hash: md5
+      md5: e69215dab5fb530ef6aff54cc8897765
+      size: 7852
+      isexec: true
+    outs:
+    - path: dvclive/best_hyperparameters_summary.csv
+      hash: md5
+      md5: 66b01e59ce62c663c6706daaf8f8768c
+      size: 2947
+    - path: dvclive/clean_best_hyperparameters.csv
+      hash: md5
+      md5: b63f038cd31c8e518896c6621f99b914
+      size: 1344
+    - path: dvclive/detailed_model_view_comparison.csv
+      hash: md5
+      md5: 3c841e406f2e2e53f8edac8c50d66a50
+      size: 1992

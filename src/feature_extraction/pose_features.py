@@ -18,9 +18,7 @@ class AngleFeatureExtractor(FeatureExtractor):
             row_features = {}
 
             # Extract key joint angles
-            row_features['spine_angle'] = self._calculate_spine_angle(row)
             row_features['shoulder_angle'] = self._calculate_shoulder_angle(row)
-            row_features['neck_angle'] = self._calculate_neck_angle(row)
             row_features['hip_angle'] = self._calculate_hip_angle(row)
             # estrada et al.
             row_features['sewangle_a_left'], row_features['sewangle_b_left'], row_features['sewangle_c_left'] = self._calculate_SEWAngleABC_left(row)
@@ -38,7 +36,7 @@ class AngleFeatureExtractor(FeatureExtractor):
 
     def get_feature_names(self) -> List[str]:
         return [
-            'spine_angle', 'shoulder_angle', 'neck_angle', 'hip_angle',
+            'shoulder_angle', 'hip_angle',
             'sewangle_a_left', 'sewangle_b_left', 'sewangle_c_left',
             'sewangle_a_right', 'sewangle_b_right', 'sewangle_c_right',
             'phi1', 'phi2', 'phi3', 'phi4', 'phi5'
@@ -52,17 +50,6 @@ class AngleFeatureExtractor(FeatureExtractor):
         """Safely compute arccos to avoid NaN values."""
         return np.arccos(np.clip(x, -1.0, 1.0))
 
-    def _calculate_spine_angle(self, row) -> float:
-        """Calculate spine curvature angle."""
-        # Extract spine points (adjust based on your BodyPart enum)
-        neck_y = row.get('NOSE_y', 0)  # Approximate neck
-        hip_center_y = (row.get('LEFT_HIP_y', 0) + row.get('RIGHT_HIP_y', 0)) / 2
-
-        # Calculate spine angle (simplified)
-        if neck_y != 0 and hip_center_y != 0:
-            return abs(neck_y - hip_center_y)
-        return 0.0
-
     def _calculate_shoulder_angle(self, row) -> float:
         """Calculate shoulder slope angle."""
         left_shoulder_y = row.get('LEFT_SHOULDER_y', 0)
@@ -75,20 +62,6 @@ class AngleFeatureExtractor(FeatureExtractor):
             dx = right_shoulder_x - left_shoulder_x
             if dx != 0:
                 return np.arctan(dy / dx) * 180 / np.pi
-        return 0.0
-
-    def _calculate_neck_angle(self, row) -> float:
-        """Calculate neck forward lean."""
-        nose_x = row.get('NOSE_x', 0)
-        nose_y = row.get('NOSE_y', 0)
-        neck_x = (row.get('LEFT_SHOULDER_x', 0) + row.get('RIGHT_SHOULDER_x', 0)) / 2
-        neck_y = (row.get('LEFT_SHOULDER_y', 0) + row.get('RIGHT_SHOULDER_y', 0)) / 2
-
-        if all([nose_x, nose_y, neck_x, neck_y]):
-            dx = nose_x - neck_x
-            dy = nose_y - neck_y
-            if dy != 0:
-                return np.arctan(dx / dy) * 180 / np.pi
         return 0.0
 
     def _calculate_hip_angle(self, row) -> float:
@@ -105,7 +78,7 @@ class AngleFeatureExtractor(FeatureExtractor):
                 return np.arctan(dy / dx) * 180 / np.pi
         return 0.0
 
-    def _calculate_SEWAngleABC_left(self, row) -> float:
+    def _calculate_SEWAngleABC_left(self, row) -> tuple[float, float, float]:
         """Calculate SEW angle for left side."""
         left_shoulder_x = row.get('LEFT_SHOULDER_x', 0)
         left_shoulder_y = row.get('LEFT_SHOULDER_y', 0)
@@ -113,6 +86,8 @@ class AngleFeatureExtractor(FeatureExtractor):
         left_elbow_y = row.get('LEFT_ELBOW_y', 0)
         left_wrist_x = row.get('LEFT_WRIST_x', 0)
         left_wrist_y = row.get('LEFT_WRIST_y', 0)
+
+        sewangle_A, sewangle_B, sewangle_C = 0.0, 0.0, 0.0
 
         if all([left_shoulder_x, left_shoulder_y, left_elbow_x, left_elbow_y, left_wrist_x, left_wrist_y]):
             # shoulder to elbow distance
@@ -134,7 +109,7 @@ class AngleFeatureExtractor(FeatureExtractor):
 
         return sewangle_A, sewangle_B, sewangle_C
 
-    def _calculate_SEWAngleABC_right(self, row) -> float:
+    def _calculate_SEWAngleABC_right(self, row) -> tuple[float, float, float]:
         """Calculate SEW angle for right side."""
         right_shoulder_x = row.get('RIGHT_SHOULDER_x', 0)
         right_shoulder_y = row.get('RIGHT_SHOULDER_y', 0)
@@ -142,6 +117,8 @@ class AngleFeatureExtractor(FeatureExtractor):
         right_elbow_y = row.get('RIGHT_ELBOW_y', 0)
         right_wrist_x = row.get('RIGHT_WRIST_x', 0)
         right_wrist_y = row.get('RIGHT_WRIST_y', 0)
+
+        sewangle_A, sewangle_B, sewangle_C = 0.0, 0.0, 0.0
 
         if all([right_shoulder_x, right_shoulder_y, right_elbow_x, right_elbow_y, right_wrist_x, right_wrist_y]):
             # shoulder to elbow distance
@@ -394,7 +371,6 @@ class DistanceFeatureExtractor(FeatureExtractor):
             row_features = {}
 
             # Key distance measurements
-            row_features['head_to_shoulder_distance'] = self._head_to_shoulder_distance(row)
             row_features['torso_length'] = self._torso_length(row)
             # estrada et al.
             row_features['nose_to_shoulder_left_distance'] = self._nose_to_shoulder_left_distance(row)
@@ -418,7 +394,7 @@ class DistanceFeatureExtractor(FeatureExtractor):
 
     def get_feature_names(self) -> List[str]:
         return [
-            'head_to_shoulder_distance', 'torso_length',
+            'torso_length',
             'nose_to_shoulder_left_distance', 'nose_to_shoulder_right_distance',
             'shoulder_to_elbow_left_distance', 'shoulder_to_elbow_right_distance',
             'elbow_to_wrist_left_distance', 'elbow_to_wrist_right_distance',
@@ -431,28 +407,6 @@ class DistanceFeatureExtractor(FeatureExtractor):
     def _euclidean_distance(self, x1, y1, x2, y2) -> float:
         """Calculate Euclidean distance between two points."""
         return np.sqrt((x2 - x1)**2 + (y2 - y1)**2)
-
-    def _head_to_shoulder_distance(self, row) -> float:
-        """Distance from head to shoulder line."""
-        nose_x = row.get('NOSE_x', 0)
-        nose_y = row.get('NOSE_y', 0)
-        shoulder_center_x = (row.get('LEFT_SHOULDER_x', 0) + row.get('RIGHT_SHOULDER_x', 0)) / 2
-        shoulder_center_y = (row.get('LEFT_SHOULDER_y', 0) + row.get('RIGHT_SHOULDER_y', 0)) / 2
-
-        if all([nose_x, nose_y, shoulder_center_x, shoulder_center_y]):
-            return self._euclidean_distance(nose_x, nose_y, shoulder_center_x, shoulder_center_y)
-        return 0.0
-
-    def _shoulder_width(self, row) -> float:
-        """Distance between shoulders."""
-        left_x = row.get('LEFT_SHOULDER_x', 0)
-        left_y = row.get('LEFT_SHOULDER_y', 0)
-        right_x = row.get('RIGHT_SHOULDER_x', 0)
-        right_y = row.get('RIGHT_SHOULDER_y', 0)
-
-        if all([left_x, left_y, right_x, right_y]):
-            return self._euclidean_distance(left_x, left_y, right_x, right_y)
-        return 0.0
 
     def _torso_length(self, row) -> float:
         """Distance from shoulders to hips."""
