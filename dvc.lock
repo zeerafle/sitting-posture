@@ -670,3 +670,40 @@ stages:
       hash: md5
       md5: 3c841e406f2e2e53f8edac8c50d66a50
       size: 1992
+  visualize:
+    cmd: uv run python src/roc_visualization.py
+    deps:
+    - path: data/processed
+      hash: md5
+      md5: 1a2640393c2285ce36038d232642b95a.dir
+      size: 1865332
+      nfiles: 9
+    - path: models/adaboost
+      hash: md5
+      md5: e4fd5558126922c6034cd9a02b86bcdf.dir
+      size: 1236492
+      nfiles: 3
+    - path: models/nn
+      hash: md5
+      md5: 07f240de0e529f5ffdd2094fb16f1cee.dir
+      size: 1644792
+      nfiles: 3
+    - path: models/xgb
+      hash: md5
+      md5: e688ba96f73eec2852a41fe2d29c7f53.dir
+      size: 157129
+      nfiles: 3
+    - path: src/models/utils.py
+      hash: md5
+      md5: fadcde095187d68c2698b49dd67fa6ec
+      size: 2137
+      isexec: true
+    - path: src/roc_visualization.py
+      hash: md5
+      md5: ddf320a2f0c666f0ffb8083c3a3263b2
+      size: 2692
+    outs:
+    - path: dvclive/plots/roc_curve_comparison.png
+      hash: md5
+      md5: ebac31083e533be9e48374dfc7ba5d57
+      size: 329654

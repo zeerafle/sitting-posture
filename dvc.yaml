@@ -79,3 +79,21 @@ stages:
             - dvclive/xgb/right/metrics.json
         outs:
             - dvclive/detailed_model_view_comparison.csv
+
+    visualize:
+        cmd: uv run python src/roc_visualization.py
+        deps:
+            - src/roc_visualization.py
+            - src/models/utils.py
+            - data/processed
+            - models/adaboost
+            - models/nn
+            - models/xgb
+        outs:
+            - dvclive/plots/roc_curve_comparison.png
+
+plots:
+    - dvclive/plots/roc_curve_comparison.png:
+        x_label: "False Positive Rate"
+        y_label: "True Positive Rate"
+        title: "ROC Curve Comparison"
