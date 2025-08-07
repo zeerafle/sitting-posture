@@ -1,19 +1,12 @@
+params:
+- ../../../dvclive/adaboost/front/params.yaml
+- ../../../dvclive/adaboost/left/params.yaml
+- ../../../dvclive/adaboost/right/params.yaml
 metrics:
-- ../../../dvclive/adaboost/metrics.json
-- ../../../dvclive/adaboost/metrics.json
-- ../../../dvclive/adaboost/metrics.json
-- ../../../dvclive/adaboost/metrics.json
+- ../../../dvclive/adaboost/front/metrics.json
+- ../../../dvclive/adaboost/left/metrics.json
+- ../../../dvclive/adaboost/right/metrics.json
 plots:
-- ../../../dvclive/adaboost/plots/metrics:
-    x: step
-- ../../../dvclive/adaboost/plots/metrics:
-    x: step
-- ../../../dvclive/adaboost/plots/metrics:
-    x: step
-- ../../../dvclive/adaboost/plots/metrics:
-    x: step
-- ../../../dvclive/adaboost/plots/images
-artifacts:
-  adaboost:
-    path: adaboost.joblib
-    type: model
+- ../../../dvclive/adaboost/front/plots/images
+- ../../../dvclive/adaboost/left/plots/images
+- ../../../dvclive/adaboost/right/plots/images

@@ -1,33 +1,42 @@
 import os
 import sys
-
-import xgboost as xgb
 import numpy as np
-
-from dvclive import Live
-
+from xgboost import XGBClassifier
+from skopt.space import Categorical, Real
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
-# move 2 level up
 parent_dir = os.path.abspath(os.path.join(current_dir, "..", ".."))
-# add parent dir to path
 sys.path.insert(0, parent_dir)
 
-from models.utils import load_data
-from evaluate import evaluate
+from models.base_trainer import BaseTrainer
 
-X_train, y_train, X_test, y_test, X_val, y_val = load_data(
-    os.path.join(parent_dir, "../data/processed")
-)
 
-with Live(os.path.join(parent_dir, "../dvclive/xgb")) as live:
-    clf = xgb.XGBClassifier()
-    clf.fit(X_train, np.ravel(y_train))
-    clf.save_model("model.json")
-    live.log_artifact("model.json", type="model")
+class XGBoostTrainer(BaseTrainer):
+    def get_estimator(self):
+        return XGBClassifier(random_state=self.params["random_state"])
 
-    # Classify pose in the TEST dataset using the trained model
-    y_pred_proba = clf.predict_proba(X_test)[:, 1]
-    y_pred = clf.predict(X_test)
+    def get_param_space(self):
+        return {
+            "n_estimators": Categorical(self.params["xgb"]["n_estimators"]),
+            "learning_rate": Real(
+                self.params["xgb"]["learning_rate_min"], self.params["xgb"]["learning_rate_max"]
+            ),
+            "gamma": Real(self.params["xgb"]["gamma_min"], self.params["xgb"]["gamma_max"]),
+            "max_depth": Categorical(self.params["xgb"]["max_depths"]),
+            "min_child_weight": Categorical(self.params["xgb"]["min_child_weights"]),
+            "subsample": Categorical(self.params["xgb"]["subsamples"]),
+            "lambda": Categorical(self.params["xgb"]["regulation_lambdas"]),
+            "alpha": Categorical(self.params["xgb"]["regulation_alphas"]),
+        }
 
-    evaluate(clf, y_test, y_pred, y_pred_proba, live)
+    def save_model(self, model, view):
+        model_path = os.path.join(self.models_dir, f"{self.model_name}_{view}.json")
+        model.save_model(model_path)
+
+    def log_model_specific_metrics(self, model, live):
+        live.log_metric("feature_importance_mean", float(np.mean(model.feature_importances_)), plot=False)
+
+
+if __name__ == "__main__":
+    trainer = XGBoostTrainer(model_name="xgb")
+    trainer.run()

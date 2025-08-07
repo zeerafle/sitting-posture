@@ -1,50 +1,99 @@
 stages:
-  download:
-    cmd: kaggle datasets download -d zeerafle/sitting-posture -p data/original --unzip
-    outs:
-    - data/original:
-        persist: true
-        cache: false
-  featurize:
-    cmd: python src/featurize.py
-    deps:
-    - data/original
-    - src/featurize.py
-    outs:
-    - data/data.csv:
-        persist: true
-    - data/poses_images_out:
-        persist: true
-  prepare:
-    cmd: python src/prepare.py
-    deps:
-    - data/data.csv
-    - src/prepare.py
-    outs:
-    - data/processed
-  train:
-    foreach:
-      - name: nn
-        out: model.keras
-      - name: adaboost
-        out: adaboost.joblib
-      - name: xgb
-        out: model.json
-    do:
-      cmd: python train.py
-      wdir: src/models/${item.name}
-      deps:
-      - train.py
-      - ../../../data/processed
-      - ../../evaluate.py
-      outs:
-      - ${item.out}:
-          cache: false
-      metrics:
-      - ../../../dvclive/${item.name}/metrics.json:
-          cache: false
-      plots:
-      - ../../../dvclive/${item.name}/plots/metrics:
-          cache: false
-          x: step
-      - ../../../dvclive/${item.name}/plots/images
+    # download:
+    #   cmd: kaggle datasets download -d zeerafle/sitting-posture -p data/original --unzip
+    #   outs:
+    #   - data/original:
+    #       persist: true
+    #       cache: false
+    extract_keypoints:
+        cmd: uv run python src/extract_keypoints.py
+        deps:
+            - data/original
+            - src/extract_keypoints.py
+            - src/keypoints_extraction/
+        outs:
+            - data/data.csv:
+                  persist: true
+            - data/poses_images_out:
+                  persist: true
+
+    featurize:
+        cmd: uv run python src/featurize.py
+        deps:
+            - data/data.csv
+            - src/feature_extraction/
+            - src/featurize.py
+        outs:
+            - data/data_with_features.csv:
+                  persist: true
+
+    prepare:
+        cmd: uv run python src/prepare.py
+        deps:
+            - data/data_with_features.csv
+            - src/prepare.py
+        outs:
+            - data/processed
+
+    train:
+        foreach:
+            - adaboost
+            - nn
+            - xgb
+        do:
+            cmd: uv run python train.py
+            wdir: src/models/${item}
+            deps:
+                - train.py
+                - ../../../data/processed
+                - ../evaluate.py
+                - ../utils.py
+                - ../base_trainer.py
+            params:
+                - ../../../params.yaml:
+            outs:
+                - ../../../models/${item}/
+            metrics:
+                - ../../../dvclive/${item}/front/metrics.json
+                - ../../../dvclive/${item}/front/htcv_results.json
+                - ../../../dvclive/${item}/front/cv_results.json
+                - ../../../dvclive/${item}/left/metrics.json
+                - ../../../dvclive/${item}/left/htcv_results.json
+                - ../../../dvclive/${item}/left/cv_results.json
+                - ../../../dvclive/${item}/right/metrics.json
+                - ../../../dvclive/${item}/right/htcv_results.json
+                - ../../../dvclive/${item}/right/cv_results.json
+
+    summarize:
+        cmd: uv run python src/model_comparison.py
+        deps:
+            - src/model_comparison.py
+            - dvclive/adaboost/front/metrics.json
+            - dvclive/adaboost/left/metrics.json
+            - dvclive/adaboost/right/metrics.json
+            - dvclive/nn/front/metrics.json
+            - dvclive/nn/left/metrics.json
+            - dvclive/nn/right/metrics.json
+            - dvclive/xgb/front/metrics.json
+            - dvclive/xgb/left/metrics.json
+            - dvclive/xgb/right/metrics.json
+        outs:
+            - dvclive/detailed_model_view_comparison.csv
+
+    visualize:
+        cmd: uv run python src/roc_visualization.py
+        deps:
+            - src/roc_visualization.py
+            - src/models/utils.py
+            - data/processed
+            - models/adaboost
+            - models/nn
+            - models/xgb
+        outs:
+            - dvclive/plots/roc_curve_comparison.png
+
+plots:
+    - dvclive/plots/roc_curve_comparison.png:
+        x_label: "False Positive Rate"
+        y_label: "True Positive Rate"
+        title: "ROC Curve Comparison"

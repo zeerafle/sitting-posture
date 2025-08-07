@@ -1,34 +1,36 @@
 import os
 import sys
-
-from sklearn.ensemble import AdaBoostClassifier
 import numpy as np
-
-from dvclive import Live
-import joblib
+from sklearn.ensemble import AdaBoostClassifier
+from skopt.space import Integer
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
-# move 2 level up
 parent_dir = os.path.abspath(os.path.join(current_dir, "..", ".."))
-# add parent dir to path
 sys.path.insert(0, parent_dir)
 
-from evaluate import evaluate
-from models.utils import load_data
+from models.base_trainer import BaseTrainer
 
-X_train, y_train, X_test, y_test, X_val, y_val = load_data(
-    os.path.join(parent_dir, "../data/processed")
-)
 
-with Live(os.path.join(parent_dir, '../dvclive/adaboost')) as live:
-    model = AdaBoostClassifier(n_estimators=500, algorithm='SAMME')
-    model.fit(X_train, np.ravel(y_train))
-    with open('adaboost.joblib', 'wb') as f:
-        joblib.dump(model, f)
-    live.log_artifact('adaboost.joblib', type='model')
+class AdaBoostTrainer(BaseTrainer):
+    def get_estimator(self):
+        return AdaBoostClassifier(random_state=self.params["random_state"])
 
-    # Classify pose in the TEST dataset using the trained model
-    y_pred_proba = model.decision_function(X_test)
-    y_pred = model.predict(X_test)
+    def get_param_space(self):
+        return {
+            "n_estimators": Integer(
+                self.params["adaboost"]["n_estimators_min"],
+                self.params["adaboost"]["n_estimators_max"],
+            ),
+        }
 
-    evaluate(model, y_test, y_pred, y_pred_proba, live)
+    def log_model_specific_metrics(self, model, live):
+        live.log_metric("estimator_weights_mean", float(np.mean(model.estimator_weights_)), plot=False)
+        live.log_metric("feature_importance_mean", float(np.mean(model.feature_importances_)), plot=False)
+
+    def get_y_pred_proba(self, model, X_test):
+        return model.decision_function(X_test)
+
+
+if __name__ == "__main__":
+    trainer = AdaBoostTrainer(model_name="adaboost")
+    trainer.run()

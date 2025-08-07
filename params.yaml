@@ -1,0 +1,31 @@
+# Global parameters shared across all models
+random_state: 42
+n_iter: 30
+cv: 5
+scoring: accuracy
+
+# Model-specific parameters
+adaboost:
+  n_estimators_min: 10
+  n_estimators_max: 2000
+
+nn:
+  first_hidden_layer_sizes_min: 128
+  first_hidden_layer_sizes_max: 512
+  second_hidden_layer_sizes_min: 256
+  second_hidden_layer_sizes_max: 1024
+  learning_rates: [0.0001, 0.001, 0.01]
+  batch_size: 32
+  epochs: 50
+
+xgb:
+  gamma_min: 5.0
+  gamma_max: 11.0
+  learning_rate_min: 0.07
+  learning_rate_max: 0.6
+  n_estimators: [50, 100, 150]
+  regulation_alphas: [0.00001, 0.01, 0.75]
+  regulation_lambdas: [0.00001, 0.01, 0.45]
+  min_child_weights: [1.5, 6, 10]
+  subsamples: [0.6, 0.95]
+  max_depths: [3, 6, 9]
