@@ -19,7 +19,7 @@ def plot_roc_curves():
     line_styles = {'front': '-', 'left': '--', 'right': ':'}
 
     fig, ax = plt.subplots(figsize=(12, 8))
-    fig.suptitle("ROC Curves Comparison - All Models and Views", fontsize=16)
+    fig.suptitle("ROC Curves Comparison - All Models and Views", fontsize=20)
 
     for view in views:
         data_path = os.path.join(f"data/processed/{view}")
@@ -63,10 +63,13 @@ def plot_roc_curves():
 
     ax.set_xlim([0.0, 1.0])
     ax.set_ylim([0.0, 1.05])
-    ax.set_xlabel('False Positive Rate', fontsize=12)
-    ax.set_ylabel('True Positive Rate', fontsize=12)
-    ax.legend(loc="lower right", fontsize=10)
+    ax.set_xlabel('False Positive Rate', fontsize=16)
+    ax.set_ylabel('True Positive Rate', fontsize=16)
+    ax.legend(loc="lower right", fontsize=12)
     ax.grid(True, alpha=0.3)
+
+    # Make tick labels larger
+    ax.tick_params(axis='both', which='major', labelsize=14)
 
     plt.tight_layout()
 

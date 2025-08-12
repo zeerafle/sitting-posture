@@ -700,10 +700,10 @@ stages:
       isexec: true
     - path: src/roc_visualization.py
       hash: md5
-      md5: ddf320a2f0c666f0ffb8083c3a3263b2
-      size: 2692
+      md5: c24aa5b0b267575d46ba60765e696b50
+      size: 2784
     outs:
     - path: dvclive/plots/roc_curve_comparison.png
       hash: md5
-      md5: ebac31083e533be9e48374dfc7ba5d57
-      size: 329654
+      md5: 46eccf206c2d6c5cfc8a8a8b6741069a
+      size: 369718
