@@ -1,3 +1,4 @@
+import os
 from dvclive import Live
 from sklearn.metrics import (
     confusion_matrix,
@@ -19,6 +20,12 @@ def evaluate(
     y_train: pl.Series, y_test: np.ndarray, y_pred: np.ndarray,
     y_pred_proba: np.ndarray, live: Live
 ):
+    # save the y_pred for further analysis
+    y_pred_save_path = os.path.join(live.dir, "y_pred.csv")
+    pl.DataFrame({"y_true": y_test, "y_pred": y_pred, "y_pred_proba": y_pred_proba}).write_csv(
+        y_pred_save_path
+    )
+    live.log_artifact(y_pred_save_path, "predictions")
     # log cross-validation for whole data (train + test)
     scoring = ['accuracy', 'f1', 'precision', 'recall', 'roc_auc']
     cv_scores = cross_validate(model,
