@@ -1,0 +1,66 @@
+{
+    "analysis_type": "combined",
+    "friedman_statistic": 7.6000000000000085,
+    "p_value": 0.0223707718561655,
+    "kendalls_w": 0.76,
+    "significant": true,
+    "models": [
+        "adaboost",
+        "nn",
+        "xgb"
+    ],
+    "views": [
+        "combined"
+    ],
+    "metric": "accuracy",
+    "alpha": 0.05,
+    "model_scores": {
+        "adaboost": [
+            0.9359850839030454,
+            0.9266169154228856,
+            0.9259950248756219,
+            0.9228855721393034,
+            0.9272388059701493
+        ],
+        "nn": [
+            0.9415786202610317,
+            0.9440298507462687,
+            0.9402985074626866,
+            0.9384328358208955,
+            0.9552238805970149
+        ],
+        "xgb": [
+            0.9502796768178993,
+            0.947139303482587,
+            0.9365671641791045,
+            0.9396766169154229,
+            0.9396766169154229
+        ]
+    },
+    "post_hoc_results": [
+        {
+            "Model 1": "adaboost",
+            "Model 2": "nn",
+            "Statistic": 0.0,
+            "P-value": 0.0625,
+            "Corrected Alpha": 0.016666666666666666,
+            "Significant": false
+        },
+        {
+            "Model 1": "adaboost",
+            "Model 2": "xgb",
+            "Statistic": 0.0,
+            "P-value": 0.0625,
+            "Corrected Alpha": 0.016666666666666666,
+            "Significant": false
+        },
+        {
+            "Model 1": "nn",
+            "Model 2": "xgb",
+            "Statistic": 7.0,
+            "P-value": 1.0,
+            "Corrected Alpha": 0.016666666666666666,
+            "Significant": false
+        }
+    ]
+}
