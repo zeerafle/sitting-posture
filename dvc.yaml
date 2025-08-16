@@ -8,7 +8,7 @@ stages:
     extract_keypoints:
         cmd: uv run python src/extract_keypoints.py
         deps:
-            - data/original
+            - /teamspace/studios/01-data-download-kaggle/.cache/kagglehub/datasets/zeerafle/sitting-posture/versions/5
             - src/extract_keypoints.py
             - src/keypoints_extraction/
         outs:

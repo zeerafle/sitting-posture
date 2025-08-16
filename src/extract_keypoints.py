@@ -3,6 +3,7 @@ import tensorflow_hub as hub
 
 from keypoints_extraction.preprocessor import MoveNetPreprocessor
 
+ORIGINAL_DIR = "/teamspace/studios/01-data-download-kaggle/.cache/kagglehub/datasets/zeerafle/sitting-posture/versions/5"
 DATA_DIR = "data"
 IMAGES_OUT_DIR = os.path.join(DATA_DIR, "poses_images_out")
 CSVS_OUT = os.path.join(DATA_DIR, "data.csv")
@@ -16,7 +17,7 @@ movenet = model.signatures["serving_default"]
 print("Processing images and extracting landmarks...")
 preprocessor = MoveNetPreprocessor(
     model=movenet,
-    images_in_folder=os.path.join(DATA_DIR, "original"),
+    images_in_folder=os.path.join(ORIGINAL_DIR),
     images_out_folder=IMAGES_OUT_DIR,
     csvs_out_path=CSVS_OUT,
     batch_size=4,
