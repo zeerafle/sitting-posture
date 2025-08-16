@@ -52,17 +52,20 @@ class AngleFeatureExtractor(FeatureExtractor):
 
     def _calculate_shoulder_angle(self, row) -> float:
         """Calculate shoulder slope angle."""
-        left_shoulder_y = row.get('LEFT_SHOULDER_y', 0)
-        right_shoulder_y = row.get('RIGHT_SHOULDER_y', 0)
-        left_shoulder_x = row.get('LEFT_SHOULDER_x', 0)
-        right_shoulder_x = row.get('RIGHT_SHOULDER_x', 0)
+        left_shoulder_y = row.get('LEFT_SHOULDER_y', None)
+        right_shoulder_y = row.get('RIGHT_SHOULDER_y', None)
+        left_shoulder_x = row.get('LEFT_SHOULDER_x', None)
+        right_shoulder_x = row.get('RIGHT_SHOULDER_x', None)
 
-        if all([left_shoulder_y, right_shoulder_y, left_shoulder_x, right_shoulder_x]):
+        if all(coord is not None for coord in [left_shoulder_y, right_shoulder_y,
+                                            left_shoulder_x, right_shoulder_x]):
             dy = right_shoulder_y - left_shoulder_y
             dx = right_shoulder_x - left_shoulder_x
             if dx != 0:
                 return np.arctan(dy / dx) * 180 / np.pi
-        return 0.0
+            else:
+                return np.nan  # Vertical line case
+        return np.nan  # Missing landmarks
 
     def _calculate_hip_angle(self, row) -> float:
         """Calculate hip alignment angle."""
@@ -80,16 +83,20 @@ class AngleFeatureExtractor(FeatureExtractor):
 
     def _calculate_SEWAngleABC_left(self, row) -> tuple[float, float, float]:
         """Calculate SEW angle for left side."""
-        left_shoulder_x = row.get('LEFT_SHOULDER_x', 0)
-        left_shoulder_y = row.get('LEFT_SHOULDER_y', 0)
-        left_elbow_x = row.get('LEFT_ELBOW_x', 0)
-        left_elbow_y = row.get('LEFT_ELBOW_y', 0)
-        left_wrist_x = row.get('LEFT_WRIST_x', 0)
-        left_wrist_y = row.get('LEFT_WRIST_y', 0)
+        left_shoulder_x = row.get('LEFT_SHOULDER_x', None)
+        left_shoulder_y = row.get('LEFT_SHOULDER_y', None)
+        left_elbow_x = row.get('LEFT_ELBOW_x', None)
+        left_elbow_y = row.get('LEFT_ELBOW_y', None)
+        left_wrist_x = row.get('LEFT_WRIST_x', None)
+        left_wrist_y = row.get('LEFT_WRIST_y', None)
 
         sewangle_A, sewangle_B, sewangle_C = 0.0, 0.0, 0.0
 
-        if all([left_shoulder_x, left_shoulder_y, left_elbow_x, left_elbow_y, left_wrist_x, left_wrist_y]):
+        # Check if ALL required landmarks are detected (not None)
+        if all(coord is not None for coord in [left_shoulder_x, left_shoulder_y,
+                                            left_elbow_x, left_elbow_y,
+                                            left_wrist_x, left_wrist_y]):
+            # Calculate distances
             # shoulder to elbow distance
             a = self._euclidean_distance(left_shoulder_x, left_shoulder_y, left_elbow_x, left_elbow_y)
             # elbow to wrist distance
@@ -97,30 +104,33 @@ class AngleFeatureExtractor(FeatureExtractor):
             # shoulder to wrist distance
             c = self._euclidean_distance(left_shoulder_x, left_shoulder_y, left_wrist_x, left_wrist_y)
 
-            sewangle_B = self._safe_arccos(
-                (a**2 + b**2 - c**2) / (2 * a * b)
-            )
+            # Additional check: ensure distances are not zero (collinear points)
+            if a > 0 and b > 0 and c > 0:
+                sewangle_B = self._safe_arccos((a**2 + b**2 - c**2) / (2 * a * b))
+                sewangle_A = self._safe_arccos((b**2 + c**2 - a**2) / (2 * b * c))
+                sewangle_C = 180 - sewangle_B - sewangle_A  # Convert to degrees if needed
+            else:
+                # Handle degenerate case where points are collinear
+                return np.nan, np.nan, np.nan
 
-            sewangle_A = self._safe_arccos(
-                (b**2 + c**2 - a**2) / (2 * b * c)
-            )
-
-            sewangle_C = 180 - sewangle_A - sewangle_B
+        else:
+            # Return NaN when landmarks are missing
+            return np.nan, np.nan, np.nan
 
         return sewangle_A, sewangle_B, sewangle_C
 
     def _calculate_SEWAngleABC_right(self, row) -> tuple[float, float, float]:
         """Calculate SEW angle for right side."""
-        right_shoulder_x = row.get('RIGHT_SHOULDER_x', 0)
-        right_shoulder_y = row.get('RIGHT_SHOULDER_y', 0)
-        right_elbow_x = row.get('RIGHT_ELBOW_x', 0)
-        right_elbow_y = row.get('RIGHT_ELBOW_y', 0)
-        right_wrist_x = row.get('RIGHT_WRIST_x', 0)
-        right_wrist_y = row.get('RIGHT_WRIST_y', 0)
+        right_shoulder_x = row.get('RIGHT_SHOULDER_x', None)
+        right_shoulder_y = row.get('RIGHT_SHOULDER_y', None)
+        right_elbow_x = row.get('RIGHT_ELBOW_x', None)
+        right_elbow_y = row.get('RIGHT_ELBOW_y', None)
+        right_wrist_x = row.get('RIGHT_WRIST_x', None)
+        right_wrist_y = row.get('RIGHT_WRIST_y', None)
 
         sewangle_A, sewangle_B, sewangle_C = 0.0, 0.0, 0.0
 
-        if all([right_shoulder_x, right_shoulder_y, right_elbow_x, right_elbow_y, right_wrist_x, right_wrist_y]):
+        if all(coord is not None for coord in [right_shoulder_x, right_shoulder_y, right_elbow_x, right_elbow_y, right_wrist_x, right_wrist_y]):
             # shoulder to elbow distance
             a = self._euclidean_distance(right_shoulder_x, right_shoulder_y, right_elbow_x, right_elbow_y)
             # elbow to wrist distance
@@ -128,15 +138,17 @@ class AngleFeatureExtractor(FeatureExtractor):
             # shoulder to wrist distance
             c = self._euclidean_distance(right_shoulder_x, right_shoulder_y, right_wrist_x, right_wrist_y)
 
-            sewangle_B = self._safe_arccos(
-                (a**2 + b**2 - c**2) / (2 * a * b)
-            )
+            if a > 0 and b > 0 and c > 0:
+                sewangle_B = self._safe_arccos((a**2 + b**2 - c**2) / (2 * a * b))
+                sewangle_A = self._safe_arccos((b**2 + c**2 - a**2) / (2 * b * c))
+                sewangle_C = 180 - sewangle_B - sewangle_A  # Convert to degrees if needed
+            else:
+                # Handle degenerate case where points are collinear
+                return np.nan, np.nan, np.nan
 
-            sewangle_A = self._safe_arccos(
-                (b**2 + c**2 - a**2) / (2 * b * c)
-            )
-
-            sewangle_C = 180 - sewangle_A - sewangle_B
+        else:
+            # Return NaN when landmarks are missing
+            return np.nan, np.nan, np.nan
 
         return sewangle_A, sewangle_B, sewangle_C
 

@@ -1,5 +1,8 @@
 import os
+import argparse
+import pandas as pd
 import polars as pl
+from sklearn.impute import SimpleImputer
 import tensorflow as tf
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
@@ -89,68 +92,261 @@ def landmarks_to_embedding(landmarks_and_scores):
     return tuple(tf.reshape(landmarks, (13*2)).numpy())
 
 
-# Load the data with all features
-df = pl.read_csv("data/data_with_features.csv")
+def prepare_data(combined=False):
+    """Prepare data for training - either by view or combined"""
 
-# Split the dataframe into landmark coordinates and engineered features
-landmark_cols = [col for col in df.columns if
-                any(part in col for part in ["NOSE", "EYE", "EAR", "SHOULDER",
-                                           "ELBOW", "WRIST", "HIP"])]
+    # Load the data with all features
+    df = pl.read_csv("data/data_with_features.csv")
 
-# Keep metadata columns separate
-metadata_cols = ["file_name", "class_name", "class_no", "view_type"]
+    # Split the dataframe into landmark coordinates and engineered features
+    landmark_cols = [col for col in df.columns if
+                    any(part in col for part in ["NOSE", "EYE", "EAR", "SHOULDER",
+                                               "ELBOW", "WRIST", "HIP"])]
 
-# Engineered feature columns (all columns except landmarks and metadata)
-feature_cols = [col for col in df.columns if col not in landmark_cols + metadata_cols]
+    # Keep metadata columns separate
+    metadata_cols = ["file_name", "class_name", "class_no", "view_type"]
 
-print(f"Number of landmark columns: {len(landmark_cols)}")
-print(f"Number of engineered feature columns: {len(feature_cols)}")
+    # Engineered feature columns (all columns except landmarks and metadata)
+    feature_cols = [col for col in df.columns if col not in landmark_cols + metadata_cols]
 
-# 1. Process landmark coordinates with the embedding function
-landmarks_df = df.select(landmark_cols)
-embeddings = landmarks_df.map_rows(landmarks_to_embedding)
+    print(f"Number of landmark columns: {len(landmark_cols)}")
+    print(f"Number of engineered feature columns: {len(feature_cols)}")
 
-# 2. Normalize engineered features using standard scaling
-features_df = df.select(feature_cols)
-features_array = features_df.to_numpy()
+    # FIRST: Split into train/test before any preprocessing
+    if combined:
+        df_work = df.drop('view_type')
+        train_df, test_df = train_test_split(df_work, test_size=0.2, random_state=42)
+    else:
+        # For individual views, we'll process them separately
+        train_dfs = {}
+        test_dfs = {}
 
-# Apply standard scaling to engineered features
-scaler = StandardScaler()
-normalized_features = scaler.fit_transform(features_array)
-normalized_features_df = pl.DataFrame(normalized_features, schema=feature_cols)
+        for view in df.select('view_type').unique().to_series():
+            view_df = df.filter(df["view_type"] == view).drop('view_type')
+            train_view, test_view = train_test_split(view_df, test_size=0.2, random_state=42)
+            train_dfs[view] = train_view
+            test_dfs[view] = test_view
 
-# 3. Combine normalized embeddings and normalized engineered features
-# First convert embeddings to a proper DataFrame with column names
-embedding_cols = [f"embedding_{i}" for i in range(26)]  # 13 landmarks * 2 coordinates
-embeddings_df = pl.DataFrame([list(e) for e in embeddings], schema=embedding_cols)
+    def process_dataset(train_data, test_data, save_path, view_name=""):
+        """Process a single dataset (train/test pair)"""
 
-# Combine all normalized features
-combined_features = pl.concat([embeddings_df, normalized_features_df], how="horizontal")
+        # Convert to pandas for imputation
+        train_pandas = train_data.to_pandas()
+        test_pandas = test_data.to_pandas()
 
-# 4. Add back the class labels
-df_to_split = combined_features.with_columns(
-    df.select(
-        pl.col('class_no').alias('labels'),
-        pl.col('view_type')
-    )
-)
+        # Handle NaN values using imputation by class_name groups (on TRAINING data only)
+        print(f"Handling NaN values for {view_name}...")
 
-for view in df.select('view_type').unique().to_series():
-    df_to_split_view = df_to_split.filter(df["view_type"] == view).drop('view_type')
+        # Check for NaNs in training data
+        train_nan_count = train_pandas[feature_cols].isna().sum().sum()
+        test_nan_count = test_pandas[feature_cols].isna().sum().sum()
+        print(f"Training NaN count before imputation: {train_nan_count}")
+        print(f"Test NaN count before imputation: {test_nan_count}")
 
-    # Split into train and test sets
-    train, test = train_test_split(df_to_split_view, test_size=0.2, random_state=42)
+        group_imputers = {}
+        overall_imputer = None
 
-    # Save the processed data
-    os.makedirs(f"data/processed/{view}", exist_ok=True)
-    train.write_csv(f"data/processed/{view}/train.csv")
-    test.write_csv(f"data/processed/{view}/test.csv")
+        if train_nan_count > 0 or test_nan_count > 0:
+            # Show NaN counts by column in training data
+            nan_counts = train_pandas[feature_cols].isna().sum()
+            nan_cols = nan_counts[nan_counts > 0]
+            if len(nan_cols) > 0:
+                print("Training columns with NaN values:")
+                for col, count in nan_cols.items():
+                    print(f"  - {col}: {count} NaNs")
 
-    # Save the scaler for future use (if needed for inference)
-    import joblib
-    os.makedirs(f"data/processed/{view}/scalers", exist_ok=True)
-    joblib.dump(scaler, f"data/processed/{view}/scalers/feature_scaler.joblib")
+            # Fit imputers on TRAINING data only
+            imputed_train = train_pandas[feature_cols].copy()
 
-print(f"Processed data saved with {len(combined_features.columns)} total features")
-print(f"- {len(embedding_cols)} normalized landmark coordinates")
-print(f"- {len(feature_cols)} normalized engineered features")
+            for class_name in train_pandas['class_name'].unique():
+                group_mask = train_pandas['class_name'] == class_name
+
+                if group_mask.sum() == 0:
+                    continue
+
+                print(f"Processing group: {class_name} ({group_mask.sum()} samples)")
+
+                group_features = train_pandas.loc[group_mask, feature_cols]
+
+                if len(group_features) > 0 and group_features.isna().any().any():
+                    imputer = SimpleImputer(strategy='mean')
+                    non_nan_cols = group_features.columns[group_features.notna().any()]
+
+                    if len(non_nan_cols) > 0:
+                        try:
+                            # Fit on training data
+                            imputer.fit(group_features[non_nan_cols])
+
+                            # Transform training data
+                            imputed_group = imputer.transform(group_features[non_nan_cols])
+                            imputed_train.loc[group_mask, non_nan_cols] = imputed_group
+
+                            # Store the fitted imputer
+                            group_imputers[class_name] = {
+                                'imputer': imputer,
+                                'columns': non_nan_cols.tolist(),
+                                'class_name': class_name
+                            }
+
+                        except Exception as e:
+                            print(f"  Warning: Could not impute for group {class_name}: {e}")
+                            # Fallback to overall mean
+                            for col in non_nan_cols:
+                                if group_features[col].isna().any():
+                                    overall_mean = train_pandas[col].mean()
+                                    if not np.isnan(overall_mean):
+                                        imputed_train.loc[group_mask & train_pandas[col].isna(), col] = overall_mean
+                                    else:
+                                        imputed_train.loc[group_mask & train_pandas[col].isna(), col] = 0.0
+
+            # Handle any remaining NaNs with overall imputer fitted on training data
+            remaining_nans = imputed_train.isna().sum().sum()
+            if remaining_nans > 0:
+                print(f"Handling {remaining_nans} remaining NaN values with overall mean...")
+                overall_imputer = SimpleImputer(strategy='mean')
+                imputed_train = pd.DataFrame(
+                    overall_imputer.fit_transform(imputed_train),
+                    columns=feature_cols,
+                    index=imputed_train.index
+                )
+
+            # Apply the SAME imputers to test data
+            imputed_test = test_pandas[feature_cols].copy()
+
+            for class_name in test_pandas['class_name'].unique():
+                if class_name in group_imputers:
+                    group_mask = test_pandas['class_name'] == class_name
+                    if group_mask.sum() > 0:
+                        imputer_info = group_imputers[class_name]
+                        imputer = imputer_info['imputer']
+                        cols = imputer_info['columns']
+
+                        try:
+                            imputed_group = imputer.transform(test_pandas.loc[group_mask, cols])
+                            imputed_test.loc[group_mask, cols] = imputed_group
+                        except Exception as e:
+                            print(f"Warning: Could not apply imputer to test group {class_name}: {e}")
+
+            # Apply overall imputer to test data if needed
+            if overall_imputer is not None:
+                imputed_test = pd.DataFrame(
+                    overall_imputer.transform(imputed_test),
+                    columns=feature_cols,
+                    index=imputed_test.index
+                )
+
+            # Replace the original features
+            train_pandas[feature_cols] = imputed_train
+            test_pandas[feature_cols] = imputed_test
+
+            # Final check
+            train_nan_after = train_pandas[feature_cols].isna().sum().sum()
+            test_nan_after = test_pandas[feature_cols].isna().sum().sum()
+            print(f"Training NaN count after imputation: {train_nan_after}")
+            print(f"Test NaN count after imputation: {test_nan_after}")
+
+        # Convert back to polars
+        train_data = pl.from_pandas(train_pandas)
+        test_data = pl.from_pandas(test_pandas)
+
+        # Process landmarks for both train and test
+        train_landmarks_df = train_data.select(landmark_cols)
+        test_landmarks_df = test_data.select(landmark_cols)
+
+        train_embeddings = train_landmarks_df.map_rows(landmarks_to_embedding)
+        test_embeddings = test_landmarks_df.map_rows(landmarks_to_embedding)
+
+        # Normalize engineered features - FIT ON TRAIN, TRANSFORM BOTH
+        train_features_array = train_data.select(feature_cols).to_numpy()
+        test_features_array = test_data.select(feature_cols).to_numpy()
+
+        # Check for zero variance columns in training data
+        std_devs = np.std(train_features_array, axis=0)
+        zero_std_columns = np.where(std_devs == 0)[0]
+
+        if len(zero_std_columns) > 0:
+            print(f"Warning: {len(zero_std_columns)} columns have zero variance in training data")
+            for col_idx in zero_std_columns:
+                print(f"  - {feature_cols[col_idx]}")
+
+            # Add small epsilon to avoid division by zero in both train and test
+            for col_idx in zero_std_columns:
+                train_features_array[:, col_idx] += np.random.normal(0, 0.001, size=train_features_array.shape[0])
+                test_features_array[:, col_idx] += np.random.normal(0, 0.001, size=test_features_array.shape[0])
+
+        # Fit scaler on training data only
+        scaler = StandardScaler()
+        normalized_train_features = scaler.fit_transform(train_features_array)
+        normalized_test_features = scaler.transform(test_features_array)
+
+        # Final NaN checks
+        train_nan_final = np.isnan(normalized_train_features).sum()
+        test_nan_final = np.isnan(normalized_test_features).sum()
+        print(f"Training NaN count after scaling: {train_nan_final}")
+        print(f"Test NaN count after scaling: {test_nan_final}")
+
+        # Replace any remaining NaNs
+        if np.isnan(normalized_train_features).any():
+            print("Replacing remaining training NaNs with 0.0...")
+            normalized_train_features = np.nan_to_num(normalized_train_features, nan=0.0)
+
+        if np.isnan(normalized_test_features).any():
+            print("Replacing remaining test NaNs with 0.0...")
+            normalized_test_features = np.nan_to_num(normalized_test_features, nan=0.0)
+
+        # Create DataFrames
+        normalized_train_df = pl.DataFrame(normalized_train_features, schema=feature_cols)
+        normalized_test_df = pl.DataFrame(normalized_test_features, schema=feature_cols)
+
+        # Combine embeddings and features
+        embedding_cols = [f"embedding_{i}" for i in range(26)]
+        train_embeddings_df = pl.DataFrame([list(e) for e in train_embeddings], schema=embedding_cols)
+        test_embeddings_df = pl.DataFrame([list(e) for e in test_embeddings], schema=embedding_cols)
+
+        train_combined = pl.concat([train_embeddings_df, normalized_train_df], how="horizontal")
+        test_combined = pl.concat([test_embeddings_df, normalized_test_df], how="horizontal")
+
+        # Add labels
+        final_train = train_combined.with_columns(train_data.select(pl.col('class_no').alias('labels')))
+        final_test = test_combined.with_columns(test_data.select(pl.col('class_no').alias('labels')))
+
+        # Save data and preprocessors
+        os.makedirs(save_path, exist_ok=True)
+        final_train.write_csv(f"{save_path}/train.csv")
+        final_test.write_csv(f"{save_path}/test.csv")
+
+        # Save preprocessors
+        os.makedirs(f"{save_path}/preprocessors", exist_ok=True)
+        import joblib
+        joblib.dump(scaler, f"{save_path}/preprocessors/feature_scaler.joblib")
+        joblib.dump(group_imputers, f"{save_path}/preprocessors/group_imputers.joblib")
+        if overall_imputer is not None:
+            joblib.dump(overall_imputer, f"{save_path}/preprocessors/overall_imputer.joblib")
+
+        joblib.dump({
+            'feature_cols': feature_cols,
+            'landmark_cols': landmark_cols,
+            'embedding_cols': embedding_cols
+        }, f"{save_path}/preprocessors/feature_info.joblib")
+
+        print(f"{view_name} data saved with {len(train_combined.columns)} total features")
+        return len(train_combined.columns)
+
+    # Process datasets
+    if combined:
+        total_features = process_dataset(train_df, test_df, "data/processed/combined", "Combined")
+    else:
+        for view in train_dfs.keys():
+            total_features = process_dataset(train_dfs[view], test_dfs[view], f"data/processed/{view}", view)
+
+    print(f"- {26} normalized landmark coordinates")
+    print(f"- {len(feature_cols)} normalized engineered features")
+    print("- All preprocessors saved for inference use")
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Prepare data for training")
+    parser.add_argument("--combined", action="store_true", help="Prepare combined view data")
+    args = parser.parse_args()
+
+    prepare_data(combined=args.combined)

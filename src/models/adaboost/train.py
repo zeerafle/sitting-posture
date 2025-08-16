@@ -1,3 +1,4 @@
+import argparse
 import os
 import sys
 import numpy as np
@@ -32,5 +33,9 @@ class AdaBoostTrainer(BaseTrainer):
 
 
 if __name__ == "__main__":
-    trainer = AdaBoostTrainer(model_name="adaboost")
+    parser = argparse.ArgumentParser(description="Train AdaBoost model")
+    parser.add_argument("--combined", action="store_true", help="Train on combined view data")
+    args = parser.parse_args()
+
+    trainer = AdaBoostTrainer(model_name="adaboost", train_combined=args.combined)
     trainer.run()

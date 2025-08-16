@@ -19,8 +19,9 @@ from models.utils import NumpyEncoder, load_data
 
 
 class BaseTrainer(ABC):
-    def __init__(self, model_name: str):
+    def __init__(self, model_name: str, train_combined: bool = False):
         self.model_name = model_name
+        self.train_combined = train_combined
         self.params = dvc.api.params_show()
         self.dvclive_path = os.path.join(parent_dir, f"../dvclive/{self.model_name}")
         self.models_dir = os.path.join(parent_dir, f"../models/{self.model_name}/")
@@ -50,67 +51,78 @@ class BaseTrainer(ABC):
         model.set_params(**best_params)
         return model
 
-    def run(self):
-        for view in self.views:
-            X_train, X_test, y_train, y_test = load_data(
-                os.path.join(parent_dir, f"../data/processed/{view}"),
+    def train_view(self, view, X_train, X_test, y_train, y_test):
+        """Train model for a specific view"""
+        dvclive_path_view = os.path.join(self.dvclive_path, view)
+
+        with Live(dvclive_path_view) as live:
+            opt = BayesSearchCV(
+                estimator=self.get_estimator(),
+                search_spaces=self.get_param_space(),
+                n_iter=self.params["n_iter"],
+                cv=self.params["cv"],
+                scoring=self.params["scoring"],
+                random_state=self.params["random_state"],
+                refit=False,
+                n_jobs=-1,
+                verbose=1,
             )
 
-            dvclive_path_view = os.path.join(self.dvclive_path, view)
+            opt.fit(X_train, np.ravel(y_train))
+            best_params = opt.best_params_
 
-            with Live(dvclive_path_view) as live:
-                opt = BayesSearchCV(
-                    estimator=self.get_estimator(),
-                    search_spaces=self.get_param_space(),
-                    n_iter=self.params["n_iter"],
-                    cv=self.params["cv"],
-                    scoring=self.params["scoring"],
-                    random_state=self.params["random_state"],
-                    refit=False,
-                    n_jobs=-1,
-                    verbose=1,
+            live.log_params(best_params)
+            live.log_param("htcv_best_score", float(opt.best_score_))
+            htcv_results_json_path = os.path.join(dvclive_path_view, "htcv_results.json")
+            with open(htcv_results_json_path, "w") as f:
+                json.dump(opt.cv_results_, f, indent=4, cls=NumpyEncoder)
+
+            model = self.get_estimator()
+            model = self.set_best_params(model, best_params)
+
+            with OfflineEmissionsTracker(save_to_file=False) as training_tracker:
+                model.fit(X_train, np.ravel(y_train))
+            live.log_metric('train/score', float(model.score(X_train, np.ravel(y_train))), plot=False)
+            live.log_metric('train/duration', training_tracker.final_emissions_data.duration, plot=False)
+            live.log_metric('train/cpu_power', training_tracker.final_emissions_data.cpu_power, plot=False)
+            live.log_metric('train/ram_power', training_tracker.final_emissions_data.ram_power, plot=False)
+            live.log_metric('train/cpu_energy', training_tracker.final_emissions_data.cpu_energy, plot=False)
+            live.log_metric('train/gpu_energy', training_tracker.final_emissions_data.gpu_energy, plot=False)
+            live.log_metric('train/energy_consumed', training_tracker.final_emissions_data.energy_consumed, plot=False)
+
+            self.log_model_specific_metrics(model, live)
+            self.save_model(model, view)
+
+            y_pred_proba = self.get_y_pred_proba(model, X_test)
+
+            with OfflineEmissionsTracker(save_to_file=False) as inference_tracker:
+                y_pred = model.predict(X_test)
+            live.log_metric('test/duration', inference_tracker.final_emissions_data.duration, plot=False)
+            live.log_metric('test/cpu_power', inference_tracker.final_emissions_data.cpu_power, plot=False)
+            live.log_metric('test/ram_power', inference_tracker.final_emissions_data.ram_power, plot=False)
+            live.log_metric('test/cpu_energy', inference_tracker.final_emissions_data.cpu_energy, plot=False)
+            live.log_metric('test/gpu_energy', inference_tracker.final_emissions_data.gpu_energy, plot=False)
+            live.log_metric('test/energy_consumed', inference_tracker.final_emissions_data.energy_consumed, plot=False)
+
+            cv_scores = evaluate(
+                model, X_train, X_test, y_train, y_test, y_pred, y_pred_proba, live
+            )
+
+            cv_results_json_path = os.path.join(dvclive_path_view, "cv_results.json")
+            with open(cv_results_json_path, "w") as f:
+                json.dump(cv_scores, f, indent=4, cls=NumpyEncoder)
+
+    def run(self):
+        if self.train_combined:
+            # Train on combined data
+            X_train, X_test, y_train, y_test = load_data(
+                os.path.join(parent_dir, "../data/processed/combined")
+            )
+            self.train_view("combined", X_train, X_test, y_train, y_test)
+        else:
+            # Train on individual views
+            for view in self.views:
+                X_train, X_test, y_train, y_test = load_data(
+                    os.path.join(parent_dir, f"../data/processed/{view}"),
                 )
-
-                opt.fit(X_train, np.ravel(y_train))
-                best_params = opt.best_params_
-
-                live.log_params(best_params)
-                live.log_param("htcv_best_score", float(opt.best_score_))
-                htcv_results_json_path = os.path.join(dvclive_path_view, "htcv_results.json")
-                with open(htcv_results_json_path, "w") as f:
-                    json.dump(opt.cv_results_, f, indent=4, cls=NumpyEncoder)
-
-                model = self.get_estimator()
-                model = self.set_best_params(model, best_params)
-
-                with OfflineEmissionsTracker(save_to_file=False) as training_tracker:
-                    model.fit(X_train, np.ravel(y_train))
-                live.log_metric('train/score', float(model.score(X_train, np.ravel(y_train))), plot=False)
-                live.log_metric('train/duration', training_tracker.final_emissions_data.duration, plot=False)
-                live.log_metric('train/cpu_power', training_tracker.final_emissions_data.cpu_power, plot=False)
-                live.log_metric('train/ram_power', training_tracker.final_emissions_data.ram_power, plot=False)
-                live.log_metric('train/cpu_energy', training_tracker.final_emissions_data.cpu_energy, plot=False)
-                live.log_metric('train/gpu_energy', training_tracker.final_emissions_data.gpu_energy, plot=False)
-                live.log_metric('train/energy_consumed', training_tracker.final_emissions_data.energy_consumed, plot=False)
-
-                self.log_model_specific_metrics(model, live)
-                self.save_model(model, view)
-
-                y_pred_proba = self.get_y_pred_proba(model, X_test)
-
-                with OfflineEmissionsTracker(save_to_file=False) as inference_tracker:
-                    y_pred = model.predict(X_test)
-                live.log_metric('test/duration', inference_tracker.final_emissions_data.duration, plot=False)
-                live.log_metric('test/cpu_power', inference_tracker.final_emissions_data.cpu_power, plot=False)
-                live.log_metric('test/ram_power', inference_tracker.final_emissions_data.ram_power, plot=False)
-                live.log_metric('test/cpu_energy', inference_tracker.final_emissions_data.cpu_energy, plot=False)
-                live.log_metric('test/gpu_energy', inference_tracker.final_emissions_data.gpu_energy, plot=False)
-                live.log_metric('test/energy_consumed', inference_tracker.final_emissions_data.energy_consumed, plot=False)
-
-                cv_scores = evaluate(
-                    model, X_train, X_test, y_train, y_test, y_pred, y_pred_proba, live
-                )
-
-                cv_results_json_path = os.path.join(dvclive_path_view, "cv_results.json")
-                with open(cv_results_json_path, "w") as f:
-                    json.dump(cv_scores, f, indent=4, cls=NumpyEncoder)
+                self.train_view(view, X_train, X_test, y_train, y_test)

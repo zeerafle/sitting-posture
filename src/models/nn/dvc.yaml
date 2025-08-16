@@ -1,18 +1,12 @@
 params:
-- ../../../dvclive/nn/front/params.yaml
-- ../../../dvclive/nn/left/params.yaml
-- ../../../dvclive/nn/right/params.yaml
+- ../../../dvclive/nn/combined/params.yaml
 metrics:
-- ../../../dvclive/nn/front/metrics.json
-- ../../../dvclive/nn/left/metrics.json
-- ../../../dvclive/nn/right/metrics.json
+- ../../../dvclive/nn/combined/metrics.json
 plots:
-- ../../../dvclive/nn/front/plots/metrics:
+- ../../../dvclive/nn/combined/plots/metrics:
     x: step
-- ../../../dvclive/nn/front/plots/images
-- ../../../dvclive/nn/left/plots/metrics:
-    x: step
-- ../../../dvclive/nn/left/plots/images
-- ../../../dvclive/nn/right/plots/metrics:
-    x: step
-- ../../../dvclive/nn/right/plots/images
+- ../../../dvclive/nn/combined/plots/images
+artifacts:
+  y_pred:
+    path: ../../../dvclive/nn/combined/y_pred.csv
+    type: predictions

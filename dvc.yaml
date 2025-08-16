@@ -33,7 +33,21 @@ stages:
             - data/data_with_features.csv
             - src/prepare.py
         outs:
-            - data/processed
+            - data/processed/front:
+                  persist: true
+            - data/processed/left:
+                  persist: true
+            - data/processed/right:
+                  persist: true
+
+    prepare_combined:
+        cmd: uv run python src/prepare.py --combined
+        deps:
+            - data/data_with_features.csv
+            - src/prepare.py
+        outs:
+            - data/processed/combined:
+                  persist: true
 
     train:
         foreach:
@@ -52,7 +66,9 @@ stages:
             params:
                 - ../../../params.yaml:
             outs:
-                - ../../../models/${item}/
+                - ../../../models/${item}/${item}_front.*
+                - ../../../models/${item}/${item}_left.*
+                - ../../../models/${item}/${item}_right.*
             metrics:
                 - ../../../dvclive/${item}/front/metrics.json
                 - ../../../dvclive/${item}/front/htcv_results.json
@@ -63,6 +79,29 @@ stages:
                 - ../../../dvclive/${item}/right/metrics.json
                 - ../../../dvclive/${item}/right/htcv_results.json
                 - ../../../dvclive/${item}/right/cv_results.json
+
+    train_combined:
+        foreach:
+            - adaboost
+            - nn
+            - xgb
+        do:
+            cmd: uv run python train.py --combined
+            wdir: src/models/${item}
+            deps:
+                - train.py
+                - ../../../data/processed/combined
+                - ../evaluate.py
+                - ../utils.py
+                - ../base_trainer.py
+            params:
+                - ../../../params.yaml:
+            outs:
+                - ../../../models/${item}/${item}_combined.joblib
+            metrics:
+                - ../../../dvclive/${item}/combined/metrics.json
+                - ../../../dvclive/${item}/combined/htcv_results.json
+                - ../../../dvclive/${item}/combined/cv_results.json
 
     summarize:
         cmd: uv run python src/model_comparison.py
@@ -79,6 +118,16 @@ stages:
             - dvclive/xgb/right/metrics.json
         outs:
             - dvclive/detailed_model_view_comparison.csv
+
+    summarize_combined:
+        cmd: uv run python src/model_comparison.py --combined
+        deps:
+            - src/model_comparison.py
+            - dvclive/adaboost/combined/metrics.json
+            - dvclive/nn/combined/metrics.json
+            - dvclive/xgb/combined/metrics.json
+        outs:
+            - dvclive/detailed_model_view_combined_comparison.csv
 
     visualize:
         cmd: uv run python src/roc_visualization.py

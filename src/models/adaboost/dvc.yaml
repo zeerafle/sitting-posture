@@ -2,11 +2,18 @@ params:
 - ../../../dvclive/adaboost/front/params.yaml
 - ../../../dvclive/adaboost/left/params.yaml
 - ../../../dvclive/adaboost/right/params.yaml
+- ../../../dvclive/adaboost/combined/params.yaml
 metrics:
 - ../../../dvclive/adaboost/front/metrics.json
 - ../../../dvclive/adaboost/left/metrics.json
 - ../../../dvclive/adaboost/right/metrics.json
+- ../../../dvclive/adaboost/combined/metrics.json
 plots:
 - ../../../dvclive/adaboost/front/plots/images
 - ../../../dvclive/adaboost/left/plots/images
 - ../../../dvclive/adaboost/right/plots/images
+- ../../../dvclive/adaboost/combined/plots/images
+artifacts:
+  y_pred:
+    path: ../../../dvclive/adaboost/combined/y_pred.csv
+    type: predictions

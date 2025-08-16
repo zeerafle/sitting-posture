@@ -1,3 +1,4 @@
+import argparse
 import os
 import sys
 import numpy as np
@@ -67,5 +68,9 @@ class NNTrainer(BaseTrainer):
         return model
 
 if __name__ == "__main__":
-    trainer = NNTrainer(model_name="nn")
+    parser = argparse.ArgumentParser(description="Train Neural Network model")
+    parser.add_argument("--combined", action="store_true", help="Train on combined view data")
+    args = parser.parse_args()
+
+    trainer = NNTrainer(model_name="nn", train_combined=args.combined)
     trainer.run()

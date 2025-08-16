@@ -1,12 +1,10 @@
 params:
-- ../../../dvclive/xgb/front/params.yaml
-- ../../../dvclive/xgb/left/params.yaml
-- ../../../dvclive/xgb/right/params.yaml
+- ../../../dvclive/xgb/combined/params.yaml
 metrics:
-- ../../../dvclive/xgb/front/metrics.json
-- ../../../dvclive/xgb/left/metrics.json
-- ../../../dvclive/xgb/right/metrics.json
+- ../../../dvclive/xgb/combined/metrics.json
 plots:
-- ../../../dvclive/xgb/front/plots/images
-- ../../../dvclive/xgb/left/plots/images
-- ../../../dvclive/xgb/right/plots/images
+- ../../../dvclive/xgb/combined/plots/images
+artifacts:
+  y_pred:
+    path: ../../../dvclive/xgb/combined/y_pred.csv
+    type: predictions

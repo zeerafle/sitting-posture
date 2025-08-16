@@ -1,3 +1,4 @@
+import argparse
 import os
 import sys
 import numpy as np
@@ -29,14 +30,14 @@ class XGBoostTrainer(BaseTrainer):
             "alpha": Categorical(self.params["xgb"]["regulation_alphas"]),
         }
 
-    def save_model(self, model, view):
-        model_path = os.path.join(self.models_dir, f"{self.model_name}_{view}.json")
-        model.save_model(model_path)
-
     def log_model_specific_metrics(self, model, live):
         live.log_metric("feature_importance_mean", float(np.mean(model.feature_importances_)), plot=False)
 
 
 if __name__ == "__main__":
-    trainer = XGBoostTrainer(model_name="xgb")
+    parser = argparse.ArgumentParser(description="Train XGBoost model")
+    parser.add_argument("--combined", action="store_true", help="Train on combined view data")
+    args = parser.parse_args()
+
+    trainer = XGBoostTrainer(model_name="xgb", train_combined=args.combined)
     trainer.run()
