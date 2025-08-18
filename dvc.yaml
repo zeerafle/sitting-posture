@@ -133,16 +133,86 @@ stages:
         cmd: uv run python src/roc_visualization.py
         deps:
             - src/roc_visualization.py
-            - src/models/utils.py
-            - data/processed
-            - models/adaboost
-            - models/nn
-            - models/xgb
+            - dvclive/adaboost/front/y_pred.csv
+            - dvclive/adaboost/left/y_pred.csv
+            - dvclive/adaboost/right/y_pred.csv
+            - dvclive/nn/front/y_pred.csv
+            - dvclive/nn/left/y_pred.csv
+            - dvclive/nn/right/y_pred.csv
+            - dvclive/xgb/front/y_pred.csv
+            - dvclive/xgb/left/y_pred.csv
+            - dvclive/xgb/right/y_pred.csv
         outs:
             - dvclive/plots/roc_curve_comparison.png
+
+    visualize_combined:
+        cmd: uv run python src/roc_visualization.py --combined
+        deps:
+            - src/roc_visualization.py
+            - dvclive/adaboost/combined/y_pred.csv
+            - dvclive/nn/combined/y_pred.csv
+            - dvclive/xgb/combined/y_pred.csv
+        outs:
+            - dvclive/plots/roc_curve_combined_comparison.png
+
+    analyze_friedman:
+        cmd: uv run python src/analysis/friedman_test.py --models adaboost nn xgb --metric accuracy
+        deps:
+            - src/analysis/friedman_test.py
+            - dvclive/adaboost/front/cv_results.json
+            - dvclive/adaboost/left/cv_results.json
+            - dvclive/adaboost/right/cv_results.json
+            - dvclive/nn/front/cv_results.json
+            - dvclive/nn/left/cv_results.json
+            - dvclive/nn/right/cv_results.json
+            - dvclive/xgb/front/cv_results.json
+            - dvclive/xgb/left/cv_results.json
+            - dvclive/xgb/right/cv_results.json
+        outs:
+            - dvclive/analysis/friedman_individual_adaboost_nn_xgb_accuracy.json
+
+    analyze_friedman_combined:
+        cmd: uv run python src/analysis/friedman_test.py --models adaboost nn xgb --metric accuracy --combined
+        deps:
+            - src/analysis/friedman_test.py
+            - dvclive/adaboost/combined/cv_results.json
+            - dvclive/nn/combined/cv_results.json
+            - dvclive/xgb/combined/cv_results.json
+        outs:
+            - dvclive/analysis/friedman_combined_adaboost_nn_xgb_accuracy.json
+
+    analyze_friedman_f1:
+        cmd: uv run python src/analysis/friedman_test.py --models adaboost nn xgb --metric f1
+        deps:
+            - src/analysis/friedman_test.py
+            - dvclive/adaboost/front/cv_results.json
+            - dvclive/adaboost/left/cv_results.json
+            - dvclive/adaboost/right/cv_results.json
+            - dvclive/nn/front/cv_results.json
+            - dvclive/nn/left/cv_results.json
+            - dvclive/nn/right/cv_results.json
+            - dvclive/xgb/front/cv_results.json
+            - dvclive/xgb/left/cv_results.json
+            - dvclive/xgb/right/cv_results.json
+        outs:
+            - dvclive/analysis/friedman_individual_adaboost_nn_xgb_f1.json
+
+    analyze_friedman_f1_combined:
+        cmd: uv run python src/analysis/friedman_test.py --models adaboost nn xgb --metric f1 --combined
+        deps:
+            - src/analysis/friedman_test.py
+            - dvclive/adaboost/combined/cv_results.json
+            - dvclive/nn/combined/cv_results.json
+            - dvclive/xgb/combined/cv_results.json
+        outs:
+            - dvclive/analysis/friedman_combined_adaboost_nn_xgb_f1.json
 
 plots:
     - dvclive/plots/roc_curve_comparison.png:
         x_label: "False Positive Rate"
         y_label: "True Positive Rate"
         title: "ROC Curve Comparison"
+    - dvclive/plots/roc_curve_combined_comparison.png:
+        x_label: "False Positive Rate"
+        y_label: "True Positive Rate"
+        title: "ROC Curve Comparison - Combined Views"

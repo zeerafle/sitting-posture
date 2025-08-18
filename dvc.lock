@@ -1023,3 +1023,59 @@ stages:
       hash: md5
       md5: 57943015e89102201187de016ebf5584
       size: 788
+  visualize_combined:
+    cmd: uv run python src/roc_visualization.py --combined
+    deps:
+    - path: dvclive/adaboost/combined/y_pred.csv
+      hash: md5
+      md5: 1e1ed9b958a015cb2ec28168a39cfdce
+      size: 39301
+      isexec: true
+    - path: dvclive/nn/combined/y_pred.csv
+      hash: md5
+      md5: 376a21cd17b2a97b568a82c3c3a5b8a1
+      size: 36200
+      isexec: true
+    - path: dvclive/xgb/combined/y_pred.csv
+      hash: md5
+      md5: c41a1a5ee3964d10ac5dab95b5cb914f
+      size: 24059
+      isexec: true
+    - path: src/roc_visualization.py
+      hash: md5
+      md5: c5fdedbb137dc5ef210d48f13342dde0
+      size: 7035
+      isexec: true
+    outs:
+    - path: dvclive/plots/roc_curve_combined_comparison.png
+      hash: md5
+      md5: 0b1b26b96ae38a1ae59e9807f757cd5b
+      size: 254991
+  analyze_friedman_combined:
+    cmd: uv run python src/analysis/friedman_test.py --models adaboost nn xgb 
+      --metric accuracy --combined
+    deps:
+    - path: dvclive/adaboost/combined/cv_results.json
+      hash: md5
+      md5: 821fe1fc11f3446810c5a43c8fe35145
+      size: 1149
+      isexec: true
+    - path: dvclive/nn/combined/cv_results.json
+      hash: md5
+      md5: f5a61f44b7deb6a40928784a9755b9f9
+      size: 1172
+      isexec: true
+    - path: dvclive/xgb/combined/cv_results.json
+      hash: md5
+      md5: 95705f51a0b587a8a73c94105f653e7d
+      size: 1172
+      isexec: true
+    - path: src/analysis/friedman_test.py
+      hash: md5
+      md5: cb934d9245e0d9b467460d0258f7abc5
+      size: 14101
+    outs:
+    - path: dvclive/analysis/friedman_combined_adaboost_nn_xgb_accuracy.json
+      hash: md5
+      md5: 8764d2d88748f870dfa8d6414815b85b
+      size: 1635
