@@ -1,1 +1,3 @@
 /friedman_combined_adaboost_nn_xgb_accuracy.json
+/friedman_loso_adaboost_nn_xgb_accuracy.json
+/friedman_loso_adaboost_nn_xgb_f1.json

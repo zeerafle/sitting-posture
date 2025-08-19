@@ -1360,3 +1360,55 @@ stages:
       hash: md5
       md5: a1c6c09da0b0305dc9ad6a616917003e
       size: 218046
+  analyze_friedman_loso:
+    cmd: uv run python src/analysis/friedman_test.py --models adaboost nn xgb 
+      --metric accuracy --loso
+    deps:
+    - path: dvclive/adaboost/combined_loso/loso_metrics.json
+      hash: md5
+      md5: bafe2ea1b6ee62877d001abf9cd507d4
+      size: 689
+    - path: dvclive/nn/combined_loso/loso_metrics.json
+      hash: md5
+      md5: bea28f458d0cfd6af5c64da9df860580
+      size: 684
+    - path: dvclive/xgb/combined_loso/loso_metrics.json
+      hash: md5
+      md5: c6ec3b1bbd78b65d8b674ac06721b703
+      size: 690
+    - path: src/analysis/friedman_test.py
+      hash: md5
+      md5: aaecda33df65fcbd3587c77b115818ec
+      size: 13309
+      isexec: true
+    outs:
+    - path: dvclive/analysis/friedman_loso_adaboost_nn_xgb_accuracy.json
+      hash: md5
+      md5: 0c3e49a5644a9da10a20d5ec4cabb213
+      size: 1289
+  analyze_friedman_f1_loso:
+    cmd: uv run python src/analysis/friedman_test.py --models adaboost nn xgb 
+      --metric f1 --loso
+    deps:
+    - path: dvclive/adaboost/combined_loso/loso_metrics.json
+      hash: md5
+      md5: bafe2ea1b6ee62877d001abf9cd507d4
+      size: 689
+    - path: dvclive/nn/combined_loso/loso_metrics.json
+      hash: md5
+      md5: bea28f458d0cfd6af5c64da9df860580
+      size: 684
+    - path: dvclive/xgb/combined_loso/loso_metrics.json
+      hash: md5
+      md5: c6ec3b1bbd78b65d8b674ac06721b703
+      size: 690
+    - path: src/analysis/friedman_test.py
+      hash: md5
+      md5: aaecda33df65fcbd3587c77b115818ec
+      size: 13309
+      isexec: true
+    outs:
+    - path: dvclive/analysis/friedman_loso_adaboost_nn_xgb_f1.json
+      hash: md5
+      md5: 1ea3916fcf4d24346a14675c5aff3b8f
+      size: 1280

@@ -286,6 +286,26 @@ stages:
         outs:
             - dvclive/analysis/friedman_combined_adaboost_nn_xgb_f1.json
 
+    analyze_friedman_loso:
+        cmd: uv run python src/analysis/friedman_test.py --models adaboost nn xgb --metric accuracy --loso
+        deps:
+            - src/analysis/friedman_test.py
+            - dvclive/adaboost/combined_loso/loso_metrics.json
+            - dvclive/nn/combined_loso/loso_metrics.json
+            - dvclive/xgb/combined_loso/loso_metrics.json
+        outs:
+            - dvclive/analysis/friedman_loso_adaboost_nn_xgb_accuracy.json
+
+    analyze_friedman_f1_loso:
+        cmd: uv run python src/analysis/friedman_test.py --models adaboost nn xgb --metric f1 --loso
+        deps:
+            - src/analysis/friedman_test.py
+            - dvclive/adaboost/combined_loso/loso_metrics.json
+            - dvclive/nn/combined_loso/loso_metrics.json
+            - dvclive/xgb/combined_loso/loso_metrics.json
+        outs:
+            - dvclive/analysis/friedman_loso_adaboost_nn_xgb_f1.json
+
 plots:
     - dvclive/plots/roc_curve_comparison.png:
         x_label: "False Positive Rate"
