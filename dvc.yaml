@@ -8,9 +8,8 @@ stages:
     extract_keypoints:
         cmd: uv run python src/extract_keypoints.py
         deps:
-            - /teamspace/studios/01-data-download-kaggle/.cache/kagglehub/datasets/zeerafle/sitting-posture/versions/5
+            - /teamspace/studios/01-data-download-kaggle/.cache/kagglehub/datasets/zeerafle/sitting-posture/versions/6
             - src/extract_keypoints.py
-            - src/keypoints_extraction/
         outs:
             - data/data.csv:
                   persist: true
@@ -33,11 +32,17 @@ stages:
             - data/data_with_features.csv
             - src/prepare.py
         outs:
-            - data/processed/front:
+            - data/processed/front/train.csv:
                   persist: true
-            - data/processed/left:
+            - data/processed/front/test.csv:
                   persist: true
-            - data/processed/right:
+            - data/processed/left/train.csv:
+                  persist: true
+            - data/processed/left/test.csv:
+                  persist: true
+            - data/processed/right/train.csv:
+                  persist: true
+            - data/processed/right/test.csv:
                   persist: true
 
     prepare_combined:
@@ -46,7 +51,31 @@ stages:
             - data/data_with_features.csv
             - src/prepare.py
         outs:
-            - data/processed/combined:
+            - data/processed/combined/train.csv:
+                  persist: true
+            - data/processed/combined/test.csv:
+                  persist: true
+
+    prepare_loso:
+        cmd: uv run python src/prepare.py --loso
+        deps:
+            - data/data_with_features.csv
+            - src/prepare.py
+        outs:
+            - data/processed/front/data.csv:
+                  persist: true
+            - data/processed/left/data.csv:
+                  persist: true
+            - data/processed/right/data.csv:
+                  persist: true
+
+    prepare_loso_combined:
+        cmd: uv run python src/prepare.py --loso --combined
+        deps:
+            - data/data_with_features.csv
+            - src/prepare.py
+        outs:
+            - data/processed/combined/data.csv:
                   persist: true
 
     train:
@@ -102,6 +131,56 @@ stages:
                 - ../../../dvclive/${item}/combined/metrics.json
                 - ../../../dvclive/${item}/combined/htcv_results.json
                 - ../../../dvclive/${item}/combined/cv_results.json
+
+    train_loso:
+        foreach:
+            - adaboost
+            - nn
+            - xgb
+        do:
+            cmd: uv run python train.py --loso
+            wdir: src/models/${item}
+            deps:
+                - train.py
+                - ../../../data/processed
+                - ../evaluate.py
+                - ../utils.py
+                - ../base_trainer.py
+            params:
+                - ../../../params.yaml:
+            outs:
+                - ../../../models/${item}/${item}_front_subject_*.joblib
+                - ../../../models/${item}/${item}_left_subject_*.joblib
+                - ../../../models/${item}/${item}_right_subject_*.joblib
+            metrics:
+                - ../../../dvclive/${item}/front_loso/metrics.json
+                - ../../../dvclive/${item}/left_loso/metrics.json
+                - ../../../dvclive/${item}/right_loso/metrics.json
+                - ../../../dvclive/${item}/front_loso/loso_metrics.json
+                - ../../../dvclive/${item}/left_loso/loso_metrics.json
+                - ../../../dvclive/${item}/right_loso/loso_metrics.json
+
+    train_loso_combined:
+        foreach:
+            - adaboost
+            - nn
+            - xgb
+        do:
+            cmd: uv run python train.py --combined --loso
+            wdir: src/models/${item}
+            deps:
+                - train.py
+                - ../../../data/processed/combined/data.csv
+                - ../evaluate.py
+                - ../utils.py
+                - ../base_trainer.py
+            params:
+                - ../../../params.yaml:
+            outs:
+                - ../../../models/${item}/${item}_combined_loso.joblib
+            metrics:
+                - ../../../dvclive/${item}/combined_loso/metrics.json
+                - ../../../dvclive/${item}/combined_loso/loso_metrics.json
 
     summarize:
         cmd: uv run python src/model_comparison.py

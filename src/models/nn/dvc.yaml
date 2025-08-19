@@ -1,12 +1,4 @@
 params:
-- ../../../dvclive/nn/combined/params.yaml
+- ../../../dvclive/nn/combined_loso/params.yaml
 metrics:
-- ../../../dvclive/nn/combined/metrics.json
-plots:
-- ../../../dvclive/nn/combined/plots/metrics:
-    x: step
-- ../../../dvclive/nn/combined/plots/images
-artifacts:
-  y_pred:
-    path: ../../../dvclive/nn/combined/y_pred.csv
-    type: predictions
+- ../../../dvclive/nn/combined_loso/metrics.json

@@ -5,23 +5,23 @@ stages:
     deps:
     - path: data/data.csv
       hash: md5
-      md5: b2a32780dca215fbe0fbad4d6207e2a9
-      size: 2890683
+      md5: d6ca8be1642022c83d9d6679bcfc66f7
+      size: 2936388
     - path: src/feature_extraction/
       hash: md5
-      md5: 3c0cc7f21c8f21585fc0bc798a1b88de.dir
+      md5: 4135fef41135fef5e58964485ee26f70.dir
       size: 81508
       nfiles: 8
     - path: src/featurize.py
       hash: md5
-      md5: 53de9237d3df698d08aaa3c5d51eb90c
-      size: 1012
+      md5: efaf05d815957f3136a97ff9f90f38dc
+      size: 3855
       isexec: true
     outs:
     - path: data/data_with_features.csv
       hash: md5
-      md5: 69d6423922a99227e6a1b9e45f688261
-      size: 7069828
+      md5: 3139a3f7bfbb61a033166318af7f27b6
+      size: 7115533
   prepare:
     cmd: uv run python src/prepare.py
     deps:
@@ -512,31 +512,31 @@ stages:
     cmd: uv run python src/extract_keypoints.py
     deps:
     - path: 
-        /teamspace/studios/01-data-download-kaggle/.cache/kagglehub/datasets/zeerafle/sitting-posture/versions/5
+        /teamspace/studios/01-data-download-kaggle/.cache/kagglehub/datasets/zeerafle/sitting-posture/versions/6
       hash: md5
-      md5: 258b49b04c742c7347834f2ff35ba8bf.dir
+      md5: 1150fe1ce4cfe5cea488d192792c3fe2.dir
       size: 12435185764
       nfiles: 8041
     - path: src/extract_keypoints.py
       hash: md5
-      md5: 0c8f224e76a20da73ec328c39588eb91
-      size: 808
+      md5: 5bb4d62b693d72cf380441a809dfb21c
+      size: 3031
       isexec: true
     - path: src/keypoints_extraction/
       hash: md5
-      md5: ba1fb7a044750b1f5df48c1eaf90881b.dir
-      size: 32973
+      md5: 80476de91ccefc31ad0bbb65115add4e.dir
+      size: 44663
       nfiles: 4
     outs:
     - path: data/data.csv
       hash: md5
-      md5: b2a32780dca215fbe0fbad4d6207e2a9
-      size: 2890683
+      md5: d6ca8be1642022c83d9d6679bcfc66f7
+      size: 2936388
     - path: data/poses_images_out
       hash: md5
-      md5: 0502281946250c4a7808999694aa8308.dir
-      size: 491254232
-      nfiles: 8042
+      md5: 9087cbbff599049857b5cc0fccfbf014.dir
+      size: 990679736
+      nfiles: 16083
   summarize:
     cmd: uv run python src/model_comparison.py && uv run python 
       src/hyperparameter_analysis.py
@@ -713,18 +713,18 @@ stages:
     deps:
     - path: data/data_with_features.csv
       hash: md5
-      md5: 69d6423922a99227e6a1b9e45f688261
-      size: 7069828
+      md5: 3139a3f7bfbb61a033166318af7f27b6
+      size: 7115533
     - path: src/prepare.py
       hash: md5
-      md5: 33478b628c4814c8ffef4c8974f083db
-      size: 15429
+      md5: 247639d31619c46a0eab08ff703238ef
+      size: 19298
       isexec: true
     outs:
     - path: data/processed/combined
       hash: md5
-      md5: 73269a2461bb2974015ed539faaf8667.dir
-      size: 9187569
+      md5: 48a8724e2d9bff1bfca917b4c7d5f78e.dir
+      size: 9343773
       nfiles: 6
   train_combined@nn:
     cmd: uv run python train.py --combined
@@ -1079,3 +1079,284 @@ stages:
       hash: md5
       md5: 8764d2d88748f870dfa8d6414815b85b
       size: 1635
+  prepare_loso_combined:
+    cmd: uv run python src/prepare.py --loso --combined
+    deps:
+    - path: data/data_with_features.csv
+      hash: md5
+      md5: 3139a3f7bfbb61a033166318af7f27b6
+      size: 7115533
+    - path: src/prepare.py
+      hash: md5
+      md5: f2ce72a6dd43658b8aaf806260bc5e81
+      size: 2422
+      isexec: true
+    outs:
+    - path: data/processed/combined/data.csv
+      hash: md5
+      md5: a18e30845d496b25443b81b9ae0fb60e
+      size: 9294544
+  train_loso_combined@adaboost:
+    cmd: uv run python train.py --combined --loso
+    deps:
+    - path: ../../../data/processed/combined/data.csv
+      hash: md5
+      md5: a18e30845d496b25443b81b9ae0fb60e
+      size: 9294544
+    - path: ../base_trainer.py
+      hash: md5
+      md5: 33aa29da454015210258faf4411c0a53
+      size: 1879
+      isexec: true
+    - path: ../evaluate.py
+      hash: md5
+      md5: d72edf3aab5d007e9bd7851856d27b7b
+      size: 4348
+      isexec: true
+    - path: ../utils.py
+      hash: md5
+      md5: 61b853cff510e365f8e931ae33c8ca30
+      size: 4006
+      isexec: true
+    - path: train.py
+      hash: md5
+      md5: 66aaae6848097b33cd7c8ea44a3a789c
+      size: 1532
+      isexec: true
+    params:
+      ../../../params.yaml:
+        adaboost:
+          n_estimators_min: 10
+          n_estimators_max: 2000
+        cv: 5
+        n_iter: 30
+        nn:
+          first_hidden_layer_sizes_min: 128
+          first_hidden_layer_sizes_max: 512
+          second_hidden_layer_sizes_min: 256
+          second_hidden_layer_sizes_max: 1024
+          learning_rates:
+          - 0.0001
+          - 0.001
+          - 0.01
+          batch_size: 32
+          epochs: 50
+        random_state: 42
+        scoring: accuracy
+        xgb:
+          gamma_min: 5.0
+          gamma_max: 11.0
+          learning_rate_min: 0.07
+          learning_rate_max: 0.6
+          n_estimators:
+          - 50
+          - 100
+          - 150
+          regulation_alphas:
+          - 1e-05
+          - 0.01
+          - 0.75
+          regulation_lambdas:
+          - 1e-05
+          - 0.01
+          - 0.45
+          min_child_weights:
+          - 1.5
+          - 6
+          - 10
+          subsamples:
+          - 0.6
+          - 0.95
+          max_depths:
+          - 3
+          - 6
+          - 9
+    outs:
+    - path: ../../../dvclive/adaboost/combined_loso/loso_metrics.json
+      hash: md5
+      md5: bafe2ea1b6ee62877d001abf9cd507d4
+      size: 689
+    - path: ../../../dvclive/adaboost/combined_loso/metrics.json
+      hash: md5
+      md5: 6c6f1708959a5d54a760cd0f8f0d0499
+      size: 448
+    - path: ../../../models/adaboost/adaboost_combined_loso.joblib
+      hash: md5
+      md5: 868477904bb2bdc7faa087f331ea030c
+      size: 1280820
+  train_loso_combined@nn:
+    cmd: uv run python train.py --combined --loso
+    deps:
+    - path: ../../../data/processed/combined/data.csv
+      hash: md5
+      md5: a18e30845d496b25443b81b9ae0fb60e
+      size: 9294544
+    - path: ../base_trainer.py
+      hash: md5
+      md5: 33aa29da454015210258faf4411c0a53
+      size: 1879
+      isexec: true
+    - path: ../evaluate.py
+      hash: md5
+      md5: d72edf3aab5d007e9bd7851856d27b7b
+      size: 4348
+      isexec: true
+    - path: ../utils.py
+      hash: md5
+      md5: 61b853cff510e365f8e931ae33c8ca30
+      size: 4006
+      isexec: true
+    - path: train.py
+      hash: md5
+      md5: 3d9dd9d273884dcb293f0de21a696b06
+      size: 2836
+      isexec: true
+    params:
+      ../../../params.yaml:
+        adaboost:
+          n_estimators_min: 10
+          n_estimators_max: 2000
+        cv: 5
+        n_iter: 30
+        nn:
+          first_hidden_layer_sizes_min: 128
+          first_hidden_layer_sizes_max: 512
+          second_hidden_layer_sizes_min: 256
+          second_hidden_layer_sizes_max: 1024
+          learning_rates:
+          - 0.0001
+          - 0.001
+          - 0.01
+          batch_size: 32
+          epochs: 50
+        random_state: 42
+        scoring: accuracy
+        xgb:
+          gamma_min: 5.0
+          gamma_max: 11.0
+          learning_rate_min: 0.07
+          learning_rate_max: 0.6
+          n_estimators:
+          - 50
+          - 100
+          - 150
+          regulation_alphas:
+          - 1e-05
+          - 0.01
+          - 0.75
+          regulation_lambdas:
+          - 1e-05
+          - 0.01
+          - 0.45
+          min_child_weights:
+          - 1.5
+          - 6
+          - 10
+          subsamples:
+          - 0.6
+          - 0.95
+          max_depths:
+          - 3
+          - 6
+          - 9
+    outs:
+    - path: ../../../dvclive/nn/combined_loso/loso_metrics.json
+      hash: md5
+      md5: bea28f458d0cfd6af5c64da9df860580
+      size: 684
+    - path: ../../../dvclive/nn/combined_loso/metrics.json
+      hash: md5
+      md5: 4c041bb21394271e99b996c1a83bf134
+      size: 449
+    - path: ../../../models/nn/nn_combined_loso.joblib
+      hash: md5
+      md5: bd224abc9ef27e5631917d1a8636206f
+      size: 27763
+  train_loso_combined@xgb:
+    cmd: uv run python train.py --combined --loso
+    deps:
+    - path: ../../../data/processed/combined/data.csv
+      hash: md5
+      md5: a18e30845d496b25443b81b9ae0fb60e
+      size: 9294544
+    - path: ../base_trainer.py
+      hash: md5
+      md5: 33aa29da454015210258faf4411c0a53
+      size: 1879
+      isexec: true
+    - path: ../evaluate.py
+      hash: md5
+      md5: d72edf3aab5d007e9bd7851856d27b7b
+      size: 4348
+      isexec: true
+    - path: ../utils.py
+      hash: md5
+      md5: 61b853cff510e365f8e931ae33c8ca30
+      size: 4006
+      isexec: true
+    - path: train.py
+      hash: md5
+      md5: 3f9fb4d23be2f75db785cf569c188851
+      size: 1841
+      isexec: true
+    params:
+      ../../../params.yaml:
+        adaboost:
+          n_estimators_min: 10
+          n_estimators_max: 2000
+        cv: 5
+        n_iter: 30
+        nn:
+          first_hidden_layer_sizes_min: 128
+          first_hidden_layer_sizes_max: 512
+          second_hidden_layer_sizes_min: 256
+          second_hidden_layer_sizes_max: 1024
+          learning_rates:
+          - 0.0001
+          - 0.001
+          - 0.01
+          batch_size: 32
+          epochs: 50
+        random_state: 42
+        scoring: accuracy
+        xgb:
+          gamma_min: 5.0
+          gamma_max: 11.0
+          learning_rate_min: 0.07
+          learning_rate_max: 0.6
+          n_estimators:
+          - 50
+          - 100
+          - 150
+          regulation_alphas:
+          - 1e-05
+          - 0.01
+          - 0.75
+          regulation_lambdas:
+          - 1e-05
+          - 0.01
+          - 0.45
+          min_child_weights:
+          - 1.5
+          - 6
+          - 10
+          subsamples:
+          - 0.6
+          - 0.95
+          max_depths:
+          - 3
+          - 6
+          - 9
+    outs:
+    - path: ../../../dvclive/xgb/combined_loso/loso_metrics.json
+      hash: md5
+      md5: c6ec3b1bbd78b65d8b674ac06721b703
+      size: 690
+    - path: ../../../dvclive/xgb/combined_loso/metrics.json
+      hash: md5
+      md5: 40b27a36a039bb40a13958661aa8ac6b
+      size: 447
+    - path: ../../../models/xgb/xgb_combined_loso.joblib
+      hash: md5
+      md5: a1c6c09da0b0305dc9ad6a616917003e
+      size: 218046

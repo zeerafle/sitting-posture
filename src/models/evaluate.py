@@ -8,7 +8,7 @@ from sklearn.metrics import (
     recall_score,
     roc_auc_score,
 )
-from sklearn.model_selection import cross_validate
+from sklearn.model_selection import cross_validate, GroupKFold
 import numpy as np
 import polars as pl
 
@@ -16,35 +16,36 @@ from models.utils import log_confusion_matrix, log_roc_auc_curve
 
 
 def evaluate(
-    model, X_train: pl.DataFrame , X_test: pl.DataFrame,
+    model, X_train: pl.DataFrame, X_test: pl.DataFrame,
     y_train: pl.Series, y_test: np.ndarray, y_pred: np.ndarray,
-    y_pred_proba: np.ndarray, live: Live
+    y_pred_proba: np.ndarray, live: Live,
+    groups_train=None, groups_test=None,
+    cross_validate_enabled: bool = True,
+    plot_cm: bool = True, plot_roc_auc: bool = True
 ):
+    """
+    Evaluate model performance using various metrics.
+
+    Parameters:
+    -----------
+    model: The trained model to evaluate
+    X_train, X_test: Training and test features
+    y_train, y_test: Training and test labels
+    y_pred: Model predictions on test set
+    y_pred_proba: Prediction probabilities on test set
+    live: DVCLive object for logging
+    groups_train: Subject IDs for training data (for grouped CV)
+    groups_test: Subject IDs for test data (for grouped CV)
+    cross_validate_enabled: Whether to perform cross-validation
+    plot_cm: Whether to plot confusion matrix
+    plot_roc_auc: Whether to plot ROC curve
+    """
     # save the y_pred for further analysis
     y_pred_save_path = os.path.join(live.dir, "y_pred.csv")
     pl.DataFrame({"y_true": y_test, "y_pred": y_pred, "y_pred_proba": y_pred_proba}).write_csv(
         y_pred_save_path
     )
     live.log_artifact(y_pred_save_path, "predictions")
-    # log cross-validation for whole data (train + test)
-    scoring = ['accuracy', 'f1', 'precision', 'recall', 'roc_auc']
-    cv_scores = cross_validate(model,
-                                pl.concat([X_train, X_test]),
-                                np.ravel(pl.concat([y_train, y_test])),
-                                cv=5,
-                                scoring=scoring,
-                                n_jobs=-1)
-    live.log_metric('cv_accuracy_mean', np.mean(cv_scores['test_accuracy']), plot=False)
-    live.log_metric('cv_f1_mean', np.mean(cv_scores['test_f1']), plot=False)
-    live.log_metric('cv_precision_mean', np.mean(cv_scores['test_precision']), plot=False)
-    live.log_metric('cv_recall_mean', np.mean(cv_scores['test_recall']), plot=False)
-    live.log_metric('cv_roc_auc_mean', np.mean(cv_scores['test_roc_auc']), plot=False)
-
-    live.log_metric('cv_std_accuracy', np.std(cv_scores['test_accuracy']), plot=False)
-    live.log_metric('cv_std_f1', np.std(cv_scores['test_f1']), plot=False)
-    live.log_metric('cv_std_precision', np.std(cv_scores['test_precision']), plot=False)
-    live.log_metric('cv_std_recall', np.std(cv_scores['test_recall']), plot=False)
-    live.log_metric('cv_std_roc_auc', np.std(cv_scores['test_roc_auc']), plot=False)
 
     # log test metric
     y_test = np.ravel(y_test)
@@ -56,9 +57,52 @@ def evaluate(
     live.log_metric("test/f1", f1_score(y_test, y_pred), plot=False)
     live.log_metric("test/roc_auc", roc_auc_score(y_test, y_pred_proba), plot=False)
 
+    if plot_cm:
     # Plot the confusion matrix
-    cm = confusion_matrix(y_test, y_pred)
-    log_confusion_matrix(live, cm, class_names=["ergonomic", "non-ergonomic"])
-    log_roc_auc_curve(live, y_test, y_pred_proba)
+        cm = confusion_matrix(y_test, y_pred)
+        log_confusion_matrix(live, cm, class_names=["ergonomic", "non-ergonomic"])
+    if plot_roc_auc:
+        log_roc_auc_curve(live, y_test, y_pred_proba)
 
-    return cv_scores
+    if cross_validate_enabled:
+        # Combine train and test data for cross-validation
+        X_combined = pl.concat([X_train, X_test])
+        y_combined = np.ravel(pl.concat([y_train, y_test]))
+
+        # Setup grouped cross-validation by subject ID
+        if groups_train is not None and groups_test is not None:
+            groups_combined = np.concatenate([groups_train, groups_test])
+            cv = GroupKFold(n_splits=5)
+            cv_splits = list(cv.split(X_combined, y_combined, groups_combined))
+            live.log_param("cv_strategy", "GroupKFold-by-subject")
+        else:
+            # Fall back to regular 5-fold CV if no groups provided
+            cv = 5
+            live.log_param("cv_strategy", "StandardCV")
+
+        # Log cross-validation for whole data
+        scoring = ['accuracy', 'f1', 'precision', 'recall', 'roc_auc']
+        cv_scores = cross_validate(
+            model,
+            X_combined,
+            y_combined,
+            cv=cv_splits if groups_train is not None else cv,
+            scoring=scoring,
+            n_jobs=-1
+        )
+
+        live.log_metric('cv_accuracy_mean', np.mean(cv_scores['test_accuracy']), plot=False)
+        live.log_metric('cv_f1_mean', np.mean(cv_scores['test_f1']), plot=False)
+        live.log_metric('cv_precision_mean', np.mean(cv_scores['test_precision']), plot=False)
+        live.log_metric('cv_recall_mean', np.mean(cv_scores['test_recall']), plot=False)
+        live.log_metric('cv_roc_auc_mean', np.mean(cv_scores['test_roc_auc']), plot=False)
+
+        live.log_metric('cv_std_accuracy', np.std(cv_scores['test_accuracy']), plot=False)
+        live.log_metric('cv_std_f1', np.std(cv_scores['test_f1']), plot=False)
+        live.log_metric('cv_std_precision', np.std(cv_scores['test_precision']), plot=False)
+        live.log_metric('cv_std_recall', np.std(cv_scores['test_recall']), plot=False)
+        live.log_metric('cv_std_roc_auc', np.std(cv_scores['test_roc_auc']), plot=False)
+
+        return cv_scores
+
+    return None

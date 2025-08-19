@@ -37,7 +37,8 @@ class XGBoostTrainer(BaseTrainer):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Train XGBoost model")
     parser.add_argument("--combined", action="store_true", help="Train on combined view data")
+    parser.add_argument("--loso", action="store_true", help="Use Leave-One-Subject-Out cross-validation")
     args = parser.parse_args()
 
-    trainer = XGBoostTrainer(model_name="xgb", train_combined=args.combined)
+    trainer = XGBoostTrainer(model_name="xgb", train_combined=args.combined, use_loso=args.loso)
     trainer.run()

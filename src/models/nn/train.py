@@ -39,6 +39,9 @@ class MLPWrapper(BaseEstimator, ClassifierMixin):
     def score(self, X, y):
         return self.model.score(X, y)
 
+    def predict_proba(self, X):
+        return self.model.predict_proba(X)
+
 
 class NNTrainer(BaseTrainer):
     def get_estimator(self):
@@ -70,7 +73,8 @@ class NNTrainer(BaseTrainer):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Train Neural Network model")
     parser.add_argument("--combined", action="store_true", help="Train on combined view data")
+    parser.add_argument("--loso", action="store_true", help="Use Leave-One-Subject-Out cross-validation")
     args = parser.parse_args()
 
-    trainer = NNTrainer(model_name="nn", train_combined=args.combined)
+    trainer = NNTrainer(model_name="nn", train_combined=args.combined, use_loso=args.loso)
     trainer.run()
