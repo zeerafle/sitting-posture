@@ -81,7 +81,7 @@ def visualize(
         # Draw all the landmarks
         for i in range(len(keypoints)):
             if keypoints[i].score >= keypoint_threshold:
-                cv2.circle(image, keypoints[i].coordinate, 5, person_color, 2)
+                cv2.circle(image, keypoints[i].coordinate, 1, person_color, 1)
 
         # Draw all the edges
         for edge_pair, edge_color in KEYPOINT_EDGE_INDS_TO_COLOR.items():
@@ -94,7 +94,7 @@ def visualize(
                     keypoints[edge_pair[0]].coordinate,
                     keypoints[edge_pair[1]].coordinate,
                     edge_color,
-                    2,
+                    1,
                 )
 
     return image
