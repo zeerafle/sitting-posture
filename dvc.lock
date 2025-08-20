@@ -1412,3 +1412,35 @@ stages:
       hash: md5
       md5: 1ea3916fcf4d24346a14675c5aff3b8f
       size: 1280
+  train_cnn_loso:
+    cmd: uv run python src/models/cnn/train_loso.py
+    deps:
+    - path: 
+        /teamspace/studios/01-data-download-kaggle/.cache/kagglehub/datasets/zeerafle/sitting-posture/versions/6
+      hash: md5
+      md5: 1150fe1ce4cfe5cea488d192792c3fe2.dir
+      size: 12435185764
+      nfiles: 8041
+    - path: data/data.csv
+      hash: md5
+      md5: d6ca8be1642022c83d9d6679bcfc66f7
+      size: 2936388
+      isexec: true
+    - path: src/models/cnn/train_loso.py
+      hash: md5
+      md5: 35498ae03f1a03fa8c9bdee0c153b778
+      size: 6508
+      isexec: true
+    outs:
+    - path: dvclive/cnn/combined_loso/loso_metrics.json
+      hash: md5
+      md5: 0bb0cf8f2a375496399680feec9269d7
+      size: 619
+    - path: dvclive/cnn/combined_loso/metrics.json
+      hash: md5
+      md5: 3dbc7a1582a1428ee7961db7a9374859
+      size: 418
+    - path: models/cnn/cnn_combined_loso.keras
+      hash: md5
+      md5: 1a857ae13a91ccf03a2cff5328247f61
+      size: 9631247

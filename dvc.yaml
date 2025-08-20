@@ -5,313 +5,333 @@ stages:
     #   - data/original:
     #       persist: true
     #       cache: false
-    extract_keypoints:
-        cmd: uv run python src/extract_keypoints.py
-        deps:
-            - /teamspace/studios/01-data-download-kaggle/.cache/kagglehub/datasets/zeerafle/sitting-posture/versions/6
-            - src/extract_keypoints.py
-        outs:
-            - data/data.csv:
-                  persist: true
-            - data/poses_images_out:
-                  persist: true
+  extract_keypoints:
+    cmd: uv run python src/extract_keypoints.py
+    deps:
+    - /teamspace/studios/01-data-download-kaggle/.cache/kagglehub/datasets/zeerafle/sitting-posture/versions/6
+    - src/extract_keypoints.py
+    outs:
+    - data/data.csv:
+        persist: true
+    - data/poses_images_out:
+        persist: true
 
-    featurize:
-        cmd: uv run python src/featurize.py
-        deps:
-            - data/data.csv
-            - src/feature_extraction/
-            - src/featurize.py
-        outs:
-            - data/data_with_features.csv:
-                  persist: true
+  featurize:
+    cmd: uv run python src/featurize.py
+    deps:
+    - data/data.csv
+    - src/feature_extraction/
+    - src/featurize.py
+    outs:
+    - data/data_with_features.csv:
+        persist: true
 
-    prepare:
-        cmd: uv run python src/prepare.py
-        deps:
-            - data/data_with_features.csv
-            - src/prepare.py
-        outs:
-            - data/processed/front/train.csv:
-                  persist: true
-            - data/processed/front/test.csv:
-                  persist: true
-            - data/processed/left/train.csv:
-                  persist: true
-            - data/processed/left/test.csv:
-                  persist: true
-            - data/processed/right/train.csv:
-                  persist: true
-            - data/processed/right/test.csv:
-                  persist: true
+  prepare:
+    cmd: uv run python src/prepare.py
+    deps:
+    - data/data_with_features.csv
+    - src/prepare.py
+    outs:
+    - data/processed/front/train.csv:
+        persist: true
+    - data/processed/front/test.csv:
+        persist: true
+    - data/processed/left/train.csv:
+        persist: true
+    - data/processed/left/test.csv:
+        persist: true
+    - data/processed/right/train.csv:
+        persist: true
+    - data/processed/right/test.csv:
+        persist: true
 
-    prepare_combined:
-        cmd: uv run python src/prepare.py --combined
-        deps:
-            - data/data_with_features.csv
-            - src/prepare.py
-        outs:
-            - data/processed/combined/train.csv:
-                  persist: true
-            - data/processed/combined/test.csv:
-                  persist: true
+  prepare_combined:
+    cmd: uv run python src/prepare.py --combined
+    deps:
+    - data/data_with_features.csv
+    - src/prepare.py
+    outs:
+    - data/processed/combined/train.csv:
+        persist: true
+    - data/processed/combined/test.csv:
+        persist: true
 
-    prepare_loso:
-        cmd: uv run python src/prepare.py --loso
-        deps:
-            - data/data_with_features.csv
-            - src/prepare.py
-        outs:
-            - data/processed/front/data.csv:
-                  persist: true
-            - data/processed/left/data.csv:
-                  persist: true
-            - data/processed/right/data.csv:
-                  persist: true
+  prepare_loso:
+    cmd: uv run python src/prepare.py --loso
+    deps:
+    - data/data_with_features.csv
+    - src/prepare.py
+    outs:
+    - data/processed/front/data.csv:
+        persist: true
+    - data/processed/left/data.csv:
+        persist: true
+    - data/processed/right/data.csv:
+        persist: true
 
-    prepare_loso_combined:
-        cmd: uv run python src/prepare.py --loso --combined
-        deps:
-            - data/data_with_features.csv
-            - src/prepare.py
-        outs:
-            - data/processed/combined/data.csv:
-                  persist: true
+  prepare_loso_combined:
+    cmd: uv run python src/prepare.py --loso --combined
+    deps:
+    - data/data_with_features.csv
+    - src/prepare.py
+    outs:
+    - data/processed/combined/data.csv:
+        persist: true
 
-    train:
-        foreach:
-            - adaboost
-            - nn
-            - xgb
-        do:
-            cmd: uv run python train.py
-            wdir: src/models/${item}
-            deps:
-                - train.py
-                - ../../../data/processed
-                - ../evaluate.py
-                - ../utils.py
-                - ../base_trainer.py
-            params:
-                - ../../../params.yaml:
-            outs:
-                - ../../../models/${item}/${item}_front.*
-                - ../../../models/${item}/${item}_left.*
-                - ../../../models/${item}/${item}_right.*
-            metrics:
-                - ../../../dvclive/${item}/front/metrics.json
-                - ../../../dvclive/${item}/front/htcv_results.json
-                - ../../../dvclive/${item}/front/cv_results.json
-                - ../../../dvclive/${item}/left/metrics.json
-                - ../../../dvclive/${item}/left/htcv_results.json
-                - ../../../dvclive/${item}/left/cv_results.json
-                - ../../../dvclive/${item}/right/metrics.json
-                - ../../../dvclive/${item}/right/htcv_results.json
-                - ../../../dvclive/${item}/right/cv_results.json
+  train:
+    foreach:
+    - adaboost
+    - nn
+    - xgb
+    do:
+      cmd: uv run python train.py
+      wdir: src/models/${item}
+      deps:
+      - train.py
+      - ../../../data/processed
+      - ../evaluate.py
+      - ../utils.py
+      - ../base_trainer.py
+      params:
+      - ../../../params.yaml:
+      outs:
+      - ../../../models/${item}/${item}_front.*
+      - ../../../models/${item}/${item}_left.*
+      - ../../../models/${item}/${item}_right.*
+      metrics:
+      - ../../../dvclive/${item}/front/metrics.json
+      - ../../../dvclive/${item}/front/htcv_results.json
+      - ../../../dvclive/${item}/front/cv_results.json
+      - ../../../dvclive/${item}/left/metrics.json
+      - ../../../dvclive/${item}/left/htcv_results.json
+      - ../../../dvclive/${item}/left/cv_results.json
+      - ../../../dvclive/${item}/right/metrics.json
+      - ../../../dvclive/${item}/right/htcv_results.json
+      - ../../../dvclive/${item}/right/cv_results.json
 
-    train_combined:
-        foreach:
-            - adaboost
-            - nn
-            - xgb
-        do:
-            cmd: uv run python train.py --combined
-            wdir: src/models/${item}
-            deps:
-                - train.py
-                - ../../../data/processed/combined
-                - ../evaluate.py
-                - ../utils.py
-                - ../base_trainer.py
-            params:
-                - ../../../params.yaml:
-            outs:
-                - ../../../models/${item}/${item}_combined.joblib
-            metrics:
-                - ../../../dvclive/${item}/combined/metrics.json
-                - ../../../dvclive/${item}/combined/htcv_results.json
-                - ../../../dvclive/${item}/combined/cv_results.json
+  train_combined:
+    foreach:
+    - adaboost
+    - nn
+    - xgb
+    do:
+      cmd: uv run python train.py --combined
+      wdir: src/models/${item}
+      deps:
+      - train.py
+      - ../../../data/processed/combined
+      - ../evaluate.py
+      - ../utils.py
+      - ../base_trainer.py
+      params:
+      - ../../../params.yaml:
+      outs:
+      - ../../../models/${item}/${item}_combined.joblib
+      metrics:
+      - ../../../dvclive/${item}/combined/metrics.json
+      - ../../../dvclive/${item}/combined/htcv_results.json
+      - ../../../dvclive/${item}/combined/cv_results.json
 
-    train_loso:
-        foreach:
-            - adaboost
-            - nn
-            - xgb
-        do:
-            cmd: uv run python train.py --loso
-            wdir: src/models/${item}
-            deps:
-                - train.py
-                - ../../../data/processed
-                - ../evaluate.py
-                - ../utils.py
-                - ../base_trainer.py
-            params:
-                - ../../../params.yaml:
-            outs:
-                - ../../../models/${item}/${item}_front_subject_*.joblib
-                - ../../../models/${item}/${item}_left_subject_*.joblib
-                - ../../../models/${item}/${item}_right_subject_*.joblib
-            metrics:
-                - ../../../dvclive/${item}/front_loso/metrics.json
-                - ../../../dvclive/${item}/left_loso/metrics.json
-                - ../../../dvclive/${item}/right_loso/metrics.json
-                - ../../../dvclive/${item}/front_loso/loso_metrics.json
-                - ../../../dvclive/${item}/left_loso/loso_metrics.json
-                - ../../../dvclive/${item}/right_loso/loso_metrics.json
+  train_loso:
+    foreach:
+    - adaboost
+    - nn
+    - xgb
+    do:
+      cmd: uv run python train.py --loso
+      wdir: src/models/${item}
+      deps:
+      - train.py
+      - ../../../data/processed
+      - ../evaluate.py
+      - ../utils.py
+      - ../base_trainer.py
+      params:
+      - ../../../params.yaml:
+      outs:
+      - ../../../models/${item}/${item}_front_subject_*.joblib
+      - ../../../models/${item}/${item}_left_subject_*.joblib
+      - ../../../models/${item}/${item}_right_subject_*.joblib
+      metrics:
+      - ../../../dvclive/${item}/front_loso/metrics.json
+      - ../../../dvclive/${item}/left_loso/metrics.json
+      - ../../../dvclive/${item}/right_loso/metrics.json
+      - ../../../dvclive/${item}/front_loso/loso_metrics.json
+      - ../../../dvclive/${item}/left_loso/loso_metrics.json
+      - ../../../dvclive/${item}/right_loso/loso_metrics.json
 
-    train_loso_combined:
-        foreach:
-            - adaboost
-            - nn
-            - xgb
-        do:
-            cmd: uv run python train.py --combined --loso
-            wdir: src/models/${item}
-            deps:
-                - train.py
-                - ../../../data/processed/combined/data.csv
-                - ../evaluate.py
-                - ../utils.py
-                - ../base_trainer.py
-            params:
-                - ../../../params.yaml:
-            outs:
-                - ../../../models/${item}/${item}_combined_loso.joblib
-            metrics:
-                - ../../../dvclive/${item}/combined_loso/metrics.json
-                - ../../../dvclive/${item}/combined_loso/loso_metrics.json
+  train_loso_combined:
+    foreach:
+    - adaboost
+    - nn
+    - xgb
+    do:
+      cmd: uv run python train.py --combined --loso
+      wdir: src/models/${item}
+      deps:
+      - train.py
+      - ../../../data/processed/combined/data.csv
+      - ../evaluate.py
+      - ../utils.py
+      - ../base_trainer.py
+      params:
+      - ../../../params.yaml:
+      outs:
+      - ../../../models/${item}/${item}_combined_loso.joblib
+      metrics:
+      - ../../../dvclive/${item}/combined_loso/metrics.json
+      - ../../../dvclive/${item}/combined_loso/loso_metrics.json
 
-    summarize:
-        cmd: uv run python src/model_comparison.py
-        deps:
-            - src/model_comparison.py
-            - dvclive/adaboost/front/metrics.json
-            - dvclive/adaboost/left/metrics.json
-            - dvclive/adaboost/right/metrics.json
-            - dvclive/nn/front/metrics.json
-            - dvclive/nn/left/metrics.json
-            - dvclive/nn/right/metrics.json
-            - dvclive/xgb/front/metrics.json
-            - dvclive/xgb/left/metrics.json
-            - dvclive/xgb/right/metrics.json
-        outs:
-            - dvclive/detailed_model_view_comparison.csv
+  train_cnn_loso:
+    cmd: uv run python src/models/cnn/train_loso.py
+    deps:
+    - src/models/cnn/train_loso.py
+    - /teamspace/studios/01-data-download-kaggle/.cache/kagglehub/datasets/zeerafle/sitting-posture/versions/6
+    - data/data.csv
+    outs:
+    - models/cnn/cnn_combined_loso.keras
+    metrics:
+    - dvclive/cnn/combined_loso/metrics.json:
+        cache: false
+    - dvclive/cnn/combined_loso/loso_metrics.json:
+        cache: false
 
-    summarize_combined:
-        cmd: uv run python src/model_comparison.py --combined
-        deps:
-            - src/model_comparison.py
-            - dvclive/adaboost/combined/metrics.json
-            - dvclive/nn/combined/metrics.json
-            - dvclive/xgb/combined/metrics.json
-        outs:
-            - dvclive/detailed_model_view_combined_comparison.csv
+  summarize:
+    cmd: uv run python src/model_comparison.py
+    deps:
+    - src/model_comparison.py
+    - dvclive/adaboost/front/metrics.json
+    - dvclive/adaboost/left/metrics.json
+    - dvclive/adaboost/right/metrics.json
+    - dvclive/nn/front/metrics.json
+    - dvclive/nn/left/metrics.json
+    - dvclive/nn/right/metrics.json
+    - dvclive/xgb/front/metrics.json
+    - dvclive/xgb/left/metrics.json
+    - dvclive/xgb/right/metrics.json
+    outs:
+    - dvclive/detailed_model_view_comparison.csv
 
-    visualize:
-        cmd: uv run python src/roc_visualization.py
-        deps:
-            - src/roc_visualization.py
-            - dvclive/adaboost/front/y_pred.csv
-            - dvclive/adaboost/left/y_pred.csv
-            - dvclive/adaboost/right/y_pred.csv
-            - dvclive/nn/front/y_pred.csv
-            - dvclive/nn/left/y_pred.csv
-            - dvclive/nn/right/y_pred.csv
-            - dvclive/xgb/front/y_pred.csv
-            - dvclive/xgb/left/y_pred.csv
-            - dvclive/xgb/right/y_pred.csv
-        outs:
-            - dvclive/plots/roc_curve_comparison.png
+  summarize_combined:
+    cmd: uv run python src/model_comparison.py --combined
+    deps:
+    - src/model_comparison.py
+    - dvclive/adaboost/combined/metrics.json
+    - dvclive/nn/combined/metrics.json
+    - dvclive/xgb/combined/metrics.json
+    outs:
+    - dvclive/detailed_model_view_combined_comparison.csv
 
-    visualize_combined:
-        cmd: uv run python src/roc_visualization.py --combined
-        deps:
-            - src/roc_visualization.py
-            - dvclive/adaboost/combined/y_pred.csv
-            - dvclive/nn/combined/y_pred.csv
-            - dvclive/xgb/combined/y_pred.csv
-        outs:
-            - dvclive/plots/roc_curve_combined_comparison.png
+  visualize:
+    cmd: uv run python src/roc_visualization.py
+    deps:
+    - src/roc_visualization.py
+    - dvclive/adaboost/front/y_pred.csv
+    - dvclive/adaboost/left/y_pred.csv
+    - dvclive/adaboost/right/y_pred.csv
+    - dvclive/nn/front/y_pred.csv
+    - dvclive/nn/left/y_pred.csv
+    - dvclive/nn/right/y_pred.csv
+    - dvclive/xgb/front/y_pred.csv
+    - dvclive/xgb/left/y_pred.csv
+    - dvclive/xgb/right/y_pred.csv
+    outs:
+    - dvclive/plots/roc_curve_comparison.png
 
-    analyze_friedman:
-        cmd: uv run python src/analysis/friedman_test.py --models adaboost nn xgb --metric accuracy
-        deps:
-            - src/analysis/friedman_test.py
-            - dvclive/adaboost/front/cv_results.json
-            - dvclive/adaboost/left/cv_results.json
-            - dvclive/adaboost/right/cv_results.json
-            - dvclive/nn/front/cv_results.json
-            - dvclive/nn/left/cv_results.json
-            - dvclive/nn/right/cv_results.json
-            - dvclive/xgb/front/cv_results.json
-            - dvclive/xgb/left/cv_results.json
-            - dvclive/xgb/right/cv_results.json
-        outs:
-            - dvclive/analysis/friedman_individual_adaboost_nn_xgb_accuracy.json
+  visualize_combined:
+    cmd: uv run python src/roc_visualization.py --combined
+    deps:
+    - src/roc_visualization.py
+    - dvclive/adaboost/combined/y_pred.csv
+    - dvclive/nn/combined/y_pred.csv
+    - dvclive/xgb/combined/y_pred.csv
+    outs:
+    - dvclive/plots/roc_curve_combined_comparison.png
 
-    analyze_friedman_combined:
-        cmd: uv run python src/analysis/friedman_test.py --models adaboost nn xgb --metric accuracy --combined
-        deps:
-            - src/analysis/friedman_test.py
-            - dvclive/adaboost/combined/cv_results.json
-            - dvclive/nn/combined/cv_results.json
-            - dvclive/xgb/combined/cv_results.json
-        outs:
-            - dvclive/analysis/friedman_combined_adaboost_nn_xgb_accuracy.json
+  analyze_friedman:
+    cmd: uv run python src/analysis/friedman_test.py --models adaboost nn xgb 
+      --metric accuracy
+    deps:
+    - src/analysis/friedman_test.py
+    - dvclive/adaboost/front/cv_results.json
+    - dvclive/adaboost/left/cv_results.json
+    - dvclive/adaboost/right/cv_results.json
+    - dvclive/nn/front/cv_results.json
+    - dvclive/nn/left/cv_results.json
+    - dvclive/nn/right/cv_results.json
+    - dvclive/xgb/front/cv_results.json
+    - dvclive/xgb/left/cv_results.json
+    - dvclive/xgb/right/cv_results.json
+    outs:
+    - dvclive/analysis/friedman_individual_adaboost_nn_xgb_accuracy.json
 
-    analyze_friedman_f1:
-        cmd: uv run python src/analysis/friedman_test.py --models adaboost nn xgb --metric f1
-        deps:
-            - src/analysis/friedman_test.py
-            - dvclive/adaboost/front/cv_results.json
-            - dvclive/adaboost/left/cv_results.json
-            - dvclive/adaboost/right/cv_results.json
-            - dvclive/nn/front/cv_results.json
-            - dvclive/nn/left/cv_results.json
-            - dvclive/nn/right/cv_results.json
-            - dvclive/xgb/front/cv_results.json
-            - dvclive/xgb/left/cv_results.json
-            - dvclive/xgb/right/cv_results.json
-        outs:
-            - dvclive/analysis/friedman_individual_adaboost_nn_xgb_f1.json
+  analyze_friedman_combined:
+    cmd: uv run python src/analysis/friedman_test.py --models adaboost nn xgb 
+      --metric accuracy --combined
+    deps:
+    - src/analysis/friedman_test.py
+    - dvclive/adaboost/combined/cv_results.json
+    - dvclive/nn/combined/cv_results.json
+    - dvclive/xgb/combined/cv_results.json
+    outs:
+    - dvclive/analysis/friedman_combined_adaboost_nn_xgb_accuracy.json
 
-    analyze_friedman_f1_combined:
-        cmd: uv run python src/analysis/friedman_test.py --models adaboost nn xgb --metric f1 --combined
-        deps:
-            - src/analysis/friedman_test.py
-            - dvclive/adaboost/combined/cv_results.json
-            - dvclive/nn/combined/cv_results.json
-            - dvclive/xgb/combined/cv_results.json
-        outs:
-            - dvclive/analysis/friedman_combined_adaboost_nn_xgb_f1.json
+  analyze_friedman_f1:
+    cmd: uv run python src/analysis/friedman_test.py --models adaboost nn xgb 
+      --metric f1
+    deps:
+    - src/analysis/friedman_test.py
+    - dvclive/adaboost/front/cv_results.json
+    - dvclive/adaboost/left/cv_results.json
+    - dvclive/adaboost/right/cv_results.json
+    - dvclive/nn/front/cv_results.json
+    - dvclive/nn/left/cv_results.json
+    - dvclive/nn/right/cv_results.json
+    - dvclive/xgb/front/cv_results.json
+    - dvclive/xgb/left/cv_results.json
+    - dvclive/xgb/right/cv_results.json
+    outs:
+    - dvclive/analysis/friedman_individual_adaboost_nn_xgb_f1.json
 
-    analyze_friedman_loso:
-        cmd: uv run python src/analysis/friedman_test.py --models adaboost nn xgb --metric accuracy --loso
-        deps:
-            - src/analysis/friedman_test.py
-            - dvclive/adaboost/combined_loso/loso_metrics.json
-            - dvclive/nn/combined_loso/loso_metrics.json
-            - dvclive/xgb/combined_loso/loso_metrics.json
-        outs:
-            - dvclive/analysis/friedman_loso_adaboost_nn_xgb_accuracy.json
+  analyze_friedman_f1_combined:
+    cmd: uv run python src/analysis/friedman_test.py --models adaboost nn xgb 
+      --metric f1 --combined
+    deps:
+    - src/analysis/friedman_test.py
+    - dvclive/adaboost/combined/cv_results.json
+    - dvclive/nn/combined/cv_results.json
+    - dvclive/xgb/combined/cv_results.json
+    outs:
+    - dvclive/analysis/friedman_combined_adaboost_nn_xgb_f1.json
 
-    analyze_friedman_f1_loso:
-        cmd: uv run python src/analysis/friedman_test.py --models adaboost nn xgb --metric f1 --loso
-        deps:
-            - src/analysis/friedman_test.py
-            - dvclive/adaboost/combined_loso/loso_metrics.json
-            - dvclive/nn/combined_loso/loso_metrics.json
-            - dvclive/xgb/combined_loso/loso_metrics.json
-        outs:
-            - dvclive/analysis/friedman_loso_adaboost_nn_xgb_f1.json
+  analyze_friedman_loso:
+    cmd: uv run python src/analysis/friedman_test.py --models adaboost nn xgb 
+      --metric accuracy --loso
+    deps:
+    - src/analysis/friedman_test.py
+    - dvclive/adaboost/combined_loso/loso_metrics.json
+    - dvclive/nn/combined_loso/loso_metrics.json
+    - dvclive/xgb/combined_loso/loso_metrics.json
+    outs:
+    - dvclive/analysis/friedman_loso_adaboost_nn_xgb_accuracy.json
+
+  analyze_friedman_f1_loso:
+    cmd: uv run python src/analysis/friedman_test.py --models adaboost nn xgb 
+      --metric f1 --loso
+    deps:
+    - src/analysis/friedman_test.py
+    - dvclive/adaboost/combined_loso/loso_metrics.json
+    - dvclive/nn/combined_loso/loso_metrics.json
+    - dvclive/xgb/combined_loso/loso_metrics.json
+    outs:
+    - dvclive/analysis/friedman_loso_adaboost_nn_xgb_f1.json
 
 plots:
-    - dvclive/plots/roc_curve_comparison.png:
-        x_label: "False Positive Rate"
-        y_label: "True Positive Rate"
-        title: "ROC Curve Comparison"
-    - dvclive/plots/roc_curve_combined_comparison.png:
-        x_label: "False Positive Rate"
-        y_label: "True Positive Rate"
-        title: "ROC Curve Comparison - Combined Views"
+- dvclive/plots/roc_curve_comparison.png:
+    x_label: False Positive Rate
+    y_label: True Positive Rate
+    title: ROC Curve Comparison
+- dvclive/plots/roc_curve_combined_comparison.png:
+    x_label: False Positive Rate
+    y_label: True Positive Rate
+    title: ROC Curve Comparison - Combined Views
