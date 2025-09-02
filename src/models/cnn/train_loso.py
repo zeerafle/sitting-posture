@@ -122,7 +122,7 @@ def run_loso_training():
             model = trainer.get_estimator()
 
             # Train model
-            model.fit(train_ds, epochs=20, verbose=1, validation_data=test_ds)
+            model.fit(train_ds, epochs=5, verbose=1)
 
             # Evaluate on test set
             y_pred_raw = model.predict(test_ds, verbose=0)
@@ -163,7 +163,7 @@ def run_loso_training():
         logger.info("Training final model on all data")
         final_ds = create_dataset(file_paths, labels)
         final_model = trainer.get_estimator()
-        final_model.fit(final_ds, epochs=20, verbose=1)
+        final_model.fit(final_ds, epochs=5, verbose=1)
 
         # Save final model with the standard naming convention for LOSO models
         model_path = os.path.join(trainer.models_dir, f"{trainer.model_name}_combined_loso.keras")
