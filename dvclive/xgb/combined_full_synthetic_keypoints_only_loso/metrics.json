@@ -1,0 +1,12 @@
+{
+    "loso_mean_accuracy": 0.9251552533665756,
+    "loso_std_accuracy": 0.012533264772680111,
+    "loso_mean_precision": 0.9336886367745079,
+    "loso_std_precision": 0.02313627314589369,
+    "loso_mean_recall": 0.9150575985495909,
+    "loso_std_recall": 0.024146577053806167,
+    "loso_mean_f1": 0.9238359466979265,
+    "loso_std_f1": 0.012743958063058327,
+    "loso_mean_roc_auc": 0.9741566103874841,
+    "loso_std_roc_auc": 0.003833865670258612
+}

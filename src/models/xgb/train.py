@@ -38,7 +38,14 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Train XGBoost model")
     parser.add_argument("--combined", action="store_true", help="Train on combined view data")
     parser.add_argument("--loso", action="store_true", help="Use Leave-One-Subject-Out cross-validation")
+    parser.add_argument("--data-config", type=str, default=None,
+                       help="Data configuration for ablation study (e.g., 'real_keypoints_only')")
     args = parser.parse_args()
 
-    trainer = XGBoostTrainer(model_name="xgb", train_combined=args.combined, use_loso=args.loso)
+    trainer = XGBoostTrainer(
+        model_name="xgb",
+        train_combined=args.combined,
+        use_loso=args.loso,
+        data_path_suffix=args.data_config
+    )
     trainer.run()

@@ -19,7 +19,11 @@ dependencies = [
     "scikit-optimize>=0.10.2",
     "seaborn>=0.13.2",
     "sklearn-evaluation>=0.12.2",
-    "tensorflow[and-cuda]>=2.19.0",
     "tensorflow-hub>=0.16.1",
     "xgboost>=3.0.2",
+    "pyarrow>=21.0.0",
+    "tensorflow>=2.20.0",
 ]
+
+[dependency-groups]
+dev = []

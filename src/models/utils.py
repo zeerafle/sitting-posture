@@ -1,8 +1,6 @@
 import os
 import sys
 import json
-import yaml
-import joblib
 import numpy as np
 import polars as pl
 from loguru import logger
@@ -13,9 +11,9 @@ from sklearn_evaluation import plot
 from pathlib import Path
 
 
-def configure_logging(log_dir: str = None):
+def configure_logging(log_dir: str = ""):
     """Initialize Loguru with console + rotating file sinks."""
-    if log_dir is None:
+    if not log_dir:
         # assume this file lives in <project>/src/models/utils.py,
         # so project_root is three levels up
         project_root = Path(__file__).parents[2]
@@ -70,8 +68,24 @@ def log_roc_auc_curve(live, y_true, y_pred_proba):
     live.log_image("test/roc_auc_curve.png", fig)
 
 
-def load_data(base_path: str):
-    """Read train/test CSVs produced by prepare.py."""
+def load_data(view: str, data_path_suffix: str = ""):
+    """
+    Read train/test CSVs produced by prepare.py.
+
+    Args:
+        view: The view to load ('front', 'left', 'right', 'combined')
+        data_path_suffix: Optional suffix for data path (e.g., 'real_keypoints_only')
+
+    Returns:
+        X_train, X_test, y_train, y_test
+    """
+    # Construct the correct data path based on suffix
+    if data_path_suffix:
+        base_path = os.path.join("data/processed", data_path_suffix, view)
+    else:
+        base_path = os.path.join("data/processed", view)
+
+    logger.info(f"Loading data from {base_path}")
     train = pl.read_csv(os.path.join(base_path, "train.csv"))
     test  = pl.read_csv(os.path.join(base_path, "test.csv"))
     X_train = train.drop("labels")
@@ -111,12 +125,16 @@ def bayes_search(
     return best, opt.cv_results_
 
 
-def extract_subject_ids(view: str, X_train, X_test, processed_root: str = "data/processed"):
+def extract_subject_ids(view: str, X_train, X_test, processed_root: str = "data/processed", data_path_suffix: str = ""):
     """
     From your processed CSVs, pull out subject_id for train/test folds.
     """
-    subdir = view if view != "combined" else "combined"
-    df = pl.read_csv(os.path.join(processed_root, subdir, "data.csv"))
+    if data_path_suffix:
+        subdir = os.path.join(processed_root, data_path_suffix, view if view != "combined" else "combined")
+    else:
+        subdir = os.path.join(processed_root, view if view != "combined" else "combined")
+
+    df = pl.read_csv(os.path.join(subdir, "data.csv"))
     train_idx = X_train.row_index
     test_idx  = X_test.row_index
     gtr = df["subject_id"].take(train_idx).to_numpy()

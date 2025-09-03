@@ -14,24 +14,60 @@ from sklearn.metrics import (
 
 from .utils import NumpyEncoder
 
-def loso_training(trainer):
+def loso_training(trainer, data_mode=None):
     """
     Leave-One-Subject-Out for combined or per-view.
     Trains folds, logs per-subject metrics, then
     re-fits on all data and saves final model.
+
+    Args:
+        trainer: A BaseTrainer instance
+        data_mode: Optional data mode path suffix (e.g., "real_keypoints_only")
+
+    Returns:
+        Dictionary with metrics from LOSO evaluation
     """
-    views = ["combined"] if trainer.train_combined else trainer.views
+    # If data_mode is provided, use it, otherwise use trainer's data_path_suffix if available
+    data_suffix = data_mode or trainer.data_path_suffix or ""
+
+    # Determine which views to use
+    if trainer.train_combined:
+        # Check if both loso and combined are true
+        views = ["combined_full" if hasattr(trainer, "use_loso") and trainer.use_loso else "combined"]
+    else:
+        views = trainer.views
+    all_metrics = {}
+
     for view in views:
         # setup paths
-        subdir = view if view != "combined" else "combined"
-        data_path = os.path.join("data/processed", subdir)
-        dvclive_loso = os.path.join(trainer.dvclive_dir, f"{subdir}_loso")
-        os.makedirs(dvclive_loso, exist_ok=True)
+        subdir = view
 
-        # load full DF
-        df = pl.read_csv(os.path.join('..', '..', '..', data_path, "data.csv"))
+        # Adjust data path based on data_suffix
+        if data_suffix:
+            data_path = os.path.join("data/processed", data_suffix, subdir)
+            dvclive_loso = os.path.join(trainer.dvclive_dir, f"{subdir}_{data_suffix}_loso")
+        else:
+            data_path = os.path.join("data/processed", subdir)
+            dvclive_loso = os.path.join(trainer.dvclive_dir, f"{subdir}_loso")
+
+
+        os.makedirs(dvclive_loso, exist_ok=True)
+        logger.info(f"Using data from {data_path}")
+
+        # Get project root directory from the trainer's dvclive_dir (which is an absolute path)
+        project_root = os.path.abspath(os.path.join(trainer.dvclive_dir, '..', '..'))
+
+        # Check if the data file exists before trying to load it
+        data_file_path = os.path.join(project_root, data_path, "data.csv")
+        try:
+            logger.info(f"Loading data from absolute path: {data_file_path}")
+            df = pl.read_csv(data_file_path)
+        except Exception as e:
+            logger.error(f"Failed to load data from {data_file_path}: {e}")
+            continue
+
         groups = df["subject_id"].to_numpy()
-        X_df = df.drop(["subject_id", "class_no", "class_name"])
+        X_df = df.drop(["subject_id", "class_no", "class_name", "file_name"])
         y_df = df.select("class_no")
 
         # load best params from combined htcv if exists
@@ -102,6 +138,9 @@ def loso_training(trainer):
             with open(json_path, "w") as f:
                 json.dump(metrics, f, indent=2, cls=NumpyEncoder)
 
+            # Store metrics for return
+            all_metrics = metrics
+
         # final model on all data
         logger.info(f"Retraining on all data for view={view}")
         final = trainer.get_estimator()
@@ -109,10 +148,16 @@ def loso_training(trainer):
             final.set_params(**best_params)
         final.fit(X, y)
 
-        # Save with the specific name expected by DVC for combined LOSO
-        model_path = os.path.join(trainer.models_dir, f"{trainer.model_name}_{view}_loso.joblib")
+        # Save with appropriate name based on data_suffix
+        if data_suffix:
+            model_path = os.path.join(trainer.models_dir, f"{trainer.model_name}_{view}_{data_suffix}.joblib")
+        else:
+            model_path = os.path.join(trainer.models_dir, f"{trainer.model_name}_{view}_loso.joblib")
+
         logger.info(f"Saving final {trainer.model_name} LOSO model for {view} view")
         with open(model_path, "wb") as f:
             joblib.dump(model, f)
         logger.success(f"Model saved to {model_path}")
         logger.success(f"Completed LOSO evaluation for view: {view}")
+
+    return all_metrics

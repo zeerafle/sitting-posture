@@ -6,9 +6,13 @@ def split_dataset(df: pl.DataFrame,
                   loso: bool=False,
                   test_size: float=0.2,
                   seed: int=42):
-    if loso:
+    if loso and combined:
+        # Handle both combined and loso
+        df2 = df.drop("view_type")
+        return {"combined_full": df2}
+    elif loso:
         return {"full": df}
-    if combined:
+    elif combined:
         df2 = df.drop("view_type")
         t, v = train_test_split(df2, test_size=test_size, random_state=seed)
         return {"combined": (pl.from_pandas(t), pl.from_pandas(v))}

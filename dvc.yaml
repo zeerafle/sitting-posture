@@ -249,7 +249,7 @@ stages:
     - dvclive/plots/roc_curve_combined_comparison.png
 
   analyze_friedman:
-    cmd: uv run python src/analysis/friedman_test.py --models adaboost nn xgb 
+    cmd: uv run python src/analysis/friedman_test.py --models adaboost nn xgb
       --metric accuracy
     deps:
     - src/analysis/friedman_test.py
@@ -266,7 +266,7 @@ stages:
     - dvclive/analysis/friedman_individual_adaboost_nn_xgb_accuracy.json
 
   analyze_friedman_combined:
-    cmd: uv run python src/analysis/friedman_test.py --models adaboost nn xgb 
+    cmd: uv run python src/analysis/friedman_test.py --models adaboost nn xgb
       --metric accuracy --combined
     deps:
     - src/analysis/friedman_test.py
@@ -277,7 +277,7 @@ stages:
     - dvclive/analysis/friedman_combined_adaboost_nn_xgb_accuracy.json
 
   analyze_friedman_f1:
-    cmd: uv run python src/analysis/friedman_test.py --models adaboost nn xgb 
+    cmd: uv run python src/analysis/friedman_test.py --models adaboost nn xgb
       --metric f1
     deps:
     - src/analysis/friedman_test.py
@@ -294,7 +294,7 @@ stages:
     - dvclive/analysis/friedman_individual_adaboost_nn_xgb_f1.json
 
   analyze_friedman_f1_combined:
-    cmd: uv run python src/analysis/friedman_test.py --models adaboost nn xgb 
+    cmd: uv run python src/analysis/friedman_test.py --models adaboost nn xgb
       --metric f1 --combined
     deps:
     - src/analysis/friedman_test.py
@@ -305,7 +305,7 @@ stages:
     - dvclive/analysis/friedman_combined_adaboost_nn_xgb_f1.json
 
   analyze_friedman_loso:
-    cmd: uv run python src/analysis/friedman_test.py --models adaboost nn xgb 
+    cmd: uv run python src/analysis/friedman_test.py --models adaboost nn xgb
       --metric accuracy --loso
     deps:
     - src/analysis/friedman_test.py
@@ -316,7 +316,7 @@ stages:
     - dvclive/analysis/friedman_loso_adaboost_nn_xgb_accuracy.json
 
   analyze_friedman_f1_loso:
-    cmd: uv run python src/analysis/friedman_test.py --models adaboost nn xgb 
+    cmd: uv run python src/analysis/friedman_test.py --models adaboost nn xgb
       --metric f1 --loso
     deps:
     - src/analysis/friedman_test.py
@@ -325,6 +325,62 @@ stages:
     - dvclive/xgb/combined_loso/loso_metrics.json
     outs:
     - dvclive/analysis/friedman_loso_adaboost_nn_xgb_f1.json
+
+  # Prepare data for the ablation study with matrix
+  prepare_ablation_combined:
+    matrix:
+      data_mode: [real, synthetic, all]
+      feature_mode: [keypoints_only, all_features]
+    cmd: uv run python src/prepare.py --loso --combined --data-mode
+      ${item.data_mode} --feature-mode ${item.feature_mode}
+    deps:
+    - data/data_with_features.csv
+    - src/prepare.py
+    - src/data_preparation/data_filter.py
+    outs:
+    - data/processed/${item.data_mode}_${item.feature_mode}/combined_full/data.csv:
+        persist: true
+
+  # Train the ablation models with matrix
+  train_ablation_combined:
+    matrix:
+      data_mode: [real, synthetic, all]
+      feature_mode: [keypoints_only, all_features]
+    cmd: uv run python src/models/xgb/train.py --loso --combined --data-config
+      ${item.data_mode}_${item.feature_mode}
+    deps:
+    - src/models/xgb/train.py
+    - data/processed/${item.data_mode}_${item.feature_mode}/combined_full/data.csv
+    - src/models/base_trainer.py
+    - src/models/loso_workflow.py
+    - src/models/utils.py
+    - src/models/training_workflow.py
+    params:
+    - params.yaml:
+    outs:
+    - models/xgb/xgb_combined_full_${item.data_mode}_${item.feature_mode}.joblib:
+        persist: true
+    metrics:
+    - dvclive/xgb/combined_full_${item.data_mode}_${item.feature_mode}_loso/loso_metrics.json:
+        cache: false
+
+  # Analyze ablation results
+  analyze_ablation:
+    vars:
+      - model: xgb
+    cmd: uv run python src/run_ablation.py --combined --model ${model}
+    deps:
+    - src/run_ablation.py
+    - dvclive/${model}/combined_full_real_keypoints_only_loso/loso_metrics.json
+    - dvclive/${model}/combined_full_real_all_features_loso/loso_metrics.json
+    - dvclive/${model}/combined_full_synthetic_keypoints_only_loso/loso_metrics.json
+    - dvclive/${model}/combined_full_synthetic_all_features_loso/loso_metrics.json
+    - dvclive/${model}/combined_full_all_keypoints_only_loso/loso_metrics.json
+    - dvclive/${model}/combined_full_all_all_features_loso/loso_metrics.json
+    outs:
+    - dvclive/analysis/ablation:
+        persist: true
+        cache: false
 
 plots:
 - dvclive/plots/roc_curve_comparison.png:
@@ -335,3 +391,21 @@ plots:
     x_label: False Positive Rate
     y_label: True Positive Rate
     title: ROC Curve Comparison - Combined Views
+- dvclive/analysis/ablation/ablation_accuracy_comparison.png:
+    x_label: Data Mode
+    y_label: Accuracy
+    title: Ablation Study - Accuracy Comparison
+params:
+- dvclive/xgb/combined_full_all_keypoints_only_loso/params.yaml
+- dvclive/xgb/combined_full_synthetic_keypoints_only_loso/params.yaml
+- dvclive/xgb/combined_full_all_all_features_loso/params.yaml
+- dvclive/xgb/combined_full_real_keypoints_only_loso/params.yaml
+- dvclive/xgb/combined_full_real_all_features_loso/params.yaml
+- dvclive/xgb/combined_full_synthetic_all_features_loso/params.yaml
+metrics:
+- dvclive/xgb/combined_full_all_keypoints_only_loso/metrics.json
+- dvclive/xgb/combined_full_synthetic_keypoints_only_loso/metrics.json
+- dvclive/xgb/combined_full_all_all_features_loso/metrics.json
+- dvclive/xgb/combined_full_real_keypoints_only_loso/metrics.json
+- dvclive/xgb/combined_full_real_all_features_loso/metrics.json
+- dvclive/xgb/combined_full_synthetic_all_features_loso/metrics.json

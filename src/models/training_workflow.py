@@ -1,7 +1,5 @@
 import os
 import json
-import numpy as np
-import polars as pl
 from codecarbon import OfflineEmissionsTracker
 from dvclive import Live
 from .evaluate import evaluate
@@ -15,9 +13,12 @@ def run_standard(trainer):
     views = ["combined"] if trainer.train_combined else trainer.views
 
     for view in views:
-        Xtr, Xte, ytr, yte = load_data(view)
-        # get subject‐IDs for cross‐validation
-        groups_train, groups_test = extract_subject_ids(view, Xtr, Xte)
+        # Pass the data_path_suffix to load_data
+        Xtr, Xte, ytr, yte = load_data(view, trainer.data_path_suffix)
+        # get subject‐IDs for cross‐validation, also passing data_path_suffix
+        groups_train, groups_test = extract_subject_ids(
+            view, Xtr, Xte, data_path_suffix=trainer.data_path_suffix
+        )
         _train_one_view(
             trainer, view,
             Xtr, Xte, ytr, yte,
@@ -35,7 +36,13 @@ def _train_one_view(
     Hyperparam search → final fit → emissions‐tracked train & inference → evaluate → save.
     """
     params        = trainer.params
-    dvclive_path  = os.path.join(trainer.dvclive_dir, view)
+
+    # Adjust the dvclive path based on data_path_suffix
+    if trainer.data_path_suffix:
+        dvclive_path = os.path.join(trainer.dvclive_dir, f"{view}_{trainer.data_path_suffix}")
+    else:
+        dvclive_path = os.path.join(trainer.dvclive_dir, view)
+
     os.makedirs(dvclive_path, exist_ok=True)
 
     with Live(dvclive_path) as live:
@@ -77,8 +84,13 @@ def _train_one_view(
         with open(os.path.join(dvclive_path,"cv_results.json"),"w") as f:
             json.dump(metrics, f, indent=2)
 
-    # 5) save final model
-    trainer.save_model(model, f"{trainer.model_name}_{view}.joblib")
+    # 5) save final model with appropriate name
+    if trainer.data_path_suffix:
+        fname = f"{trainer.model_name}_{view}_{trainer.data_path_suffix}.joblib"
+    else:
+        fname = f"{trainer.model_name}_{view}.joblib"
+
+    trainer.save_model(model, fname)
 
 
 def run_loso(trainer):
