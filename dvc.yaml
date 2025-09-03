@@ -326,6 +326,78 @@ stages:
     outs:
     - dvclive/analysis/friedman_loso_adaboost_nn_xgb_f1.json
 
+  # Ablation study statistical analysis stages
+  analyze_friedman_ablation_data_modes:
+    cmd: uv run python src/analysis/friedman_test.py --models real_keypoints_only synthetic_keypoints_only all_keypoints_only --metric accuracy --ablation
+    deps:
+    - src/analysis/friedman_test.py
+    - src/analysis/statistical/
+    - dvclive/xgb/combined_full_real_keypoints_only_loso/loso_metrics.json
+    - dvclive/xgb/combined_full_synthetic_keypoints_only_loso/loso_metrics.json
+    - dvclive/xgb/combined_full_all_keypoints_only_loso/loso_metrics.json
+    outs:
+    - dvclive/analysis/friedman_ablation_real_keypoints_only_synthetic_keypoints_only_all_keypoints_only_accuracy.json
+
+  analyze_friedman_ablation_features:
+    cmd: uv run python src/analysis/friedman_test.py --models all_keypoints_only all_all_features --metric accuracy --ablation
+    deps:
+    - src/analysis/friedman_test.py
+    - src/analysis/statistical/
+    - dvclive/xgb/combined_full_all_keypoints_only_loso/loso_metrics.json
+    - dvclive/xgb/combined_full_all_all_features_loso/loso_metrics.json
+    outs:
+    - dvclive/analysis/friedman_ablation_all_keypoints_only_all_all_features_accuracy.json
+
+  analyze_friedman_ablation_full:
+    cmd: uv run python src/analysis/friedman_test.py --models real_keypoints_only real_all_features synthetic_keypoints_only synthetic_all_features all_keypoints_only all_all_features --metric accuracy --ablation
+    deps:
+    - src/analysis/friedman_test.py
+    - src/analysis/statistical/
+    - dvclive/xgb/combined_full_real_keypoints_only_loso/loso_metrics.json
+    - dvclive/xgb/combined_full_real_all_features_loso/loso_metrics.json
+    - dvclive/xgb/combined_full_synthetic_keypoints_only_loso/loso_metrics.json
+    - dvclive/xgb/combined_full_synthetic_all_features_loso/loso_metrics.json
+    - dvclive/xgb/combined_full_all_keypoints_only_loso/loso_metrics.json
+    - dvclive/xgb/combined_full_all_all_features_loso/loso_metrics.json
+    outs:
+    - dvclive/analysis/friedman_ablation_real_keypoints_only_real_all_features_synthetic_keypoints_only_synthetic_all_features_all_keypoints_only_all_all_features_accuracy.json
+
+  # F1 score versions of ablation analysis stages
+  analyze_friedman_ablation_data_modes_f1:
+    cmd: uv run python src/analysis/friedman_test.py --models real_keypoints_only synthetic_keypoints_only all_keypoints_only --metric f1 --ablation
+    deps:
+    - src/analysis/friedman_test.py
+    - src/analysis/statistical/
+    - dvclive/xgb/combined_full_real_keypoints_only_loso/loso_metrics.json
+    - dvclive/xgb/combined_full_synthetic_keypoints_only_loso/loso_metrics.json
+    - dvclive/xgb/combined_full_all_keypoints_only_loso/loso_metrics.json
+    outs:
+    - dvclive/analysis/friedman_ablation_real_keypoints_only_synthetic_keypoints_only_all_keypoints_only_f1.json
+
+  analyze_friedman_ablation_features_f1:
+    cmd: uv run python src/analysis/friedman_test.py --models all_keypoints_only all_all_features --metric f1 --ablation
+    deps:
+    - src/analysis/friedman_test.py
+    - src/analysis/statistical/
+    - dvclive/xgb/combined_full_all_keypoints_only_loso/loso_metrics.json
+    - dvclive/xgb/combined_full_all_all_features_loso/loso_metrics.json
+    outs:
+    - dvclive/analysis/friedman_ablation_all_keypoints_only_all_all_features_f1.json
+
+  analyze_friedman_ablation_full_f1:
+    cmd: uv run python src/analysis/friedman_test.py --models real_keypoints_only real_all_features synthetic_keypoints_only synthetic_all_features all_keypoints_only all_all_features --metric f1 --ablation
+    deps:
+    - src/analysis/friedman_test.py
+    - src/analysis/statistical/
+    - dvclive/xgb/combined_full_real_keypoints_only_loso/loso_metrics.json
+    - dvclive/xgb/combined_full_real_all_features_loso/loso_metrics.json
+    - dvclive/xgb/combined_full_synthetic_keypoints_only_loso/loso_metrics.json
+    - dvclive/xgb/combined_full_synthetic_all_features_loso/loso_metrics.json
+    - dvclive/xgb/combined_full_all_keypoints_only_loso/loso_metrics.json
+    - dvclive/xgb/combined_full_all_all_features_loso/loso_metrics.json
+    outs:
+    - dvclive/analysis/friedman_ablation_real_keypoints_only_real_all_features_synthetic_keypoints_only_synthetic_all_features_all_keypoints_only_all_all_features_f1.json
+
   # Prepare data for the ablation study with matrix
   prepare_ablation_combined:
     matrix:

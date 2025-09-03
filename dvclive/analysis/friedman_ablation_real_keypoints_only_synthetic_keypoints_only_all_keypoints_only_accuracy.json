@@ -1,0 +1,50 @@
+{
+    "analysis_type": "ablation",
+    "friedman_statistic": 0.4000000000000057,
+    "p_value": 0.8187307530779795,
+    "kendalls_w": 0.04,
+    "significant": false,
+    "models": [
+        "combined_full_real_keypoints_only_loso",
+        "combined_full_synthetic_keypoints_only_loso",
+        "combined_full_all_keypoints_only_loso"
+    ],
+    "metric": "accuracy",
+    "alpha": 0.05,
+    "model_performance": {
+        "combined_full_real_keypoints_only_loso": {
+            "mean": 0.9130580097585371,
+            "std": 0.03732638087075372,
+            "values": [
+                0.9316628701594533,
+                0.9317269076305221,
+                0.9248,
+                0.8388888888888889,
+                0.9382113821138212
+            ]
+        },
+        "combined_full_synthetic_keypoints_only_loso": {
+            "mean": 0.9251552533665756,
+            "std": 0.012533264772680111,
+            "values": [
+                0.918423464711274,
+                0.9494584837545126,
+                0.9165217391304348,
+                0.916504854368932,
+                0.9248677248677248
+            ]
+        },
+        "combined_full_all_keypoints_only_loso": {
+            "mean": 0.915036513493192,
+            "std": 0.023400198934824635,
+            "values": [
+                0.9443708609271523,
+                0.9413392363032651,
+                0.888755980861244,
+                0.8947040498442368,
+                0.9060124395300622
+            ]
+        }
+    },
+    "post_hoc_results": []
+}

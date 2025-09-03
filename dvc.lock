@@ -2170,3 +2170,57 @@ stages:
       md5: 3d4d3b20c347245c0632378b67096f6b.dir
       size: 484197
       nfiles: 23
+  analyze_friedman_ablation_full:
+    cmd: uv run python src/analysis/friedman_test.py --models 
+      real_keypoints_only real_all_features synthetic_keypoints_only 
+      synthetic_all_features all_keypoints_only all_all_features --metric 
+      accuracy --ablation
+    deps:
+    - path: dvclive/xgb/combined_full_all_all_features_loso/loso_metrics.json
+      hash: md5
+      md5: 50124f6082209b59e22f534b37891f4f
+      size: 690
+      isexec: true
+    - path: dvclive/xgb/combined_full_all_keypoints_only_loso/loso_metrics.json
+      hash: md5
+      md5: 2b5c6bdd6f8d1f6c9a350e58e59406bd
+      size: 677
+      isexec: true
+    - path: dvclive/xgb/combined_full_real_all_features_loso/loso_metrics.json
+      hash: md5
+      md5: 3e79c20af8c00f98ca5d5245b0ea1a31
+      size: 667
+      isexec: true
+    - path: dvclive/xgb/combined_full_real_keypoints_only_loso/loso_metrics.json
+      hash: md5
+      md5: 8dded9f2d74ab785c9b816dcdb276c7e
+      size: 667
+      isexec: true
+    - path: 
+        dvclive/xgb/combined_full_synthetic_all_features_loso/loso_metrics.json
+      hash: md5
+      md5: f4a93d039c03a56d17dbd978ceb2ae43
+      size: 692
+      isexec: true
+    - path: 
+        dvclive/xgb/combined_full_synthetic_keypoints_only_loso/loso_metrics.json
+      hash: md5
+      md5: 8e6c597b31b0eb833e9b36c5c8c4ca47
+      size: 667
+      isexec: true
+    - path: src/analysis/friedman_test.py
+      hash: md5
+      md5: 06f1c310219535d9a182c87e32a310c9
+      size: 3247
+      isexec: true
+    - path: src/analysis/statistical/
+      hash: md5
+      md5: 6bc84d957da348bb4508f809c70554db.dir
+      size: 27088
+      nfiles: 8
+    outs:
+    - path: 
+        dvclive/analysis/friedman_ablation_real_keypoints_only_real_all_features_synthetic_keypoints_only_synthetic_all_features_all_keypoints_only_all_all_features_accuracy.json
+      hash: md5
+      md5: 1fb62cbc82ac3c390d7dc52d26756158
+      size: 2744
