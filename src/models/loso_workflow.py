@@ -34,7 +34,7 @@ def loso_training(trainer, data_mode=None):
     # Determine which views to use
     if getattr(trainer, "train_combined", False):
         # Check if both loso and combined are true
-        views = ["combined_full" if getattr(trainer, "use_loso", False) else "combined"]
+        views = ["combined"]
     else:
         views = trainer.views
     all_metrics = {}
@@ -67,7 +67,7 @@ def loso_training(trainer, data_mode=None):
             continue
 
         groups = df["subject_id"].to_numpy()
-        X_df = df.drop(columns=["subject_id", "class_no", "class_name", "file_name"], errors="ignore")
+        X_df = df.drop(columns=["subject_id", "class_no", "class_name", "file_name", "view_type"])
         y = df["class_no"].to_numpy()
 
         # load best params from combined htcv if exists
@@ -150,7 +150,7 @@ def loso_training(trainer, data_mode=None):
 
         # Save with appropriate name based on data_suffix
         if data_suffix:
-            model_path = os.path.join(trainer.models_dir, f"{trainer.model_name}_{view}_{data_suffix}.joblib")
+            model_path = os.path.join(trainer.models_dir, f"{trainer.model_name}_{view}_{data_suffix}_loso.joblib")
         else:
             model_path = os.path.join(trainer.models_dir, f"{trainer.model_name}_{view}_loso.joblib")
 

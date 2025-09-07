@@ -1126,34 +1126,36 @@ stages:
       md5: a18e30845d496b25443b81b9ae0fb60e
       size: 9294544
   train_loso_combined@adaboost:
-    cmd: uv run python train.py --combined --loso
+    cmd: uv run python src/models/adaboost/train.py --combined --loso 
+      --data-config all_all_features
     deps:
-    - path: ../../../data/processed/combined/data.csv
+    - path: data/processed/all_all_features/combined/data.csv
       hash: md5
-      md5: a18e30845d496b25443b81b9ae0fb60e
-      size: 9294544
-    - path: ../base_trainer.py
-      hash: md5
-      md5: 33aa29da454015210258faf4411c0a53
-      size: 1879
+      md5: f5220acc8d7d4e660ccacca73c27d267
+      size: 9821342
       isexec: true
-    - path: ../evaluate.py
+    - path: src/models/adaboost/train.py
       hash: md5
-      md5: d72edf3aab5d007e9bd7851856d27b7b
-      size: 4348
+      md5: 10e8544323b5a1fef69a46c123500a20
+      size: 1632
       isexec: true
-    - path: ../utils.py
+    - path: src/models/base_trainer.py
       hash: md5
-      md5: 61b853cff510e365f8e931ae33c8ca30
-      size: 4006
+      md5: b4baa34b5a9617f915e42ec6706ad00a
+      size: 2039
       isexec: true
-    - path: train.py
+    - path: src/models/evaluate.py
       hash: md5
-      md5: 66aaae6848097b33cd7c8ea44a3a789c
-      size: 1532
+      md5: 28205306d098d1e8af69835dde06c3b8
+      size: 4604
+      isexec: true
+    - path: src/models/utils.py
+      hash: md5
+      md5: c51d309800e3542813508b9671af8ba2
+      size: 5480
       isexec: true
     params:
-      ../../../params.yaml:
+      params.yaml:
         adaboost:
           n_estimators_min: 10
           n_estimators_max: 2000
@@ -1201,47 +1203,49 @@ stages:
           - 6
           - 9
     outs:
-    - path: ../../../dvclive/adaboost/combined_loso/loso_metrics.json
+    - path: dvclive/adaboost/combined_loso/loso_metrics.json
       hash: md5
       md5: bafe2ea1b6ee62877d001abf9cd507d4
       size: 689
-    - path: ../../../dvclive/adaboost/combined_loso/metrics.json
+    - path: dvclive/adaboost/combined_loso/metrics.json
       hash: md5
-      md5: 6c6f1708959a5d54a760cd0f8f0d0499
-      size: 448
-    - path: ../../../models/adaboost/adaboost_combined_loso.joblib
+      md5: 8a80554c91d9fca8acb82f023de02f11
+      size: 3
+    - path: models/adaboost/adaboost_combined_all_all_features_loso.joblib
       hash: md5
-      md5: 868477904bb2bdc7faa087f331ea030c
-      size: 1280820
+      md5: 18bb91271689a5d795436735e919ac93
+      size: 34052
   train_loso_combined@nn:
-    cmd: uv run python train.py --combined --loso
+    cmd: uv run python src/models/nn/train.py --combined --loso --data-config 
+      all_all_features
     deps:
-    - path: ../../../data/processed/combined/data.csv
+    - path: data/processed/all_all_features/combined/data.csv
       hash: md5
-      md5: a18e30845d496b25443b81b9ae0fb60e
-      size: 9294544
-    - path: ../base_trainer.py
-      hash: md5
-      md5: 33aa29da454015210258faf4411c0a53
-      size: 1879
+      md5: f5220acc8d7d4e660ccacca73c27d267
+      size: 9821342
       isexec: true
-    - path: ../evaluate.py
+    - path: src/models/base_trainer.py
       hash: md5
-      md5: d72edf3aab5d007e9bd7851856d27b7b
-      size: 4348
+      md5: b4baa34b5a9617f915e42ec6706ad00a
+      size: 2039
       isexec: true
-    - path: ../utils.py
+    - path: src/models/evaluate.py
       hash: md5
-      md5: 61b853cff510e365f8e931ae33c8ca30
-      size: 4006
+      md5: 28205306d098d1e8af69835dde06c3b8
+      size: 4604
       isexec: true
-    - path: train.py
+    - path: src/models/nn/train.py
       hash: md5
-      md5: 3d9dd9d273884dcb293f0de21a696b06
-      size: 2836
+      md5: 66ebc494d0e941c803590cbd4619d300
+      size: 2936
+      isexec: true
+    - path: src/models/utils.py
+      hash: md5
+      md5: c51d309800e3542813508b9671af8ba2
+      size: 5480
       isexec: true
     params:
-      ../../../params.yaml:
+      params.yaml:
         adaboost:
           n_estimators_min: 10
           n_estimators_max: 2000
@@ -1289,47 +1293,49 @@ stages:
           - 6
           - 9
     outs:
-    - path: ../../../dvclive/nn/combined_loso/loso_metrics.json
+    - path: dvclive/nn/combined_loso/loso_metrics.json
       hash: md5
       md5: bea28f458d0cfd6af5c64da9df860580
       size: 684
-    - path: ../../../dvclive/nn/combined_loso/metrics.json
+    - path: dvclive/nn/combined_loso/metrics.json
       hash: md5
       md5: 4c041bb21394271e99b996c1a83bf134
       size: 449
-    - path: ../../../models/nn/nn_combined_loso.joblib
+    - path: models/nn/nn_combined_all_all_features_loso.joblib
       hash: md5
-      md5: bd224abc9ef27e5631917d1a8636206f
-      size: 27763
+      md5: 31646ad46cc560117ecbe2a9f20fee7f
+      size: 27699
   train_loso_combined@xgb:
-    cmd: uv run python train.py --combined --loso
+    cmd: uv run python src/models/xgb/train.py --combined --loso --data-config 
+      all_all_features
     deps:
-    - path: ../../../data/processed/combined/data.csv
+    - path: data/processed/all_all_features/combined/data.csv
       hash: md5
-      md5: a18e30845d496b25443b81b9ae0fb60e
-      size: 9294544
-    - path: ../base_trainer.py
-      hash: md5
-      md5: 33aa29da454015210258faf4411c0a53
-      size: 1879
+      md5: f5220acc8d7d4e660ccacca73c27d267
+      size: 9821342
       isexec: true
-    - path: ../evaluate.py
+    - path: src/models/base_trainer.py
       hash: md5
-      md5: d72edf3aab5d007e9bd7851856d27b7b
-      size: 4348
+      md5: b4baa34b5a9617f915e42ec6706ad00a
+      size: 2039
       isexec: true
-    - path: ../utils.py
+    - path: src/models/evaluate.py
       hash: md5
-      md5: 61b853cff510e365f8e931ae33c8ca30
-      size: 4006
+      md5: 28205306d098d1e8af69835dde06c3b8
+      size: 4604
       isexec: true
-    - path: train.py
+    - path: src/models/utils.py
       hash: md5
-      md5: 3f9fb4d23be2f75db785cf569c188851
-      size: 1841
+      md5: c51d309800e3542813508b9671af8ba2
+      size: 5480
+      isexec: true
+    - path: src/models/xgb/train.py
+      hash: md5
+      md5: feaac9da16de5f1630ee5ebb2ed28b47
+      size: 2078
       isexec: true
     params:
-      ../../../params.yaml:
+      params.yaml:
         adaboost:
           n_estimators_min: 10
           n_estimators_max: 2000
@@ -1377,18 +1383,18 @@ stages:
           - 6
           - 9
     outs:
-    - path: ../../../dvclive/xgb/combined_loso/loso_metrics.json
+    - path: dvclive/xgb/combined_loso/loso_metrics.json
       hash: md5
       md5: c6ec3b1bbd78b65d8b674ac06721b703
       size: 690
-    - path: ../../../dvclive/xgb/combined_loso/metrics.json
+    - path: dvclive/xgb/combined_loso/metrics.json
       hash: md5
       md5: 40b27a36a039bb40a13958661aa8ac6b
       size: 447
-    - path: ../../../models/xgb/xgb_combined_loso.joblib
+    - path: models/xgb/xgb_combined_all_all_features_loso.joblib
       hash: md5
-      md5: a1c6c09da0b0305dc9ad6a616917003e
-      size: 218046
+      md5: d9214771ee96e711f548094d35a05973
+      size: 113929
   analyze_friedman_loso:
     cmd: uv run python src/analysis/friedman_test.py --models adaboost nn xgb 
       --metric accuracy --loso
@@ -2255,70 +2261,74 @@ stages:
       size: 2744
   analyze_stats_loso@accuracy:
     cmd: uv run python src/analysis/statistical_test.py --models adaboost nn xgb
-      --metric accuracy --loso --force_pairwise --bayesian
+      --metric accuracy --loso --force_pairwise --bayesian --posthoc nemenyi 
+      --cd_diagram
     deps:
     - path: dvclive/adaboost/combined_loso/loso_metrics.json
       hash: md5
       md5: bafe2ea1b6ee62877d001abf9cd507d4
       size: 689
-      isexec: true
     - path: dvclive/nn/combined_loso/loso_metrics.json
       hash: md5
       md5: bea28f458d0cfd6af5c64da9df860580
       size: 684
-      isexec: true
     - path: dvclive/xgb/combined_loso/loso_metrics.json
       hash: md5
       md5: c6ec3b1bbd78b65d8b674ac06721b703
       size: 690
-      isexec: true
     - path: src/analysis/statistical/
       hash: md5
-      md5: dc15656e91675bb2853cad9c9a1c8582.dir
-      size: 32610
-      nfiles: 8
+      md5: 191c86395e6c0e32d54bcaa8b59f1711.dir
+      size: 61179
+      nfiles: 10
     - path: src/analysis/statistical_test.py
       hash: md5
-      md5: 19d262308a42293e24908d4096b416f1
-      size: 5032
+      md5: 25e389f38c02c58889b3cfd294635f4d
+      size: 7875
       isexec: true
     outs:
+    - path: dvclive/analysis/cd_diagram_loso_adaboost_nn_xgb_accuracy.png
+      hash: md5
+      md5: bafb95c84fb57e87675547c7a91550a9
+      size: 12434
     - path: 
         dvclive/analysis/friedman_bayesian_loso_adaboost_nn_xgb_accuracy.json
       hash: md5
-      md5: f6d8014ddaa6042a10221ff7354134fc
-      size: 2925
+      md5: bf29979502c61fa279476e392ce00ef1
+      size: 3567
   analyze_stats_loso@f1:
     cmd: uv run python src/analysis/statistical_test.py --models adaboost nn xgb
-      --metric f1 --loso --force_pairwise --bayesian
+      --metric f1 --loso --force_pairwise --bayesian --posthoc nemenyi 
+      --cd_diagram
     deps:
     - path: dvclive/adaboost/combined_loso/loso_metrics.json
       hash: md5
       md5: bafe2ea1b6ee62877d001abf9cd507d4
       size: 689
-      isexec: true
     - path: dvclive/nn/combined_loso/loso_metrics.json
       hash: md5
       md5: bea28f458d0cfd6af5c64da9df860580
       size: 684
-      isexec: true
     - path: dvclive/xgb/combined_loso/loso_metrics.json
       hash: md5
       md5: c6ec3b1bbd78b65d8b674ac06721b703
       size: 690
-      isexec: true
     - path: src/analysis/statistical/
       hash: md5
-      md5: dc15656e91675bb2853cad9c9a1c8582.dir
-      size: 32610
-      nfiles: 8
+      md5: 191c86395e6c0e32d54bcaa8b59f1711.dir
+      size: 61179
+      nfiles: 10
     - path: src/analysis/statistical_test.py
       hash: md5
-      md5: 19d262308a42293e24908d4096b416f1
-      size: 5032
+      md5: 25e389f38c02c58889b3cfd294635f4d
+      size: 7875
       isexec: true
     outs:
+    - path: dvclive/analysis/cd_diagram_loso_adaboost_nn_xgb_f1.png
+      hash: md5
+      md5: bafb95c84fb57e87675547c7a91550a9
+      size: 12434
     - path: dvclive/analysis/friedman_bayesian_loso_adaboost_nn_xgb_f1.json
       hash: md5
-      md5: e27e5acfb22cbe324b326923a084721e
-      size: 2913
+      md5: 1ee33d95b35e6347664e46091aa8369e
+      size: 3552

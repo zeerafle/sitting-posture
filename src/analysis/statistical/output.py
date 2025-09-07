@@ -36,8 +36,34 @@ def print_results(result: Dict[str, Any]) -> None:
     for model, perf in result['model_performance'].items():
         print(f"  {model}: Mean = {perf['mean']:.4f}, Std = {perf['std']:.4f}")
 
-    # Frequentist post-hoc
-    if result['post_hoc_results']:
+    # Average ranks and CD info
+    avg_ranks = result.get('average_ranks', {})
+    if avg_ranks:
+        print("\nAverage Ranks (lower is better):")
+        for m, r in avg_ranks.items():
+            print(f"  {m}: {r:.3f}")
+    cd = result.get('cd_value', None)
+    if cd is not None:
+        print(f"\nCritical Difference (CD): {cd:.3f}")
+        cd_file = result.get('cd_diagram_file')
+        if cd_file:
+            print(f"CD diagram saved to: {cd_file}")
+
+    # Frequentist post-hoc for k>=3
+    if result.get('post_hoc_matrix'):
+        print("\nPOST-HOC COMPARISONS (k>=3):")
+        print("=" * 60)
+        method = result.get('post_hoc_method', '')
+        if method:
+            print(f"Method: {method}")
+        # Pretty-print a few upper-triangular entries
+        pairs = result.get('post_hoc_results', [])
+        for row in pairs:
+            status = "SIGNIFICANT" if row.get('Significant') else "Not significant"
+            print(f"{row['Model 1']} vs {row['Model 2']}: p = {row['P-value']:.6f} ({status})")
+
+    # Frequentist pairwise (legacy, k=2 or fallback)
+    elif result['post_hoc_results']:
         print("\nPOST-HOC PAIRWISE COMPARISONS (Wilcoxon signed-rank test):")
         print("=" * 60)
         for comparison in result['post_hoc_results']:

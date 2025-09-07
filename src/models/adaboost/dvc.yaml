@@ -1,4 +1,0 @@
-params:
-- ../../../dvclive/adaboost/combined_loso/params.yaml
-metrics:
-- ../../../dvclive/adaboost/combined_loso/metrics.json

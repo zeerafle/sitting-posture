@@ -1,4 +1,0 @@
-params:
-- ../../../dvclive/nn/combined_loso/params.yaml
-metrics:
-- ../../../dvclive/nn/combined_loso/metrics.json

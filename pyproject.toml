@@ -20,10 +20,14 @@ dependencies = [
     "seaborn>=0.13.2",
     "sklearn-evaluation>=0.12.2",
     "tensorflow-hub>=0.16.1",
-    "xgboost>=3.0.2",
+    "xgboost>=1.7.4,<2.1",
     "pyarrow>=21.0.0",
     "tensorflow>=2.20.0",
     "baycomp>=1.0.3",
+    "setuptools>=80.9.0",
+    "scikit-posthocs>=0.11.4",
+    "orange3>=3.39.0",
+    "statsmodels>=0.14.5",
 ]
 
 [tool.pyright]
