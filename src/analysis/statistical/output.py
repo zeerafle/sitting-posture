@@ -1,4 +1,3 @@
-"""Output utilities for statistical analysis results."""
 import os
 import json
 from typing import Dict, Any
@@ -37,7 +36,7 @@ def print_results(result: Dict[str, Any]) -> None:
     for model, perf in result['model_performance'].items():
         print(f"  {model}: Mean = {perf['mean']:.4f}, Std = {perf['std']:.4f}")
 
-    # Post-hoc results
+    # Frequentist post-hoc
     if result['post_hoc_results']:
         print("\nPOST-HOC PAIRWISE COMPARISONS (Wilcoxon signed-rank test):")
         print("=" * 60)
@@ -45,13 +44,34 @@ def print_results(result: Dict[str, Any]) -> None:
             status = "SIGNIFICANT" if comparison['Significant'] else "Not significant"
             print(f"{comparison['Model 1']} vs {comparison['Model 2']}: p = {comparison['P-value']:.6f} ({status})")
 
+    # Bayesian post-hoc
+    bayes = result.get('bayesian_post_hoc_results', [])
+    if bayes:
+        params = result.get('bayesian_params', {})
+        rope = params.get('rope', None)
+        print("\nBAYESIAN SIGNED-RANK (Dirichlet) PAIRWISE COMPARISONS:")
+        print("=" * 60)
+        if rope is not None:
+            print(f"ROPE = {rope}")
+        for comparison in bayes:
+            m1 = comparison['Model 1']
+            m2 = comparison['Model 2']
+            pl = comparison['P_left(M1>M2)']
+            pe = comparison['P_rope(|diff|<=ROPE)']
+            pr = comparison['P_right(M2>M1)']
+            winner = comparison.get('Winner') or "—"
+            print(f"{m1} vs {m2}: P_left={pl:.3f}, P_rope={pe:.3f}, P_right={pr:.3f} | Winner: {winner}")
+
 
 def save_results(result: Dict[str, Any], output_path: str, models: list, analysis_type: str, metric: str) -> None:
     """Save results to JSON file."""
     os.makedirs(output_path, exist_ok=True)
 
     model_string = "_".join(models)
-    filename = f"friedman_{analysis_type}_{model_string}_{metric}.json"
+    filename = f"friedman_bayesian_{analysis_type}_{model_string}_{metric.jsonSafe() if hasattr(metric, 'jsonSafe') else metric}.json"
+    # Guard against odd metric names
+    filename = filename.replace(os.sep, "_")
+
     output_file = os.path.join(output_path, filename)
 
     with open(output_file, 'w') as f:

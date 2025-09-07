@@ -1,5 +1,5 @@
-import polars as pl
 import numpy as np
+import pandas as pd
 from typing import List
 from .base import FeatureExtractor
 
@@ -10,11 +10,11 @@ class AngleFeatureExtractor(FeatureExtractor):
     def __init__(self):
         super().__init__("angle_features")
 
-    def extract(self, landmarks_df: pl.DataFrame) -> pl.DataFrame:
+    def extract(self, landmarks_df: pd.DataFrame) -> pd.DataFrame:
         """Extract angle features from pose landmarks."""
         features = []
 
-        for row in landmarks_df.iter_rows(named=True):
+        for row in landmarks_df.to_dict(orient="records"):
             row_features = {}
 
             # Extract key joint angles
@@ -32,7 +32,7 @@ class AngleFeatureExtractor(FeatureExtractor):
 
             features.append(row_features)
 
-        return pl.DataFrame(features)
+        return pd.DataFrame(features)
 
     def get_feature_names(self) -> List[str]:
         return [
@@ -58,11 +58,11 @@ class AngleFeatureExtractor(FeatureExtractor):
         right_shoulder_x = row.get('RIGHT_SHOULDER_x', None)
 
         if all(coord is not None for coord in [left_shoulder_y, right_shoulder_y,
-                                            left_shoulder_x, right_shoulder_x]):
+                                               left_shoulder_x, right_shoulder_x]):
             dy = right_shoulder_y - left_shoulder_y
             dx = right_shoulder_x - left_shoulder_x
             if dx != 0:
-                return np.arctan(dy / dx) * 180 / np.pi
+                return np.degrees(np.arctan(dy / dx))
             else:
                 return np.nan  # Vertical line case
         return np.nan  # Missing landmarks
@@ -78,7 +78,7 @@ class AngleFeatureExtractor(FeatureExtractor):
             dy = right_hip_y - left_hip_y
             dx = right_hip_x - left_hip_x
             if dx != 0:
-                return np.arctan(dy / dx) * 180 / np.pi
+                return np.degrees(np.arctan(dy / dx))
         return 0.0
 
     def _calculate_SEWAngleABC_left(self, row) -> tuple[float, float, float]:
@@ -94,8 +94,8 @@ class AngleFeatureExtractor(FeatureExtractor):
 
         # Check if ALL required landmarks are detected (not None)
         if all(coord is not None for coord in [left_shoulder_x, left_shoulder_y,
-                                            left_elbow_x, left_elbow_y,
-                                            left_wrist_x, left_wrist_y]):
+                                               left_elbow_x, left_elbow_y,
+                                               left_wrist_x, left_wrist_y]):
             # Calculate distances
             # shoulder to elbow distance
             a = self._euclidean_distance(left_shoulder_x, left_shoulder_y, left_elbow_x, left_elbow_y)
@@ -108,7 +108,7 @@ class AngleFeatureExtractor(FeatureExtractor):
             if a > 0 and b > 0 and c > 0:
                 sewangle_B = self._safe_arccos((a**2 + b**2 - c**2) / (2 * a * b))
                 sewangle_A = self._safe_arccos((b**2 + c**2 - a**2) / (2 * b * c))
-                sewangle_C = 180 - sewangle_B - sewangle_A  # Convert to degrees if needed
+                sewangle_C = 180 - sewangle_B - sewangle_A  # NOTE: original logic (mixed units)
             else:
                 # Handle degenerate case where points are collinear
                 return np.nan, np.nan, np.nan
@@ -141,7 +141,7 @@ class AngleFeatureExtractor(FeatureExtractor):
             if a > 0 and b > 0 and c > 0:
                 sewangle_B = self._safe_arccos((a**2 + b**2 - c**2) / (2 * a * b))
                 sewangle_A = self._safe_arccos((b**2 + c**2 - a**2) / (2 * b * c))
-                sewangle_C = 180 - sewangle_B - sewangle_A  # Convert to degrees if needed
+                sewangle_C = 180 - sewangle_B - sewangle_A  # NOTE: original logic (mixed units)
             else:
                 # Handle degenerate case where points are collinear
                 return np.nan, np.nan, np.nan
@@ -191,7 +191,7 @@ class AngleFeatureExtractor(FeatureExtractor):
                 # Clamp to [-1, 1] to avoid numerical errors
                 cos_angle = max(-1, min(1, cos_angle))
                 # Convert to degrees
-                phi1 = np.arccos(cos_angle) * 180 / np.pi
+                phi1 = np.degrees(np.arccos(cos_angle))
                 return phi1
 
         return 0.0
@@ -234,7 +234,7 @@ class AngleFeatureExtractor(FeatureExtractor):
                 # Clamp to [-1, 1] to avoid numerical errors
                 cos_angle = max(-1, min(1, cos_angle))
                 # Convert to degrees
-                phi2 = np.arccos(cos_angle) * 180 / np.pi
+                phi2 = np.degrees(np.arccos(cos_angle))
                 return phi2
 
         return 0.0
@@ -277,7 +277,7 @@ class AngleFeatureExtractor(FeatureExtractor):
                 # Clamp to [-1, 1] to avoid numerical errors
                 cos_angle = max(-1, min(1, cos_angle))
                 # Convert to degrees
-                phi2_left = np.arccos(cos_angle) * 180 / np.pi
+                phi2_left = np.degrees(np.arccos(cos_angle))
                 return phi2_left
 
         return 0.0
@@ -321,7 +321,7 @@ class AngleFeatureExtractor(FeatureExtractor):
                 # Clamp to [-1, 1] to avoid numerical errors
                 cos_angle = max(-1, min(1, cos_angle))
                 # Convert to degrees
-                phi3 = np.arccos(cos_angle) * 180 / np.pi
+                phi3 = np.degrees(np.arccos(cos_angle))
                 return phi3
 
         return 0.0
@@ -365,21 +365,22 @@ class AngleFeatureExtractor(FeatureExtractor):
                 # Clamp to [-1, 1] to avoid numerical errors
                 cos_angle = max(-1, min(1, cos_angle))
                 # Convert to degrees
-                phi5 = np.arccos(cos_angle) * 180 / np.pi
+                phi5 = np.degrees(np.arccos(cos_angle))
                 return phi5
 
         return 0.0
+
 
 class DistanceFeatureExtractor(FeatureExtractor):
     """Extract distance-based features."""
     def __init__(self):
         super().__init__("distance_features")
 
-    def extract(self, landmarks_df: pl.DataFrame) -> pl.DataFrame:
+    def extract(self, landmarks_df: pd.DataFrame) -> pd.DataFrame:
         """Extract distance features from pose landmarks."""
         features = []
 
-        for row in landmarks_df.iter_rows(named=True):
+        for row in landmarks_df.to_dict(orient="records"):
             row_features = {}
 
             # Key distance measurements
@@ -402,7 +403,7 @@ class DistanceFeatureExtractor(FeatureExtractor):
 
             features.append(row_features)
 
-        return pl.DataFrame(features)
+        return pd.DataFrame(features)
 
     def get_feature_names(self) -> List[str]:
         return [
@@ -667,11 +668,11 @@ class SymmetryFeatureExtractor(FeatureExtractor):
     def __init__(self):
         super().__init__("symmetry_features")
 
-    def extract(self, landmarks_df: pl.DataFrame) -> pl.DataFrame:
+    def extract(self, landmarks_df: pd.DataFrame) -> pd.DataFrame:
         """Extract symmetry features from pose landmarks."""
         features = []
 
-        for row in landmarks_df.iter_rows(named=True):
+        for row in landmarks_df.to_dict(orient="records"):
             row_features = {}
 
             # Symmetry measurements
@@ -681,7 +682,7 @@ class SymmetryFeatureExtractor(FeatureExtractor):
 
             features.append(row_features)
 
-        return pl.DataFrame(features)
+        return pd.DataFrame(features)
 
     def get_feature_names(self) -> List[str]:
         return ['shoulder_symmetry', 'hip_symmetry', 'overall_body_symmetry']
@@ -719,11 +720,11 @@ class SpineAlignmentFeatureExtractor(FeatureExtractor):
     def __init__(self):
         super().__init__("spine_alignment_features")
 
-    def extract(self, landmarks_df: pl.DataFrame) -> pl.DataFrame:
+    def extract(self, landmarks_df: pd.DataFrame) -> pd.DataFrame:
         """Extract spine alignment features from pose landmarks."""
         features = []
 
-        for row in landmarks_df.iter_rows(named=True):
+        for row in landmarks_df.to_dict(orient="records"):
             row_features = {}
 
             # Calculate the Y-coordinates for the three spine points
@@ -744,7 +745,7 @@ class SpineAlignmentFeatureExtractor(FeatureExtractor):
 
             features.append(row_features)
 
-        return pl.DataFrame(features)
+        return pd.DataFrame(features)
 
     def get_feature_names(self) -> List[str]:
         return ['t_tl_diff_y', 'tl_l_diff_y', 't_l_diff_y']

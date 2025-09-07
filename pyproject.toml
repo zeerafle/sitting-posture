@@ -23,7 +23,12 @@ dependencies = [
     "xgboost>=3.0.2",
     "pyarrow>=21.0.0",
     "tensorflow>=2.20.0",
+    "baycomp>=1.0.3",
 ]
+
+[tool.pyright]
+reportAttributeAccessIssue = false
+reportGeneralTypeIssues = false
 
 [dependency-groups]
 dev = []

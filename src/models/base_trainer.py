@@ -14,7 +14,7 @@ class BaseTrainer(ABC):
         self.train_combined = train_combined
         self.use_loso       = use_loso
         # assume params_show returns a dict
-        self.params         = dvc.api.params_show()
+        self.params         = dvc.api.params_show(os.path.join(parent_dir, "params.yaml"))
         self.dvclive_dir    = os.path.join(parent_dir, "dvclive", model_name)
         self.models_dir     = os.path.join(parent_dir, "models",  model_name)
         self.views          = ["front","left","right"]
@@ -22,7 +22,7 @@ class BaseTrainer(ABC):
 
         os.makedirs(self.models_dir, exist_ok=True)
         logger.info(f"Initialized '{model_name}' trainer "
-                    f"(combined={train_combined}, loso={use_loso}, data_path_suffix={data_path_suffix})")
+            f"(combined={train_combined}, loso={use_loso}, data_path_suffix={data_path_suffix})")
 
     @abstractmethod
     def get_estimator(self):

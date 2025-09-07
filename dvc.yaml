@@ -26,88 +26,15 @@ stages:
     - data/data_with_features.csv:
         persist: true
 
-  prepare:
-    cmd: uv run python src/prepare.py
-    deps:
-    - data/data_with_features.csv
-    - src/prepare.py
-    outs:
-    - data/processed/front/train.csv:
-        persist: true
-    - data/processed/front/test.csv:
-        persist: true
-    - data/processed/left/train.csv:
-        persist: true
-    - data/processed/left/test.csv:
-        persist: true
-    - data/processed/right/train.csv:
-        persist: true
-    - data/processed/right/test.csv:
-        persist: true
-
   prepare_combined:
     cmd: uv run python src/prepare.py --combined
     deps:
     - data/data_with_features.csv
     - src/prepare.py
+    - src/data_preparation/saver.py
     outs:
-    - data/processed/combined/train.csv:
-        persist: true
-    - data/processed/combined/test.csv:
-        persist: true
-
-  prepare_loso:
-    cmd: uv run python src/prepare.py --loso
-    deps:
-    - data/data_with_features.csv
-    - src/prepare.py
-    outs:
-    - data/processed/front/data.csv:
-        persist: true
-    - data/processed/left/data.csv:
-        persist: true
-    - data/processed/right/data.csv:
-        persist: true
-
-  prepare_loso_combined:
-    cmd: uv run python src/prepare.py --loso --combined
-    deps:
-    - data/data_with_features.csv
-    - src/prepare.py
-    outs:
-    - data/processed/combined/data.csv:
-        persist: true
-
-  train:
-    foreach:
-    - adaboost
-    - nn
-    - xgb
-    do:
-      cmd: uv run python train.py
-      wdir: src/models/${item}
-      deps:
-      - train.py
-      - ../../../data/processed
-      - ../evaluate.py
-      - ../utils.py
-      - ../base_trainer.py
-      params:
-      - ../../../params.yaml:
-      outs:
-      - ../../../models/${item}/${item}_front.*
-      - ../../../models/${item}/${item}_left.*
-      - ../../../models/${item}/${item}_right.*
-      metrics:
-      - ../../../dvclive/${item}/front/metrics.json
-      - ../../../dvclive/${item}/front/htcv_results.json
-      - ../../../dvclive/${item}/front/cv_results.json
-      - ../../../dvclive/${item}/left/metrics.json
-      - ../../../dvclive/${item}/left/htcv_results.json
-      - ../../../dvclive/${item}/left/cv_results.json
-      - ../../../dvclive/${item}/right/metrics.json
-      - ../../../dvclive/${item}/right/htcv_results.json
-      - ../../../dvclive/${item}/right/cv_results.json
+    - data/processed/all_all_features/combined/train.csv
+    - data/processed/all_all_features/combined/test.csv
 
   train_combined:
     foreach:
@@ -115,50 +42,21 @@ stages:
     - nn
     - xgb
     do:
-      cmd: uv run python train.py --combined
-      wdir: src/models/${item}
+      cmd: uv run python src/models/${item}/train.py --combined --data-config
+        all_all_features
       deps:
-      - train.py
-      - ../../../data/processed/combined
-      - ../evaluate.py
-      - ../utils.py
-      - ../base_trainer.py
+      - src/models/${item}/train.py
+      - data/processed/all_all_features/combined
+      - src/models/evaluate.py
+      - src/models/base_trainer.py
       params:
-      - ../../../params.yaml:
+      - params.yaml:
       outs:
-      - ../../../models/${item}/${item}_combined.joblib
+      - models/${item}/${item}_combined_all_all_features.joblib
       metrics:
-      - ../../../dvclive/${item}/combined/metrics.json
-      - ../../../dvclive/${item}/combined/htcv_results.json
-      - ../../../dvclive/${item}/combined/cv_results.json
-
-  train_loso:
-    foreach:
-    - adaboost
-    - nn
-    - xgb
-    do:
-      cmd: uv run python train.py --loso
-      wdir: src/models/${item}
-      deps:
-      - train.py
-      - ../../../data/processed
-      - ../evaluate.py
-      - ../utils.py
-      - ../base_trainer.py
-      params:
-      - ../../../params.yaml:
-      outs:
-      - ../../../models/${item}/${item}_front_subject_*.joblib
-      - ../../../models/${item}/${item}_left_subject_*.joblib
-      - ../../../models/${item}/${item}_right_subject_*.joblib
-      metrics:
-      - ../../../dvclive/${item}/front_loso/metrics.json
-      - ../../../dvclive/${item}/left_loso/metrics.json
-      - ../../../dvclive/${item}/right_loso/metrics.json
-      - ../../../dvclive/${item}/front_loso/loso_metrics.json
-      - ../../../dvclive/${item}/left_loso/loso_metrics.json
-      - ../../../dvclive/${item}/right_loso/loso_metrics.json
+      - dvclive/${item}/combined/metrics.json
+      - dvclive/${item}/combined/htcv_results.json
+      - dvclive/${item}/combined/cv_results.json
 
   train_loso_combined:
     foreach:
@@ -166,21 +64,20 @@ stages:
     - nn
     - xgb
     do:
-      cmd: uv run python train.py --combined --loso
-      wdir: src/models/${item}
+      cmd: uv run python src/models/${item}/train.py --combined --loso
       deps:
-      - train.py
-      - ../../../data/processed/combined/data.csv
-      - ../evaluate.py
-      - ../utils.py
-      - ../base_trainer.py
+      - src/models/${item}/train.py
+      - data/processed/all_all_features/combined/data.csv
+      - src/models/evaluate.py
+      - src/models/utils.py
+      - src/models/base_trainer.py
       params:
-      - ../../../params.yaml:
+      - params.yaml:
       outs:
-      - ../../../models/${item}/${item}_combined_loso.joblib
+      - models/${item}/${item}_combined_loso.joblib
       metrics:
-      - ../../../dvclive/${item}/combined_loso/metrics.json
-      - ../../../dvclive/${item}/combined_loso/loso_metrics.json
+      - dvclive/${item}/combined_loso/metrics.json
+      - dvclive/${item}/combined_loso/loso_metrics.json
 
   train_cnn_loso:
     cmd: uv run python src/models/cnn/train_loso.py
@@ -196,22 +93,6 @@ stages:
     - dvclive/cnn/combined_loso/loso_metrics.json:
         cache: false
 
-  summarize:
-    cmd: uv run python src/model_comparison.py
-    deps:
-    - src/model_comparison.py
-    - dvclive/adaboost/front/metrics.json
-    - dvclive/adaboost/left/metrics.json
-    - dvclive/adaboost/right/metrics.json
-    - dvclive/nn/front/metrics.json
-    - dvclive/nn/left/metrics.json
-    - dvclive/nn/right/metrics.json
-    - dvclive/xgb/front/metrics.json
-    - dvclive/xgb/left/metrics.json
-    - dvclive/xgb/right/metrics.json
-    outs:
-    - dvclive/detailed_model_view_comparison.csv
-
   summarize_combined:
     cmd: uv run python src/model_comparison.py --combined
     deps:
@@ -221,22 +102,6 @@ stages:
     - dvclive/xgb/combined/metrics.json
     outs:
     - dvclive/detailed_model_view_combined_comparison.csv
-
-  visualize:
-    cmd: uv run python src/roc_visualization.py
-    deps:
-    - src/roc_visualization.py
-    - dvclive/adaboost/front/y_pred.csv
-    - dvclive/adaboost/left/y_pred.csv
-    - dvclive/adaboost/right/y_pred.csv
-    - dvclive/nn/front/y_pred.csv
-    - dvclive/nn/left/y_pred.csv
-    - dvclive/nn/right/y_pred.csv
-    - dvclive/xgb/front/y_pred.csv
-    - dvclive/xgb/left/y_pred.csv
-    - dvclive/xgb/right/y_pred.csv
-    outs:
-    - dvclive/plots/roc_curve_comparison.png
 
   visualize_combined:
     cmd: uv run python src/roc_visualization.py --combined
@@ -248,155 +113,87 @@ stages:
     outs:
     - dvclive/plots/roc_curve_combined_comparison.png
 
-  analyze_friedman:
-    cmd: uv run python src/analysis/friedman_test.py --models adaboost nn xgb
-      --metric accuracy
-    deps:
-    - src/analysis/friedman_test.py
-    - dvclive/adaboost/front/cv_results.json
-    - dvclive/adaboost/left/cv_results.json
-    - dvclive/adaboost/right/cv_results.json
-    - dvclive/nn/front/cv_results.json
-    - dvclive/nn/left/cv_results.json
-    - dvclive/nn/right/cv_results.json
-    - dvclive/xgb/front/cv_results.json
-    - dvclive/xgb/left/cv_results.json
-    - dvclive/xgb/right/cv_results.json
-    outs:
-    - dvclive/analysis/friedman_individual_adaboost_nn_xgb_accuracy.json
+  # Compact statistical analysis for combined view CV
+  analyze_stats_combined:
+    foreach: [accuracy, f1]
+    do:
+      cmd: uv run python src/analysis/statistical_test.py --models adaboost nn
+        xgb --metric ${item} --combined --force_pairwise --bayesian
+      deps:
+      - src/analysis/statistical_test.py
+      - src/analysis/statistical/
+      - dvclive/adaboost/combined/cv_results.json
+      - dvclive/nn/combined/cv_results.json
+      - dvclive/xgb/combined/cv_results.json
+      outs:
+      - dvclive/analysis/friedman_combined_adaboost_nn_xgb_${item}.json
 
-  analyze_friedman_combined:
-    cmd: uv run python src/analysis/friedman_test.py --models adaboost nn xgb
-      --metric accuracy --combined
-    deps:
-    - src/analysis/friedman_test.py
-    - dvclive/adaboost/combined/cv_results.json
-    - dvclive/nn/combined/cv_results.json
-    - dvclive/xgb/combined/cv_results.json
-    outs:
-    - dvclive/analysis/friedman_combined_adaboost_nn_xgb_accuracy.json
+  # Compact statistical analysis for LOSO (subjects) on combined views
+  analyze_stats_loso:
+    foreach: [accuracy, f1]
+    do:
+      cmd: uv run python src/analysis/statistical_test.py --models adaboost nn
+        xgb --metric ${item} --loso --force_pairwise --bayesian
+      deps:
+      - src/analysis/statistical_test.py
+      - src/analysis/statistical/
+      - dvclive/adaboost/combined_loso/loso_metrics.json
+      - dvclive/nn/combined_loso/loso_metrics.json
+      - dvclive/xgb/combined_loso/loso_metrics.json
+      outs:
+      # - dvclive/analysis/friedman_loso_adaboost_nn_xgb_${item}.json
+      - dvclive/analysis/friedman_bayesian_loso_adaboost_nn_xgb_${item}.json
 
-  analyze_friedman_f1:
-    cmd: uv run python src/analysis/friedman_test.py --models adaboost nn xgb
-      --metric f1
-    deps:
-    - src/analysis/friedman_test.py
-    - dvclive/adaboost/front/cv_results.json
-    - dvclive/adaboost/left/cv_results.json
-    - dvclive/adaboost/right/cv_results.json
-    - dvclive/nn/front/cv_results.json
-    - dvclive/nn/left/cv_results.json
-    - dvclive/nn/right/cv_results.json
-    - dvclive/xgb/front/cv_results.json
-    - dvclive/xgb/left/cv_results.json
-    - dvclive/xgb/right/cv_results.json
-    outs:
-    - dvclive/analysis/friedman_individual_adaboost_nn_xgb_f1.json
+  # Ablation: data modes (real, synthetic, all) — simpler foreach by metric
+  analyze_ablation_data_modes:
+    foreach: [accuracy, f1]
+    do:
+      cmd: uv run python src/analysis/statistical_test.py --models
+        real_keypoints_only synthetic_keypoints_only all_keypoints_only --metric
+        ${item} --ablation --force_pairwise --bayesian --force-real-test
+      deps:
+      - src/analysis/statistical_test.py
+      - src/analysis/statistical/
+      - dvclive/xgb/combined_full_real_keypoints_only_loso/loso_metrics.json
+      - dvclive/xgb/combined_full_synthetic_keypoints_only_loso/loso_metrics.json
+      - dvclive/xgb/combined_full_all_keypoints_only_loso/loso_metrics.json
+      outs:
+      - dvclive/analysis/friedman_ablation_real_keypoints_only_synthetic_keypoints_only_all_keypoints_only_${item}.json
 
-  analyze_friedman_f1_combined:
-    cmd: uv run python src/analysis/friedman_test.py --models adaboost nn xgb
-      --metric f1 --combined
-    deps:
-    - src/analysis/friedman_test.py
-    - dvclive/adaboost/combined/cv_results.json
-    - dvclive/nn/combined/cv_results.json
-    - dvclive/xgb/combined/cv_results.json
-    outs:
-    - dvclive/analysis/friedman_combined_adaboost_nn_xgb_f1.json
+  # Ablation: features (keypoints_only vs all_features) — simpler foreach by metric
+  analyze_ablation_features:
+    foreach: [accuracy, f1]
+    do:
+      cmd: uv run python src/analysis/statistical_test.py --models
+        all_keypoints_only all_all_features --metric ${item} --ablation
+        --force_pairwise --bayesian --force-real-test
+      deps:
+      - src/analysis/statistical_test.py
+      - src/analysis/statistical/
+      - dvclive/xgb/combined_full_all_keypoints_only_loso/loso_metrics.json
+      - dvclive/xgb/combined_full_all_all_features_loso/loso_metrics.json
+      outs:
+      - dvclive/analysis/friedman_ablation_all_keypoints_only_all_all_features_${item}.json
 
-  analyze_friedman_loso:
-    cmd: uv run python src/analysis/friedman_test.py --models adaboost nn xgb
-      --metric accuracy --loso
-    deps:
-    - src/analysis/friedman_test.py
-    - dvclive/adaboost/combined_loso/loso_metrics.json
-    - dvclive/nn/combined_loso/loso_metrics.json
-    - dvclive/xgb/combined_loso/loso_metrics.json
-    outs:
-    - dvclive/analysis/friedman_loso_adaboost_nn_xgb_accuracy.json
-
-  analyze_friedman_f1_loso:
-    cmd: uv run python src/analysis/friedman_test.py --models adaboost nn xgb
-      --metric f1 --loso
-    deps:
-    - src/analysis/friedman_test.py
-    - dvclive/adaboost/combined_loso/loso_metrics.json
-    - dvclive/nn/combined_loso/loso_metrics.json
-    - dvclive/xgb/combined_loso/loso_metrics.json
-    outs:
-    - dvclive/analysis/friedman_loso_adaboost_nn_xgb_f1.json
-
-  # Ablation study statistical analysis stages
-  analyze_friedman_ablation_data_modes:
-    cmd: uv run python src/analysis/friedman_test.py --models real_keypoints_only synthetic_keypoints_only all_keypoints_only --metric accuracy --ablation
-    deps:
-    - src/analysis/friedman_test.py
-    - src/analysis/statistical/
-    - dvclive/xgb/combined_full_real_keypoints_only_loso/loso_metrics.json
-    - dvclive/xgb/combined_full_synthetic_keypoints_only_loso/loso_metrics.json
-    - dvclive/xgb/combined_full_all_keypoints_only_loso/loso_metrics.json
-    outs:
-    - dvclive/analysis/friedman_ablation_real_keypoints_only_synthetic_keypoints_only_all_keypoints_only_accuracy.json
-
-  analyze_friedman_ablation_features:
-    cmd: uv run python src/analysis/friedman_test.py --models all_keypoints_only all_all_features --metric accuracy --ablation
-    deps:
-    - src/analysis/friedman_test.py
-    - src/analysis/statistical/
-    - dvclive/xgb/combined_full_all_keypoints_only_loso/loso_metrics.json
-    - dvclive/xgb/combined_full_all_all_features_loso/loso_metrics.json
-    outs:
-    - dvclive/analysis/friedman_ablation_all_keypoints_only_all_all_features_accuracy.json
-
-  analyze_friedman_ablation_full:
-    cmd: uv run python src/analysis/friedman_test.py --models real_keypoints_only real_all_features synthetic_keypoints_only synthetic_all_features all_keypoints_only all_all_features --metric accuracy --ablation
-    deps:
-    - src/analysis/friedman_test.py
-    - src/analysis/statistical/
-    - dvclive/xgb/combined_full_real_keypoints_only_loso/loso_metrics.json
-    - dvclive/xgb/combined_full_real_all_features_loso/loso_metrics.json
-    - dvclive/xgb/combined_full_synthetic_keypoints_only_loso/loso_metrics.json
-    - dvclive/xgb/combined_full_synthetic_all_features_loso/loso_metrics.json
-    - dvclive/xgb/combined_full_all_keypoints_only_loso/loso_metrics.json
-    - dvclive/xgb/combined_full_all_all_features_loso/loso_metrics.json
-    outs:
-    - dvclive/analysis/friedman_ablation_real_keypoints_only_real_all_features_synthetic_keypoints_only_synthetic_all_features_all_keypoints_only_all_all_features_accuracy.json
-
-  # F1 score versions of ablation analysis stages
-  analyze_friedman_ablation_data_modes_f1:
-    cmd: uv run python src/analysis/friedman_test.py --models real_keypoints_only synthetic_keypoints_only all_keypoints_only --metric f1 --ablation
-    deps:
-    - src/analysis/friedman_test.py
-    - src/analysis/statistical/
-    - dvclive/xgb/combined_full_real_keypoints_only_loso/loso_metrics.json
-    - dvclive/xgb/combined_full_synthetic_keypoints_only_loso/loso_metrics.json
-    - dvclive/xgb/combined_full_all_keypoints_only_loso/loso_metrics.json
-    outs:
-    - dvclive/analysis/friedman_ablation_real_keypoints_only_synthetic_keypoints_only_all_keypoints_only_f1.json
-
-  analyze_friedman_ablation_features_f1:
-    cmd: uv run python src/analysis/friedman_test.py --models all_keypoints_only all_all_features --metric f1 --ablation
-    deps:
-    - src/analysis/friedman_test.py
-    - src/analysis/statistical/
-    - dvclive/xgb/combined_full_all_keypoints_only_loso/loso_metrics.json
-    - dvclive/xgb/combined_full_all_all_features_loso/loso_metrics.json
-    outs:
-    - dvclive/analysis/friedman_ablation_all_keypoints_only_all_all_features_f1.json
-
-  analyze_friedman_ablation_full_f1:
-    cmd: uv run python src/analysis/friedman_test.py --models real_keypoints_only real_all_features synthetic_keypoints_only synthetic_all_features all_keypoints_only all_all_features --metric f1 --ablation
-    deps:
-    - src/analysis/friedman_test.py
-    - src/analysis/statistical/
-    - dvclive/xgb/combined_full_real_keypoints_only_loso/loso_metrics.json
-    - dvclive/xgb/combined_full_real_all_features_loso/loso_metrics.json
-    - dvclive/xgb/combined_full_synthetic_keypoints_only_loso/loso_metrics.json
-    - dvclive/xgb/combined_full_synthetic_all_features_loso/loso_metrics.json
-    - dvclive/xgb/combined_full_all_keypoints_only_loso/loso_metrics.json
-    - dvclive/xgb/combined_full_all_all_features_loso/loso_metrics.json
-    outs:
-    - dvclive/analysis/friedman_ablation_real_keypoints_only_real_all_features_synthetic_keypoints_only_synthetic_all_features_all_keypoints_only_all_all_features_f1.json
+  # Ablation: full set of configurations — simpler foreach by metric
+  analyze_ablation_full:
+    foreach: [accuracy, f1]
+    do:
+      cmd: uv run python src/analysis/statistical_test.py --models
+        real_keypoints_only real_all_features synthetic_keypoints_only
+        synthetic_all_features all_keypoints_only all_all_features --metric
+        ${item} --ablation --force_pairwise --bayesian --force-real-test
+      deps:
+      - src/analysis/statistical_test.py
+      - src/analysis/statistical/
+      - dvclive/xgb/combined_full_real_keypoints_only_loso/loso_metrics.json
+      - dvclive/xgb/combined_full_real_all_features_loso/loso_metrics.json
+      - dvclive/xgb/combined_full_synthetic_keypoints_only_loso/loso_metrics.json
+      - dvclive/xgb/combined_full_synthetic_all_features_loso/loso_metrics.json
+      - dvclive/xgb/combined_full_all_keypoints_only_loso/loso_metrics.json
+      - dvclive/xgb/combined_full_all_all_features_loso/loso_metrics.json
+      outs:
+      - dvclive/analysis/friedman_ablation_real_keypoints_only_real_all_features_synthetic_keypoints_only_synthetic_all_features_all_keypoints_only_all_all_features_${item}.json
 
   # Prepare data for the ablation study with matrix
   prepare_ablation_combined:
@@ -410,8 +207,7 @@ stages:
     - src/prepare.py
     - src/data_preparation/data_filter.py
     outs:
-    - data/processed/${item.data_mode}_${item.feature_mode}/combined_full/data.csv:
-        persist: true
+    - data/processed/${item.data_mode}_${item.feature_mode}/combined_full/data.csv
 
   # Train the ablation models with matrix
   train_ablation_combined:
@@ -430,8 +226,7 @@ stages:
     params:
     - params.yaml:
     outs:
-    - models/xgb/xgb_combined_full_${item.data_mode}_${item.feature_mode}.joblib:
-        persist: true
+    - models/xgb/xgb_combined_full_${item.data_mode}_${item.feature_mode}.joblib
     metrics:
     - dvclive/xgb/combined_full_${item.data_mode}_${item.feature_mode}_loso/loso_metrics.json:
         cache: false
@@ -439,7 +234,7 @@ stages:
   # Analyze ablation results
   analyze_ablation:
     vars:
-      - model: xgb
+    - model: xgb
     cmd: uv run python src/run_ablation.py --combined --model ${model}
     deps:
     - src/run_ablation.py
@@ -453,31 +248,3 @@ stages:
     - dvclive/analysis/ablation:
         persist: true
         cache: false
-
-plots:
-- dvclive/plots/roc_curve_comparison.png:
-    x_label: False Positive Rate
-    y_label: True Positive Rate
-    title: ROC Curve Comparison
-- dvclive/plots/roc_curve_combined_comparison.png:
-    x_label: False Positive Rate
-    y_label: True Positive Rate
-    title: ROC Curve Comparison - Combined Views
-- dvclive/analysis/ablation/ablation_accuracy_comparison.png:
-    x_label: Data Mode
-    y_label: Accuracy
-    title: Ablation Study - Accuracy Comparison
-params:
-- dvclive/xgb/combined_full_all_keypoints_only_loso/params.yaml
-- dvclive/xgb/combined_full_synthetic_keypoints_only_loso/params.yaml
-- dvclive/xgb/combined_full_all_all_features_loso/params.yaml
-- dvclive/xgb/combined_full_real_keypoints_only_loso/params.yaml
-- dvclive/xgb/combined_full_real_all_features_loso/params.yaml
-- dvclive/xgb/combined_full_synthetic_all_features_loso/params.yaml
-metrics:
-- dvclive/xgb/combined_full_all_keypoints_only_loso/metrics.json
-- dvclive/xgb/combined_full_synthetic_keypoints_only_loso/metrics.json
-- dvclive/xgb/combined_full_all_all_features_loso/metrics.json
-- dvclive/xgb/combined_full_real_keypoints_only_loso/metrics.json
-- dvclive/xgb/combined_full_real_all_features_loso/metrics.json
-- dvclive/xgb/combined_full_synthetic_all_features_loso/metrics.json

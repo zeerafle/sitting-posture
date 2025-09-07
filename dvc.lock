@@ -7,39 +7,59 @@ stages:
       hash: md5
       md5: d6ca8be1642022c83d9d6679bcfc66f7
       size: 2936388
+      isexec: true
     - path: src/feature_extraction/
       hash: md5
-      md5: 4135fef41135fef5e58964485ee26f70.dir
-      size: 81508
+      md5: 0b506b32fbfb620e81dd2e0e6958f1b4.dir
+      size: 85447
       nfiles: 8
     - path: src/featurize.py
       hash: md5
-      md5: efaf05d815957f3136a97ff9f90f38dc
-      size: 3855
+      md5: 178f93ffdfa0d91a59eb5b00418f16db
+      size: 7788
       isexec: true
     outs:
     - path: data/data_with_features.csv
       hash: md5
-      md5: 3139a3f7bfbb61a033166318af7f27b6
-      size: 7115533
+      md5: e5f4a47ed665f32bdd29e3a52a99964e
+      size: 7114898
   prepare:
     cmd: uv run python src/prepare.py
     deps:
     - path: data/data_with_features.csv
       hash: md5
-      md5: f098b884313b72a5cdd24c19707ea43c
-      size: 7069683
+      md5: e5f4a47ed665f32bdd29e3a52a99964e
+      size: 7114898
     - path: src/prepare.py
       hash: md5
-      md5: 2e386586d3caadc2d5f1b4193160b6ff
-      size: 5852
+      md5: 8c8fcf799bb1852871cb8a7b9e83293b
+      size: 14109
       isexec: true
     outs:
-    - path: data/processed
+    - path: data/processed/front/test.csv
       hash: md5
-      md5: f56d8cb8bbcb529974b78e40ece1ca82.dir
-      size: 9202299
-      nfiles: 9
+      md5: 1e3eb9bd8714850c670dfaa6b5aa0f8e
+      size: 600015
+    - path: data/processed/front/train.csv
+      hash: md5
+      md5: f02ea1b560cd37ef6a8b01ee6ffde054
+      size: 2395549
+    - path: data/processed/left/test.csv
+      hash: md5
+      md5: 379090115e714555c7aa1e8eea1a38c2
+      size: 622512
+    - path: data/processed/left/train.csv
+      hash: md5
+      md5: 0a57f41a988a53cdd44fdf09a4cd5152
+      size: 2481988
+    - path: data/processed/right/test.csv
+      hash: md5
+      md5: 9d61371478767b2c95ab8abda89ac68a
+      size: 620726
+    - path: data/processed/right/train.csv
+      hash: md5
+      md5: a58f3036ba91138b52fd074bdeb13fd9
+      size: 2476760
   train@nn:
     cmd: uv run python train.py
     deps:
@@ -713,19 +733,28 @@ stages:
     deps:
     - path: data/data_with_features.csv
       hash: md5
-      md5: 3139a3f7bfbb61a033166318af7f27b6
-      size: 7115533
+      md5: e5f4a47ed665f32bdd29e3a52a99964e
+      size: 7114898
+      isexec: true
+    - path: src/data_preparation/saver.py
+      hash: md5
+      md5: 8dd8a697a72186ab9c504d2983a696e3
+      size: 922
+      isexec: true
     - path: src/prepare.py
       hash: md5
-      md5: 247639d31619c46a0eab08ff703238ef
-      size: 19298
+      md5: c41c02ce3ce7f71f82edd1f2cdfd5621
+      size: 6280
       isexec: true
     outs:
-    - path: data/processed/combined
+    - path: data/processed/all_all_features/combined/test.csv
       hash: md5
-      md5: 48a8724e2d9bff1bfca917b4c7d5f78e.dir
-      size: 9343773
-      nfiles: 6
+      md5: 24253d984e119b9ccda508f3dbbfcbf8
+      size: 1852810
+    - path: data/processed/all_all_features/combined/train.csv
+      hash: md5
+      md5: ada259afbaff1040670cb22b9144cf05
+      size: 7404171
   train_combined@nn:
     cmd: uv run python train.py --combined
     deps:
@@ -1084,12 +1113,12 @@ stages:
     deps:
     - path: data/data_with_features.csv
       hash: md5
-      md5: 3139a3f7bfbb61a033166318af7f27b6
-      size: 7115533
+      md5: e5f4a47ed665f32bdd29e3a52a99964e
+      size: 7114898
     - path: src/prepare.py
       hash: md5
-      md5: f2ce72a6dd43658b8aaf806260bc5e81
-      size: 2422
+      md5: 8c8fcf799bb1852871cb8a7b9e83293b
+      size: 14109
       isexec: true
     outs:
     - path: data/processed/combined/data.csv
@@ -2224,3 +2253,72 @@ stages:
       hash: md5
       md5: 1fb62cbc82ac3c390d7dc52d26756158
       size: 2744
+  analyze_stats_loso@accuracy:
+    cmd: uv run python src/analysis/statistical_test.py --models adaboost nn xgb
+      --metric accuracy --loso --force_pairwise --bayesian
+    deps:
+    - path: dvclive/adaboost/combined_loso/loso_metrics.json
+      hash: md5
+      md5: bafe2ea1b6ee62877d001abf9cd507d4
+      size: 689
+      isexec: true
+    - path: dvclive/nn/combined_loso/loso_metrics.json
+      hash: md5
+      md5: bea28f458d0cfd6af5c64da9df860580
+      size: 684
+      isexec: true
+    - path: dvclive/xgb/combined_loso/loso_metrics.json
+      hash: md5
+      md5: c6ec3b1bbd78b65d8b674ac06721b703
+      size: 690
+      isexec: true
+    - path: src/analysis/statistical/
+      hash: md5
+      md5: dc15656e91675bb2853cad9c9a1c8582.dir
+      size: 32610
+      nfiles: 8
+    - path: src/analysis/statistical_test.py
+      hash: md5
+      md5: 19d262308a42293e24908d4096b416f1
+      size: 5032
+      isexec: true
+    outs:
+    - path: 
+        dvclive/analysis/friedman_bayesian_loso_adaboost_nn_xgb_accuracy.json
+      hash: md5
+      md5: f6d8014ddaa6042a10221ff7354134fc
+      size: 2925
+  analyze_stats_loso@f1:
+    cmd: uv run python src/analysis/statistical_test.py --models adaboost nn xgb
+      --metric f1 --loso --force_pairwise --bayesian
+    deps:
+    - path: dvclive/adaboost/combined_loso/loso_metrics.json
+      hash: md5
+      md5: bafe2ea1b6ee62877d001abf9cd507d4
+      size: 689
+      isexec: true
+    - path: dvclive/nn/combined_loso/loso_metrics.json
+      hash: md5
+      md5: bea28f458d0cfd6af5c64da9df860580
+      size: 684
+      isexec: true
+    - path: dvclive/xgb/combined_loso/loso_metrics.json
+      hash: md5
+      md5: c6ec3b1bbd78b65d8b674ac06721b703
+      size: 690
+      isexec: true
+    - path: src/analysis/statistical/
+      hash: md5
+      md5: dc15656e91675bb2853cad9c9a1c8582.dir
+      size: 32610
+      nfiles: 8
+    - path: src/analysis/statistical_test.py
+      hash: md5
+      md5: 19d262308a42293e24908d4096b416f1
+      size: 5032
+      isexec: true
+    outs:
+    - path: dvclive/analysis/friedman_bayesian_loso_adaboost_nn_xgb_f1.json
+      hash: md5
+      md5: e27e5acfb22cbe324b326923a084721e
+      size: 2913

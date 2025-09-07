@@ -3,7 +3,7 @@ import json
 from codecarbon import OfflineEmissionsTracker
 from dvclive import Live
 from .evaluate import evaluate
-from .utils    import load_data, bayes_search, extract_subject_ids
+from .utils    import load_data, bayes_search, extract_subject_ids, NumpyEncoder
 
 def run_standard(trainer):
     """
@@ -35,7 +35,7 @@ def _train_one_view(
     """
     Hyperparam search → final fit → emissions‐tracked train & inference → evaluate → save.
     """
-    params        = trainer.params
+    params = trainer.params
 
     # Adjust the dvclive path based on data_path_suffix
     if trainer.data_path_suffix:
@@ -56,7 +56,7 @@ def _train_one_view(
         )
         # persist cv_results …
         with open(os.path.join(dvclive_path,"htcv_results.json"),"w") as f:
-            json.dump(cv_results, f, indent=2)
+            json.dump(cv_results, f, indent=2, cls=NumpyEncoder)
 
         # 2) final fit w/ emissions
         model = trainer.get_estimator()
@@ -82,7 +82,7 @@ def _train_one_view(
             groups_test=groups_test
         )
         with open(os.path.join(dvclive_path,"cv_results.json"),"w") as f:
-            json.dump(metrics, f, indent=2)
+            json.dump(metrics, f, indent=2, cls=NumpyEncoder)
 
     # 5) save final model with appropriate name
     if trainer.data_path_suffix:
