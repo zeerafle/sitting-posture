@@ -2332,3 +2332,59 @@ stages:
       hash: md5
       md5: 1ee33d95b35e6347664e46091aa8369e
       size: 3552
+  prepare_standard_split:
+    cmd: uv run python src/prepare_standard.py
+    deps:
+    - path: data/data_with_features.csv
+      hash: md5
+      md5: e5f4a47ed665f32bdd29e3a52a99964e
+      size: 7114898
+      isexec: true
+    - path: src/data_preparation/
+      hash: md5
+      md5: 2c2befcdf4893154db3bec937a2374aa.dir
+      size: 26426
+      nfiles: 16
+    - path: src/prepare_standard.py
+      hash: md5
+      md5: 38cde66b36d0c28b9f362b142058a3cc
+      size: 5586
+    outs:
+    - path: data/processed/standard_split/preprocessors.joblib
+      hash: md5
+      md5: c5f8410f0c8d43f7879101bb83183086
+      size: 5615
+    - path: data/processed/standard_split/test.csv
+      hash: md5
+      md5: e0fdd11e27204427a4febd008ec7f63d
+      size: 1881614
+    - path: data/processed/standard_split/train.csv
+      hash: md5
+      md5: cbcc55068df17014eaabdb0fc8581b8f
+      size: 7338355
+  prepare_loso:
+    cmd: uv run python src/prepare_loso.py
+    deps:
+    - path: data/data_with_features.csv
+      hash: md5
+      md5: e5f4a47ed665f32bdd29e3a52a99964e
+      size: 7114898
+      isexec: true
+    - path: src/data_preparation/
+      hash: md5
+      md5: 2c2befcdf4893154db3bec937a2374aa.dir
+      size: 26426
+      nfiles: 16
+    - path: src/prepare_loso.py
+      hash: md5
+      md5: 0583635f58bf59d7130287c153f4269e
+      size: 5523
+    outs:
+    - path: data/processed/loso/data.csv
+      hash: md5
+      md5: 5765d651ac37804795180ad1d5899fba
+      size: 9804945
+    - path: data/processed/loso/preprocessors.joblib
+      hash: md5
+      md5: 7ccd0e5fd71b7bb06a726cb13c178b97
+      size: 5615

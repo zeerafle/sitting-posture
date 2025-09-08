@@ -1,10 +1,5 @@
 stages:
-    # download:
-    #   cmd: kaggle datasets download -d zeerafle/sitting-posture -p data/original --unzip
-    #   outs:
-    #   - data/original:
-    #       persist: true
-    #       cache: false
+  # Extract keypoints from images (unchanged)
   extract_keypoints:
     cmd: uv run python src/extract_keypoints.py
     deps:
@@ -16,6 +11,7 @@ stages:
     - data/poses_images_out:
         persist: true
 
+  # Extract features from keypoints (unchanged)
   featurize:
     cmd: uv run python src/featurize.py
     deps:
@@ -26,252 +22,230 @@ stages:
     - data/data_with_features.csv:
         persist: true
 
-  prepare_combined:
-    cmd: uv run python src/prepare.py --combined
+  # Prepare data for standard train-test split (combined data only)
+  prepare_standard_split:
+    cmd: uv run python src/prepare_standard.py
     deps:
     - data/data_with_features.csv
-    - src/prepare.py
-    - src/data_preparation/saver.py
+    - src/prepare_standard.py
+    - src/data_preparation/
     outs:
-    - data/processed/all_all_features/combined/train.csv
-    - data/processed/all_all_features/combined/test.csv
+    - data/processed/standard_split/train.csv
+    - data/processed/standard_split/test.csv
+    - data/processed/standard_split/preprocessors.joblib
 
-  train_combined:
+  # Prepare data for LOSO (grouped 5-fold CV)
+  prepare_loso:
+    cmd: uv run python src/prepare_loso.py
+    deps:
+    - data/data_with_features.csv
+    - src/prepare_loso.py
+    - src/data_preparation/
+    outs:
+    - data/processed/loso/data.csv
+    - data/processed/loso/preprocessors.joblib
+
+  # Train models with standard train-test split (including hyperparameter tuning)
+  train_standard_split:
     foreach:
     - adaboost
     - nn
     - xgb
+    - cnn
     do:
-      cmd: uv run python src/models/${item}/train.py --combined --data-config
-        all_all_features
+      cmd: uv run python src/models/${item}/train_standard.py
       deps:
-      - src/models/${item}/train.py
-      - data/processed/all_all_features/combined
-      - src/models/evaluate.py
+      - src/models/${item}/train_standard.py
       - src/models/base_trainer.py
-      params:
-      - params.yaml:
-      outs:
-      - models/${item}/${item}_combined_all_all_features.joblib
-      metrics:
-      - dvclive/${item}/combined/metrics.json
-      - dvclive/${item}/combined/htcv_results.json
-      - dvclive/${item}/combined/cv_results.json
-
-  train_loso_combined:
-    foreach:
-    - adaboost
-    - nn
-    - xgb
-    do:
-      cmd: uv run python src/models/${item}/train.py --combined --loso
-        --data-config all_all_features
-      deps:
-      - src/models/${item}/train.py
-      - data/processed/all_all_features/combined/data.csv
+      - src/models/standard_workflow.py
       - src/models/evaluate.py
       - src/models/utils.py
-      - src/models/base_trainer.py
+      - data/processed/standard_split/
       params:
-      - params.yaml:
+      - params.yaml:${item}
+      - params.yaml:random_state
+      - params.yaml:n_iter
+      - params.yaml:cv
+      - params.yaml:scoring
       outs:
-      - models/${item}/${item}_combined_all_all_features_loso.joblib
+      - models/${item}/${item}_standard.joblib
       metrics:
-      - dvclive/${item}/combined_loso/metrics.json:
-          persist: true
-      - dvclive/${item}/combined_loso/loso_metrics.json:
-          persist: true
+      - dvclive/${item}/standard/metrics.json
+      - dvclive/${item}/standard/hyperparameter_results.json
+      - dvclive/${item}/standard/test_predictions.csv
 
-  train_cnn_loso:
-    cmd: uv run python src/models/cnn/train_loso.py
+  # Train models with LOSO (grouped 5-fold CV by participant)
+  train_loso:
+    foreach:
+    - adaboost
+    - nn
+    - xgb
+    - cnn
+    do:
+      cmd: uv run python src/models/${item}/train_loso.py
+      deps:
+      - src/models/${item}/train_loso.py
+      - src/models/base_trainer.py
+      - src/models/loso_workflow.py
+      - src/models/evaluate.py
+      - src/models/utils.py
+      - data/processed/loso/
+      params:
+      - params.yaml:${item}
+      - params.yaml:random_state
+      - params.yaml:cv_folds
+      outs:
+      - models/${item}/${item}_loso.joblib
+      metrics:
+      - dvclive/${item}/loso/fold_metrics.json
+      - dvclive/${item}/loso/aggregated_metrics.json
+
+  # Statistical analysis of LOSO results to determine best model
+  statistical_analysis_loso:
+    foreach: [accuracy, f1]
+    do:
+      cmd: uv run python src/analysis/statistical_analysis.py --models adaboost nn xgb cnn --metric ${item} --analysis-type loso --output-dir dvclive/analysis/loso
+      deps:
+      - src/analysis/statistical_analysis.py
+      - src/analysis/statistical/
+      - dvclive/adaboost/loso/fold_metrics.json
+      - dvclive/nn/loso/fold_metrics.json
+      - dvclive/xgb/loso/fold_metrics.json
+      - dvclive/cnn/loso/fold_metrics.json
+      outs:
+      - dvclive/analysis/loso/statistical_results_${item}.json
+      - dvclive/analysis/loso/critical_difference_diagram_${item}.png
+      - dvclive/analysis/loso/model_rankings_${item}.csv
+
+  # Determine best model from statistical analysis
+  select_best_model:
+    cmd: uv run python src/analysis/select_best_model.py --metric accuracy --analysis-dir dvclive/analysis/loso
     deps:
-    - src/models/cnn/train_loso.py
-    - /teamspace/studios/01-data-download-kaggle/.cache/kagglehub/datasets/zeerafle/sitting-posture/versions/6
-    - data/data.csv
+    - src/analysis/select_best_model.py
+    - dvclive/analysis/loso/statistical_results_accuracy.json
+    - dvclive/analysis/loso/model_rankings_accuracy.csv
     outs:
-    - models/cnn/cnn_combined_loso.keras
-    metrics:
-    - dvclive/cnn/combined_loso/metrics.json:
-        cache: false
-    - dvclive/cnn/combined_loso/loso_metrics.json:
-        cache: false
+    - dvclive/analysis/best_model.json
 
-  summarize_combined:
-    cmd: uv run python src/model_comparison.py --combined
-    deps:
-    - src/model_comparison.py
-    - dvclive/adaboost/combined/metrics.json
-    - dvclive/nn/combined/metrics.json
-    - dvclive/xgb/combined/metrics.json
-    outs:
-    - dvclive/detailed_model_view_combined_comparison.csv
-
-  visualize_combined:
-    cmd: uv run python src/roc_visualization.py --combined
-    deps:
-    - src/roc_visualization.py
-    - dvclive/adaboost/combined/y_pred.csv
-    - dvclive/nn/combined/y_pred.csv
-    - dvclive/xgb/combined/y_pred.csv
-    outs:
-    - dvclive/plots/roc_curve_combined_comparison.png
-
-  # Compact statistical analysis for combined view CV
-  analyze_stats_combined:
-    foreach: [accuracy, f1]
-    do:
-      cmd: uv run python src/analysis/statistical_test.py --models adaboost nn
-        xgb --metric ${item} --combined --force_pairwise --bayesian --posthoc
-        nemenyi --cd_diagram
-      deps:
-      - src/analysis/statistical_test.py
-      - src/analysis/statistical/
-      - dvclive/adaboost/combined/cv_results.json
-      - dvclive/nn/combined/cv_results.json
-      - dvclive/xgb/combined/cv_results.json
-      outs:
-      - dvclive/analysis/friedman_bayesian_nemenyi_combined_adaboost_nn_xgb_${item}.json
-      - dvclive/analysis/cd_diagram_combined_adaboost_nn_xgb_${item}.png
-
-  # Compact statistical analysis for LOSO (subjects) on combined views
-  analyze_stats_loso:
-    foreach: [accuracy, f1]
-    do:
-      cmd: uv run python src/analysis/statistical_test.py --models adaboost nn
-        xgb --metric ${item} --loso --force_pairwise --bayesian --posthoc
-        nemenyi --cd_diagram
-      deps:
-      - src/analysis/statistical_test.py
-      - src/analysis/statistical/
-      - dvclive/adaboost/combined_loso/loso_metrics.json
-      - dvclive/nn/combined_loso/loso_metrics.json
-      - dvclive/xgb/combined_loso/loso_metrics.json
-      outs:
-      - dvclive/analysis/friedman_bayesian_loso_adaboost_nn_xgb_${item}.json
-      - dvclive/analysis/cd_diagram_loso_adaboost_nn_xgb_${item}.png
-
-  # Ablation: data modes (real, synthetic, all) — simpler foreach by metric
-  analyze_ablation_data_modes:
-    foreach: [accuracy, f1]
-    do:
-      cmd: uv run python src/analysis/statistical_test.py --models
-        real_keypoints_only synthetic_keypoints_only all_keypoints_only --metric
-        ${item} --ablation --force_pairwise --bayesian --posthoc nemenyi
-        --cd_diagram --force-real-test
-      deps:
-      - src/analysis/statistical_test.py
-      - src/analysis/statistical/
-      - dvclive/xgb/combined_full_real_keypoints_only_loso/loso_metrics.json
-      - dvclive/xgb/combined_full_synthetic_keypoints_only_loso/loso_metrics.json
-      - dvclive/xgb/combined_full_all_keypoints_only_loso/loso_metrics.json
-      outs:
-      - dvclive/analysis/friedman_bayesian_ablation_real_keypoints_only_synthetic_keypoints_only_all_keypoints_only_${item}.json
-      - dvclive/analysis/cd_diagram_ablation_real_keypoints_only_synthetic_keypoints_only_all_keypoints_only_${item}.png
-
-  # Ablation: features (keypoints_only vs all_features) — simpler foreach by metric
-  analyze_ablation_features:
-    foreach: [accuracy, f1]
-    do:
-      cmd: uv run python src/analysis/statistical_test.py --models
-        all_keypoints_only all_all_features --metric ${item} --ablation
-        --force_pairwise --bayesian --posthoc nemenyi --cd_diagram
-        --force-real-test
-      deps:
-      - src/analysis/statistical_test.py
-      - src/analysis/statistical/
-      - dvclive/xgb/combined_full_all_keypoints_only_loso/loso_metrics.json
-      - dvclive/xgb/combined_full_all_all_features_loso/loso_metrics.json
-      outs:
-      - dvclive/analysis/friedman_bayesian_ablation_all_keypoints_only_all_all_features_${item}.json
-      - dvclive/analysis/cd_diagram_ablation_all_keypoints_only_all_all_features_${item}.png
-
-  # Ablation: full set of configurations — simpler foreach by metric
-  analyze_ablation_full:
-    foreach: [accuracy, f1]
-    do:
-      cmd: uv run python src/analysis/statistical_test.py --models
-        real_keypoints_only real_all_features synthetic_keypoints_only
-        synthetic_all_features all_keypoints_only all_all_features --metric
-        ${item} --ablation --force_pairwise --bayesian --posthoc nemenyi
-        --cd_diagram --force-real-test
-      deps:
-      - src/analysis/statistical_test.py
-      - src/analysis/statistical/
-      - dvclive/xgb/combined_full_real_keypoints_only_loso/loso_metrics.json
-      - dvclive/xgb/combined_full_real_all_features_loso/loso_metrics.json
-      - dvclive/xgb/combined_full_synthetic_keypoints_only_loso/loso_metrics.json
-      - dvclive/xgb/combined_full_synthetic_all_features_loso/loso_metrics.json
-      - dvclive/xgb/combined_full_all_keypoints_only_loso/loso_metrics.json
-      - dvclive/xgb/combined_full_all_all_features_loso/loso_metrics.json
-      outs:
-      - dvclive/analysis/friedman_bayesian_ablation_real_keypoints_only_real_all_features_synthetic_keypoints_only_synthetic_all_features_all_keypoints_only_all_all_features_${item}.json
-      - dvclive/analysis/cd_diagram_ablation_real_keypoints_only_real_all_features_synthetic_keypoints_only_synthetic_all_features_all_keypoints_only_all_all_features_${item}.png
-
-  # Prepare data for the ablation study with matrix
-  prepare_ablation_combined:
+  # Prepare data for ablation experiments
+  prepare_ablation:
     matrix:
       data_mode: [real, synthetic, all]
       feature_mode: [keypoints_only, all_features]
-    cmd: uv run python src/prepare.py --loso --combined --data-mode
-      ${item.data_mode} --feature-mode ${item.feature_mode}
+    cmd: uv run python src/prepare_ablation.py --data-mode ${item.data_mode} --feature-mode ${item.feature_mode}
     deps:
     - data/data_with_features.csv
-    - src/prepare.py
-    - src/data_preparation/data_filter.py
+    - src/prepare_ablation.py
+    - src/data_preparation/
     outs:
-    - data/processed/${item.data_mode}_${item.feature_mode}/combined/data.csv
+    - data/processed/ablation/${item.data_mode}_${item.feature_mode}/data.csv
+    - data/processed/ablation/${item.data_mode}_${item.feature_mode}/preprocessors.joblib
 
-  # Train the ablation models with matrix
-  train_ablation_combined:
+  # Train ablation models using best model (grouped 5-fold CV)
+  train_ablation:
     matrix:
       data_mode: [real, synthetic, all]
       feature_mode: [keypoints_only, all_features]
-    cmd: uv run python src/models/xgb/train.py --loso --combined --data-config
-      ${item.data_mode}_${item.feature_mode}
+    cmd: uv run python src/models/train_ablation.py --data-mode ${item.data_mode} --feature-mode ${item.feature_mode} --best-model-config dvclive/analysis/best_model.json
     deps:
-    - src/models/xgb/train.py
-    - data/processed/${item.data_mode}_${item.feature_mode}/combined/data.csv
+    - src/models/train_ablation.py
     - src/models/base_trainer.py
     - src/models/loso_workflow.py
+    - src/models/evaluate.py
     - src/models/utils.py
-    - src/models/training_workflow.py
+    - data/processed/ablation/${item.data_mode}_${item.feature_mode}/
+    - dvclive/analysis/best_model.json
     params:
-    - params.yaml:
+    - params.yaml:random_state
+    - params.yaml:cv_folds
     outs:
-    - models/xgb/xgb_combined_${item.data_mode}_${item.feature_mode}_loso.joblib
+    - models/ablation/best_model_${item.data_mode}_${item.feature_mode}.joblib
     metrics:
-    - dvclive/xgb/combined_${item.data_mode}_${item.feature_mode}_loso/loso_metrics.json:
-        cache: false
+    - dvclive/ablation/${item.data_mode}_${item.feature_mode}/fold_metrics.json
+    - dvclive/ablation/${item.data_mode}_${item.feature_mode}/aggregated_metrics.json
 
-  # Analyze ablation results
-  analyze_ablation:
-    vars:
-    - model: xgb
-    cmd: uv run python src/run_ablation.py --combined --model ${model}
+  # Statistical analysis of ablation experiment results
+  statistical_analysis_ablation_data_modes:
+    foreach: [accuracy, f1]
+    do:
+      cmd: uv run python src/analysis/statistical_analysis.py --models real_keypoints_only synthetic_keypoints_only all_keypoints_only --metric ${item} --analysis-type ablation --experiment-type data_modes --output-dir dvclive/analysis/ablation/data_modes
+      deps:
+      - src/analysis/statistical_analysis.py
+      - src/analysis/statistical/
+      - dvclive/ablation/real_keypoints_only/fold_metrics.json
+      - dvclive/ablation/synthetic_keypoints_only/fold_metrics.json
+      - dvclive/ablation/all_keypoints_only/fold_metrics.json
+      outs:
+      - dvclive/analysis/ablation/data_modes/statistical_results_${item}.json
+      - dvclive/analysis/ablation/data_modes/critical_difference_diagram_${item}.png
+      - dvclive/analysis/ablation/data_modes/model_rankings_${item}.csv
+
+  statistical_analysis_ablation_feature_modes:
+    foreach: [accuracy, f1]
+    do:
+      cmd: uv run python src/analysis/statistical_analysis.py --models all_keypoints_only all_all_features --metric ${item} --analysis-type ablation --experiment-type feature_modes --output-dir dvclive/analysis/ablation/feature_modes
+      deps:
+      - src/analysis/statistical_analysis.py
+      - src/analysis/statistical/
+      - dvclive/ablation/all_keypoints_only/fold_metrics.json
+      - dvclive/ablation/all_all_features/fold_metrics.json
+      outs:
+      - dvclive/analysis/ablation/feature_modes/statistical_results_${item}.json
+      - dvclive/analysis/ablation/feature_modes/critical_difference_diagram_${item}.png
+      - dvclive/analysis/ablation/feature_modes/model_rankings_${item}.csv
+
+  statistical_analysis_ablation_full:
+    foreach: [accuracy, f1]
+    do:
+      cmd: uv run python src/analysis/statistical_analysis.py --models real_keypoints_only real_all_features synthetic_keypoints_only synthetic_all_features all_keypoints_only all_all_features --metric ${item} --analysis-type ablation --experiment-type full --output-dir dvclive/analysis/ablation/full
+      deps:
+      - src/analysis/statistical_analysis.py
+      - src/analysis/statistical/
+      - dvclive/ablation/real_keypoints_only/fold_metrics.json
+      - dvclive/ablation/real_all_features/fold_metrics.json
+      - dvclive/ablation/synthetic_keypoints_only/fold_metrics.json
+      - dvclive/ablation/synthetic_all_features/fold_metrics.json
+      - dvclive/ablation/all_keypoints_only/fold_metrics.json
+      - dvclive/ablation/all_all_features/fold_metrics.json
+      outs:
+      - dvclive/analysis/ablation/full/statistical_results_${item}.json
+      - dvclive/analysis/ablation/full/critical_difference_diagram_${item}.png
+      - dvclive/analysis/ablation/full/model_rankings_${item}.csv
+
+  # Generate comprehensive analysis report
+  generate_analysis_report:
+    cmd: uv run python src/analysis/generate_report.py --output-dir dvclive/analysis/final_report
     deps:
-    - src/run_ablation.py
-    - dvclive/${model}/combined_full_real_keypoints_only_loso/loso_metrics.json
-    - dvclive/${model}/combined_full_real_all_features_loso/loso_metrics.json
-    - dvclive/${model}/combined_full_synthetic_keypoints_only_loso/loso_metrics.json
-    - dvclive/${model}/combined_full_synthetic_all_features_loso/loso_metrics.json
-    - dvclive/${model}/combined_full_all_keypoints_only_loso/loso_metrics.json
-    - dvclive/${model}/combined_full_all_all_features_loso/loso_metrics.json
+    - src/analysis/generate_report.py
+    - dvclive/analysis/loso/
+    - dvclive/analysis/ablation/
+    - dvclive/analysis/best_model.json
     outs:
-    - dvclive/analysis/ablation:
-        persist: true
-        cache: false
+    - dvclive/analysis/final_report/comprehensive_analysis_report.html
+    - dvclive/analysis/final_report/summary_statistics.csv
+
 params:
-- dvclive/xgb/combined_loso/params.yaml
-- dvclive/nn/combined_loso/params.yaml
-- dvclive/adaboost/combined_loso/params.yaml
-- dvclive/nn/combined_all_all_features_loso/params.yaml
-- dvclive/adaboost/combined_all_all_features_loso/params.yaml
-- dvclive/xgb/combined_real_keypoints_only_loso/params.yaml
-- dvclive/xgb/combined_all_all_features_loso/params.yaml
+- params.yaml:random_state
+- params.yaml:n_iter
+- params.yaml:cv
+- params.yaml:cv_folds
+- params.yaml:scoring
+- params.yaml:adaboost
+- params.yaml:nn
+- params.yaml:xgb
+
 metrics:
-- dvclive/xgb/combined_loso/metrics.json
-- dvclive/nn/combined_loso/metrics.json
-- dvclive/nn/combined_all_all_features_loso/metrics.json
-- dvclive/adaboost/combined_all_all_features_loso/metrics.json
-- dvclive/xgb/combined_real_keypoints_only_loso/metrics.json
-- dvclive/xgb/combined_all_all_features_loso/metrics.json
+- dvclive/adaboost/standard/metrics.json
+- dvclive/nn/standard/metrics.json
+- dvclive/xgb/standard/metrics.json
+- dvclive/cnn/standard/metrics.json
+- dvclive/adaboost/loso/aggregated_metrics.json
+- dvclive/nn/loso/aggregated_metrics.json
+- dvclive/xgb/loso/aggregated_metrics.json
+- dvclive/cnn/loso/aggregated_metrics.json
+- dvclive/ablation/real_keypoints_only/aggregated_metrics.json
+- dvclive/ablation/real_all_features/aggregated_metrics.json
+- dvclive/ablation/synthetic_keypoints_only/aggregated_metrics.json
+- dvclive/ablation/synthetic_all_features/aggregated_metrics.json
+- dvclive/ablation/all_keypoints_only/aggregated_metrics.json
+- dvclive/ablation/all_all_features/aggregated_metrics.json

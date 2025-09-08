@@ -3,21 +3,19 @@ import joblib
 import dvc.api
 from abc import ABC, abstractmethod
 from loguru import logger
-from .training_workflow import run_standard, run_loso
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.abspath(os.path.join(current_dir, "..", '..'))
 
 class BaseTrainer(ABC):
-    def __init__(self, model_name: str, train_combined: bool=False, use_loso: bool=False, data_path_suffix: str=""):
+    def __init__(self, model_name: str, train_combined: bool=True, use_loso: bool=False, data_path_suffix: str=""):
         self.model_name     = model_name
-        self.train_combined = train_combined
+        self.train_combined = train_combined  # Always True in new structure (combined data only)
         self.use_loso       = use_loso
         # assume params_show returns a dict
         self.params         = dvc.api.params_show(os.path.join(parent_dir, "params.yaml"))
         self.dvclive_dir    = os.path.join(parent_dir, "dvclive", model_name)
         self.models_dir     = os.path.join(parent_dir, "models",  model_name)
-        self.views          = ["front","left","right"]
         self.data_path_suffix = data_path_suffix  # For ablation studies (e.g., "real_keypoints_only")
 
         os.makedirs(self.models_dir, exist_ok=True)
@@ -41,14 +39,19 @@ class BaseTrainer(ABC):
 
     def get_y_pred_proba(self, model, X):
         logger.debug(f"Getting prediction probabilities for {len(X)} test samples")
-        return model.predict_proba(X)[:, 1]
+        if hasattr(model, 'predict_proba'):
+            return model.predict_proba(X)[:, 1]
+        else:
+            # Fallback for models without predict_proba
+            logger.warning(f"Model {self.model_name} doesn't have predict_proba, using decision_function or predict")
+            if hasattr(model, 'decision_function'):
+                return model.decision_function(X)
+            else:
+                return model.predict(X)
 
     def run(self):
         """
-        Dispatch either to the standard train/test flow
-        or the LOSO flow (per‐subject folds).
+        Abstract method to be implemented by subclasses.
+        Should call appropriate workflow (standard or LOSO).
         """
-        if self.use_loso:
-            run_loso(self)
-        else:
-            run_standard(self)
+        raise NotImplementedError("Subclasses must implement the run method")

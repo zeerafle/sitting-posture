@@ -1,2 +1,0 @@
-n_estimators: 1999
-cv_strategy: GroupKFold-by-subject
