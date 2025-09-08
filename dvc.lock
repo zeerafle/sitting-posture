@@ -1485,24 +1485,24 @@ stages:
     deps:
     - path: data/data_with_features.csv
       hash: md5
-      md5: 3139a3f7bfbb61a033166318af7f27b6
-      size: 7115533
+      md5: e5f4a47ed665f32bdd29e3a52a99964e
+      size: 7114898
       isexec: true
     - path: src/data_preparation/data_filter.py
       hash: md5
-      md5: f8f33449d4762f099be6e593e74f6532
-      size: 3133
+      md5: 36922b468d897b8a35f43f0dd8e90b3e
+      size: 2816
       isexec: true
     - path: src/prepare.py
       hash: md5
-      md5: 04372e50ec4750f4d65002072b17cb66
-      size: 6067
+      md5: c41c02ce3ce7f71f82edd1f2cdfd5621
+      size: 6280
       isexec: true
     outs:
-    - path: data/processed/all_all_features/combined_full/data.csv
+    - path: data/processed/all_all_features/combined/data.csv
       hash: md5
-      md5: ae54f020c6a6f1e7ec8111825670d1ec
-      size: 9759364
+      md5: f5220acc8d7d4e660ccacca73c27d267
+      size: 9821342
   prepare_ablation_combined@synthetic-keypoints_only:
     cmd: uv run python src/prepare.py --loso --combined --data-mode synthetic 
       --feature-mode keypoints_only
@@ -1557,48 +1557,48 @@ stages:
     deps:
     - path: data/data_with_features.csv
       hash: md5
-      md5: 3139a3f7bfbb61a033166318af7f27b6
-      size: 7115533
+      md5: e5f4a47ed665f32bdd29e3a52a99964e
+      size: 7114898
       isexec: true
     - path: src/data_preparation/data_filter.py
       hash: md5
-      md5: f8f33449d4762f099be6e593e74f6532
-      size: 3133
+      md5: 36922b468d897b8a35f43f0dd8e90b3e
+      size: 2816
       isexec: true
     - path: src/prepare.py
       hash: md5
-      md5: 04372e50ec4750f4d65002072b17cb66
-      size: 6067
+      md5: c41c02ce3ce7f71f82edd1f2cdfd5621
+      size: 6280
       isexec: true
     outs:
-    - path: data/processed/all_keypoints_only/combined_full/data.csv
+    - path: data/processed/all_keypoints_only/combined/data.csv
       hash: md5
-      md5: 5c712bcb7897c620e3b7a2591bff6d3d
-      size: 4861486
+      md5: c7f5523dc33c097e81750b21cb28e1c9
+      size: 4923378
   prepare_ablation_combined@real-keypoints_only:
     cmd: uv run python src/prepare.py --loso --combined --data-mode real 
       --feature-mode keypoints_only
     deps:
     - path: data/data_with_features.csv
       hash: md5
-      md5: 3139a3f7bfbb61a033166318af7f27b6
-      size: 7115533
+      md5: e5f4a47ed665f32bdd29e3a52a99964e
+      size: 7114898
       isexec: true
     - path: src/data_preparation/data_filter.py
       hash: md5
-      md5: f8f33449d4762f099be6e593e74f6532
-      size: 3133
+      md5: 36922b468d897b8a35f43f0dd8e90b3e
+      size: 2816
       isexec: true
     - path: src/prepare.py
       hash: md5
-      md5: 04372e50ec4750f4d65002072b17cb66
-      size: 6067
+      md5: c41c02ce3ce7f71f82edd1f2cdfd5621
+      size: 6280
       isexec: true
     outs:
-    - path: data/processed/real_keypoints_only/combined_full/data.csv
+    - path: data/processed/real_keypoints_only/combined/data.csv
       hash: md5
-      md5: 03495ef5d291854f5d87c7b7a3b82af3
-      size: 1650016
+      md5: e3966a0b7970188a3a3a22362562f87b
+      size: 1672027
   train_ablation_combined@all-keypoints_only:
     cmd: uv run python src/models/xgb/train.py --loso --combined --data-config 
       all_keypoints_only

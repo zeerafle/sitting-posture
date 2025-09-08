@@ -68,6 +68,7 @@ def loso_training(trainer, data_mode=None):
 
         groups = df["subject_id"].to_numpy()
         X_df = df.drop(columns=["subject_id", "class_no", "class_name", "file_name", "view_type"])
+        print(X_df.columns)
         y = df["class_no"].to_numpy()
 
         # load best params from combined htcv if exists
@@ -98,6 +99,16 @@ def loso_training(trainer, data_mode=None):
             for fold, (tr_idx, te_idx) in enumerate(splits, start=1):
                 subj = groups[te_idx[0]]
                 logger.info(f"Fold {fold}/5 — holding out subject {subj}")
+
+                # Add detailed logging to check for subject separation
+                train_subjects = set(groups[tr_idx])
+                test_subjects = set(groups[te_idx])
+                intersection = train_subjects.intersection(test_subjects)
+
+                logger.debug(f"Training subjects: {sorted(train_subjects)}")
+                logger.debug(f"Test subject(s): {sorted(test_subjects)}")
+                if intersection:
+                    logger.error(f"DATA LEAKAGE DETECTED! Subject(s) {sorted(intersection)} appear in both training and test sets!")
 
                 Xtr, ytr = X[tr_idx], y[tr_idx]
                 Xte, yte = X[te_idx], y[te_idx]

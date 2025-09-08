@@ -219,7 +219,7 @@ stages:
     - src/prepare.py
     - src/data_preparation/data_filter.py
     outs:
-    - data/processed/${item.data_mode}_${item.feature_mode}/combined_full/data.csv
+    - data/processed/${item.data_mode}_${item.feature_mode}/combined/data.csv
 
   # Train the ablation models with matrix
   train_ablation_combined:
@@ -230,7 +230,7 @@ stages:
       ${item.data_mode}_${item.feature_mode}
     deps:
     - src/models/xgb/train.py
-    - data/processed/${item.data_mode}_${item.feature_mode}/combined_full/data.csv
+    - data/processed/${item.data_mode}_${item.feature_mode}/combined/data.csv
     - src/models/base_trainer.py
     - src/models/loso_workflow.py
     - src/models/utils.py
@@ -238,9 +238,9 @@ stages:
     params:
     - params.yaml:
     outs:
-    - models/xgb/xgb_combined_full_${item.data_mode}_${item.feature_mode}.joblib
+    - models/xgb/xgb_combined_${item.data_mode}_${item.feature_mode}_loso.joblib
     metrics:
-    - dvclive/xgb/combined_full_${item.data_mode}_${item.feature_mode}_loso/loso_metrics.json:
+    - dvclive/xgb/combined_${item.data_mode}_${item.feature_mode}_loso/loso_metrics.json:
         cache: false
 
   # Analyze ablation results
@@ -266,10 +266,12 @@ params:
 - dvclive/adaboost/combined_loso/params.yaml
 - dvclive/nn/combined_all_all_features_loso/params.yaml
 - dvclive/adaboost/combined_all_all_features_loso/params.yaml
+- dvclive/xgb/combined_real_keypoints_only_loso/params.yaml
 - dvclive/xgb/combined_all_all_features_loso/params.yaml
 metrics:
 - dvclive/xgb/combined_loso/metrics.json
 - dvclive/nn/combined_loso/metrics.json
 - dvclive/nn/combined_all_all_features_loso/metrics.json
 - dvclive/adaboost/combined_all_all_features_loso/metrics.json
+- dvclive/xgb/combined_real_keypoints_only_loso/metrics.json
 - dvclive/xgb/combined_all_all_features_loso/metrics.json
