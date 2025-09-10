@@ -2388,3 +2388,597 @@ stages:
       hash: md5
       md5: 7ccd0e5fd71b7bb06a726cb13c178b97
       size: 5615
+  train_standard_split@adaboost:
+    cmd: uv run python src/models/adaboost/train_standard.py
+    deps:
+    - path: data/processed/standard_split/
+      hash: md5
+      md5: 0c5c4c739d2862d908bda4120cfc2500.dir
+      size: 9225584
+      nfiles: 3
+    - path: src/models/adaboost/train_standard.py
+      hash: md5
+      md5: 5a850ed120a17a8ee90027e8a3854634
+      size: 2101
+      isexec: true
+    - path: src/models/base_trainer.py
+      hash: md5
+      md5: a57f8eb114a0cc63aa652596546a1b48
+      size: 2372
+      isexec: true
+    - path: src/models/evaluate.py
+      hash: md5
+      md5: c901aed098fd676775dd31cba4ebf8bb
+      size: 5198
+      isexec: true
+    - path: src/models/standard_workflow.py
+      hash: md5
+      md5: 0eb24f8b14b7a4997a0a0a7fa367024d
+      size: 7027
+      isexec: true
+    - path: src/models/utils.py
+      hash: md5
+      md5: c51d309800e3542813508b9671af8ba2
+      size: 5480
+      isexec: true
+    params:
+      params.yaml:
+        adaboost:
+          n_estimators_min: 10
+          n_estimators_max: 2000
+        cv: 2
+        cv_folds: 5
+        n_iter: 2
+        nn:
+          first_hidden_layer_sizes_min: 128
+          first_hidden_layer_sizes_max: 512
+          second_hidden_layer_sizes_min: 256
+          second_hidden_layer_sizes_max: 1024
+          learning_rates:
+          - 0.0001
+          - 0.001
+          - 0.01
+          batch_size: 32
+          epochs: 50
+        random_state: 42
+        scoring: accuracy
+        xgb:
+          gamma_min: 5.0
+          gamma_max: 11.0
+          learning_rate_min: 0.07
+          learning_rate_max: 0.6
+          n_estimators:
+          - 50
+          - 100
+          - 150
+          regulation_alphas:
+          - 1e-05
+          - 0.01
+          - 0.75
+          regulation_lambdas:
+          - 1e-05
+          - 0.01
+          - 0.45
+          min_child_weights:
+          - 1.5
+          - 6
+          - 10
+          subsamples:
+          - 0.6
+          - 0.95
+          max_depths:
+          - 3
+          - 6
+          - 9
+    outs:
+    - path: dvclive/adaboost/standard/hyperparameter_results.json
+      hash: md5
+      md5: f0e8ae8e448a120653e73ea7c6b7bbf5
+      size: 1198
+    - path: dvclive/adaboost/standard/metrics.json
+      hash: md5
+      md5: 47aeaddf51fea65657967423fefb27a5
+      size: 1056
+    - path: dvclive/adaboost/standard/test_predictions.csv
+      hash: md5
+      md5: d4e035705ee9a6300b1e3363973b5e1f
+      size: 37972
+    - path: dvclive/adaboost/standard/y_pred.csv
+      hash: md5
+      md5: e92bd1fa9787bfeb318b167751df5ced
+      size: 37977
+    - path: models/adaboost/adaboost_standard.joblib
+      hash: md5
+      md5: 7f9acf31a0d6461705f82db3e734b980
+      size: 937188
+  train_standard_split@xgb:
+    cmd: uv run python src/models/xgb/train_standard.py
+    deps:
+    - path: data/processed/standard_split/
+      hash: md5
+      md5: 0c5c4c739d2862d908bda4120cfc2500.dir
+      size: 9225584
+      nfiles: 3
+    - path: src/models/base_trainer.py
+      hash: md5
+      md5: a57f8eb114a0cc63aa652596546a1b48
+      size: 2372
+      isexec: true
+    - path: src/models/evaluate.py
+      hash: md5
+      md5: c901aed098fd676775dd31cba4ebf8bb
+      size: 5198
+      isexec: true
+    - path: src/models/standard_workflow.py
+      hash: md5
+      md5: 0eb24f8b14b7a4997a0a0a7fa367024d
+      size: 7027
+      isexec: true
+    - path: src/models/utils.py
+      hash: md5
+      md5: c51d309800e3542813508b9671af8ba2
+      size: 5480
+      isexec: true
+    - path: src/models/xgb/train_standard.py
+      hash: md5
+      md5: 40c0e70eea2ae88d81cf3f8e2c85c85d
+      size: 2392
+      isexec: true
+    params:
+      params.yaml:
+        adaboost:
+          n_estimators_min: 10
+          n_estimators_max: 2000
+        cv: 2
+        cv_folds: 5
+        n_iter: 2
+        nn:
+          first_hidden_layer_sizes_min: 128
+          first_hidden_layer_sizes_max: 512
+          second_hidden_layer_sizes_min: 256
+          second_hidden_layer_sizes_max: 1024
+          learning_rates:
+          - 0.0001
+          - 0.001
+          - 0.01
+          batch_size: 32
+          epochs: 50
+        random_state: 42
+        scoring: accuracy
+        xgb:
+          gamma_min: 5.0
+          gamma_max: 11.0
+          learning_rate_min: 0.07
+          learning_rate_max: 0.6
+          n_estimators:
+          - 50
+          - 100
+          - 150
+          regulation_alphas:
+          - 1e-05
+          - 0.01
+          - 0.75
+          regulation_lambdas:
+          - 1e-05
+          - 0.01
+          - 0.45
+          min_child_weights:
+          - 1.5
+          - 6
+          - 10
+          subsamples:
+          - 0.6
+          - 0.95
+          max_depths:
+          - 3
+          - 6
+          - 9
+    outs:
+    - path: dvclive/xgb/standard/hyperparameter_results.json
+      hash: md5
+      md5: a8c46e370e5b64b2cbd77ac953d0c42e
+      size: 2028
+    - path: dvclive/xgb/standard/metrics.json
+      hash: md5
+      md5: d8af1d957384e3528da65979f72dd6ba
+      size: 525
+    - path: dvclive/xgb/standard/test_predictions.csv
+      hash: md5
+      md5: 6bfaf4d1fc41c329f85f9c300cc712a7
+      size: 24637
+    - path: dvclive/xgb/standard/y_pred.csv
+      hash: md5
+      md5: c4b57110fdf7b5a3a1234ad6cf3644f4
+      size: 24642
+    - path: models/xgb/xgb_standard.joblib
+      hash: md5
+      md5: 98ffe91d3bdcc3deddefc3e3a7441c97
+      size: 49914
+  train_standard_split@nn:
+    cmd: uv run python src/models/nn/train_standard.py
+    deps:
+    - path: data/processed/standard_split/
+      hash: md5
+      md5: 0c5c4c739d2862d908bda4120cfc2500.dir
+      size: 9225584
+      nfiles: 3
+    - path: src/models/base_trainer.py
+      hash: md5
+      md5: a57f8eb114a0cc63aa652596546a1b48
+      size: 2372
+      isexec: true
+    - path: src/models/evaluate.py
+      hash: md5
+      md5: c901aed098fd676775dd31cba4ebf8bb
+      size: 5198
+      isexec: true
+    - path: src/models/nn/train_standard.py
+      hash: md5
+      md5: 6084bd0c2e889fb4cb43e9f0146a3460
+      size: 4214
+      isexec: true
+    - path: src/models/standard_workflow.py
+      hash: md5
+      md5: 0eb24f8b14b7a4997a0a0a7fa367024d
+      size: 7027
+      isexec: true
+    - path: src/models/utils.py
+      hash: md5
+      md5: c51d309800e3542813508b9671af8ba2
+      size: 5480
+      isexec: true
+    params:
+      params.yaml:
+        adaboost:
+          n_estimators_min: 10
+          n_estimators_max: 2000
+        cv: 2
+        cv_folds: 5
+        n_iter: 2
+        nn:
+          first_hidden_layer_sizes_min: 128
+          first_hidden_layer_sizes_max: 512
+          second_hidden_layer_sizes_min: 256
+          second_hidden_layer_sizes_max: 1024
+          learning_rates:
+          - 0.0001
+          - 0.001
+          - 0.01
+          batch_size: 32
+          epochs: 50
+        random_state: 42
+        scoring: accuracy
+        xgb:
+          gamma_min: 5.0
+          gamma_max: 11.0
+          learning_rate_min: 0.07
+          learning_rate_max: 0.6
+          n_estimators:
+          - 50
+          - 100
+          - 150
+          regulation_alphas:
+          - 1e-05
+          - 0.01
+          - 0.75
+          regulation_lambdas:
+          - 1e-05
+          - 0.01
+          - 0.45
+          min_child_weights:
+          - 1.5
+          - 6
+          - 10
+          subsamples:
+          - 0.6
+          - 0.95
+          max_depths:
+          - 3
+          - 6
+          - 9
+    outs:
+    - path: dvclive/nn/standard/hyperparameter_results.json
+      hash: md5
+      md5: 9050679d90f7a5ae245535964d9875c8
+      size: 1454
+    - path: dvclive/nn/standard/metrics.json
+      hash: md5
+      md5: 3afe625bbddefe9e6eee5915144f9318
+      size: 542
+    - path: dvclive/nn/standard/test_predictions.csv
+      hash: md5
+      md5: 6ae50838cba18d0f9959d00bfcc4ff2b
+      size: 38797
+    - path: dvclive/nn/standard/y_pred.csv
+      hash: md5
+      md5: b65090663f521939e92836afe57da64f
+      size: 38802
+    - path: models/nn/nn_standard.joblib
+      hash: md5
+      md5: 17a2241e820847b3e2f9b9b8995c7693
+      size: 151626
+  train_loso@adaboost:
+    cmd: uv run python src/models/adaboost/train_loso.py
+    deps:
+    - path: data/processed/loso/
+      hash: md5
+      md5: a463c4f1663c8f1f943bbf944862b984.dir
+      size: 9810560
+      nfiles: 2
+    - path: src/models/adaboost/train_loso.py
+      hash: md5
+      md5: e7b2c0e8362165ea44587e8478879d18
+      size: 2057
+      isexec: true
+    - path: src/models/base_trainer.py
+      hash: md5
+      md5: a57f8eb114a0cc63aa652596546a1b48
+      size: 2372
+      isexec: true
+    - path: src/models/evaluate.py
+      hash: md5
+      md5: c901aed098fd676775dd31cba4ebf8bb
+      size: 5198
+      isexec: true
+    - path: src/models/loso_workflow.py
+      hash: md5
+      md5: c6c841edd45159be41132b71d7b3df83
+      size: 12074
+      isexec: true
+    - path: src/models/utils.py
+      hash: md5
+      md5: c51d309800e3542813508b9671af8ba2
+      size: 5480
+      isexec: true
+    params:
+      params.yaml:
+        adaboost:
+          n_estimators_min: 10
+          n_estimators_max: 2000
+        cv: 2
+        cv_folds: 5
+        n_iter: 2
+        nn:
+          first_hidden_layer_sizes_min: 128
+          first_hidden_layer_sizes_max: 512
+          second_hidden_layer_sizes_min: 256
+          second_hidden_layer_sizes_max: 1024
+          learning_rates:
+          - 0.0001
+          - 0.001
+          - 0.01
+          batch_size: 32
+          epochs: 50
+        random_state: 42
+        scoring: accuracy
+        xgb:
+          gamma_min: 5.0
+          gamma_max: 11.0
+          learning_rate_min: 0.07
+          learning_rate_max: 0.6
+          n_estimators:
+          - 50
+          - 100
+          - 150
+          regulation_alphas:
+          - 1e-05
+          - 0.01
+          - 0.75
+          regulation_lambdas:
+          - 1e-05
+          - 0.01
+          - 0.45
+          min_child_weights:
+          - 1.5
+          - 6
+          - 10
+          subsamples:
+          - 0.6
+          - 0.95
+          max_depths:
+          - 3
+          - 6
+          - 9
+    outs:
+    - path: dvclive/adaboost/loso/aggregated_metrics.json
+      hash: md5
+      md5: 478cda87c0b9c1432d02c89b99fe8b50
+      size: 377
+    - path: dvclive/adaboost/loso/fold_metrics.json
+      hash: md5
+      md5: 07f79ee1c4a80d307c4a682c24c1f2c3
+      size: 3962
+    - path: models/adaboost/adaboost_loso.joblib
+      hash: md5
+      md5: 7dc5d8f6661acd04d003461d3276c354
+      size: 935860
+  train_loso@nn:
+    cmd: uv run python src/models/nn/train_loso.py
+    deps:
+    - path: data/processed/loso/
+      hash: md5
+      md5: a463c4f1663c8f1f943bbf944862b984.dir
+      size: 9810560
+      nfiles: 2
+    - path: src/models/base_trainer.py
+      hash: md5
+      md5: a57f8eb114a0cc63aa652596546a1b48
+      size: 2372
+      isexec: true
+    - path: src/models/evaluate.py
+      hash: md5
+      md5: c901aed098fd676775dd31cba4ebf8bb
+      size: 5198
+      isexec: true
+    - path: src/models/loso_workflow.py
+      hash: md5
+      md5: c6c841edd45159be41132b71d7b3df83
+      size: 12074
+      isexec: true
+    - path: src/models/nn/train_loso.py
+      hash: md5
+      md5: 4fb20a831bb833f2c8c5a416f0fd0049
+      size: 4106
+      isexec: true
+    - path: src/models/utils.py
+      hash: md5
+      md5: c51d309800e3542813508b9671af8ba2
+      size: 5480
+      isexec: true
+    params:
+      params.yaml:
+        adaboost:
+          n_estimators_min: 10
+          n_estimators_max: 2000
+        cv: 2
+        cv_folds: 5
+        n_iter: 2
+        nn:
+          first_hidden_layer_sizes_min: 128
+          first_hidden_layer_sizes_max: 512
+          second_hidden_layer_sizes_min: 256
+          second_hidden_layer_sizes_max: 1024
+          learning_rates:
+          - 0.0001
+          - 0.001
+          - 0.01
+          batch_size: 32
+          epochs: 50
+        random_state: 42
+        scoring: accuracy
+        xgb:
+          gamma_min: 5.0
+          gamma_max: 11.0
+          learning_rate_min: 0.07
+          learning_rate_max: 0.6
+          n_estimators:
+          - 50
+          - 100
+          - 150
+          regulation_alphas:
+          - 1e-05
+          - 0.01
+          - 0.75
+          regulation_lambdas:
+          - 1e-05
+          - 0.01
+          - 0.45
+          min_child_weights:
+          - 1.5
+          - 6
+          - 10
+          subsamples:
+          - 0.6
+          - 0.95
+          max_depths:
+          - 3
+          - 6
+          - 9
+    outs:
+    - path: dvclive/nn/loso/aggregated_metrics.json
+      hash: md5
+      md5: 5405dc3e4469f8e561db439017f08748
+      size: 377
+    - path: dvclive/nn/loso/fold_metrics.json
+      hash: md5
+      md5: 4aec6e990a548836ea0aaa2739ea9cb1
+      size: 3978
+    - path: models/nn/nn_loso.joblib
+      hash: md5
+      md5: 27c42ed2374177a005cea5d05aa6d597
+      size: 150007
+  train_loso@xgb:
+    cmd: uv run python src/models/xgb/train_loso.py
+    deps:
+    - path: data/processed/loso/
+      hash: md5
+      md5: a463c4f1663c8f1f943bbf944862b984.dir
+      size: 9810560
+      nfiles: 2
+    - path: src/models/base_trainer.py
+      hash: md5
+      md5: a57f8eb114a0cc63aa652596546a1b48
+      size: 2372
+      isexec: true
+    - path: src/models/evaluate.py
+      hash: md5
+      md5: c901aed098fd676775dd31cba4ebf8bb
+      size: 5198
+      isexec: true
+    - path: src/models/loso_workflow.py
+      hash: md5
+      md5: c6c841edd45159be41132b71d7b3df83
+      size: 12074
+      isexec: true
+    - path: src/models/utils.py
+      hash: md5
+      md5: c51d309800e3542813508b9671af8ba2
+      size: 5480
+      isexec: true
+    - path: src/models/xgb/train_loso.py
+      hash: md5
+      md5: 3ac0abb28687143235f3e27a9867466b
+      size: 2296
+      isexec: true
+    params:
+      params.yaml:
+        adaboost:
+          n_estimators_min: 10
+          n_estimators_max: 2000
+        cv: 2
+        cv_folds: 5
+        n_iter: 2
+        nn:
+          first_hidden_layer_sizes_min: 128
+          first_hidden_layer_sizes_max: 512
+          second_hidden_layer_sizes_min: 256
+          second_hidden_layer_sizes_max: 1024
+          learning_rates:
+          - 0.0001
+          - 0.001
+          - 0.01
+          batch_size: 32
+          epochs: 50
+        random_state: 42
+        scoring: accuracy
+        xgb:
+          gamma_min: 5.0
+          gamma_max: 11.0
+          learning_rate_min: 0.07
+          learning_rate_max: 0.6
+          n_estimators:
+          - 50
+          - 100
+          - 150
+          regulation_alphas:
+          - 1e-05
+          - 0.01
+          - 0.75
+          regulation_lambdas:
+          - 1e-05
+          - 0.01
+          - 0.45
+          min_child_weights:
+          - 1.5
+          - 6
+          - 10
+          subsamples:
+          - 0.6
+          - 0.95
+          max_depths:
+          - 3
+          - 6
+          - 9
+    outs:
+    - path: dvclive/xgb/loso/aggregated_metrics.json
+      hash: md5
+      md5: 9484abd1d693861ff84005104479c8a2
+      size: 376
+    - path: dvclive/xgb/loso/fold_metrics.json
+      hash: md5
+      md5: bffa07e57f743f7678b887c827341a63
+      size: 3979
+    - path: models/xgb/xgb_loso.joblib
+      hash: md5
+      md5: 7d4d630d1c64c0528b59c793965157e5
+      size: 49276

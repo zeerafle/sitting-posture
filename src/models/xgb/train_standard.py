@@ -1,13 +1,15 @@
 import argparse
 import os
 import sys
-import numpy as np
-from xgboost import XGBClassifier
-from skopt.space import Categorical, Real
 
+# Add parent directory to path
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.abspath(os.path.join(current_dir, "..", ".."))
 sys.path.insert(0, parent_dir)
+
+import numpy as np
+from xgboost import XGBClassifier
+from skopt.space import Categorical, Real
 
 from models.base_trainer import BaseTrainer
 from models.standard_workflow import run_standard_workflow
@@ -24,7 +26,8 @@ class XGBoostStandardTrainer(BaseTrainer):
     def get_estimator(self):
         return XGBClassifier(
             random_state=self.params["random_state"],
-            eval_metric='logloss'
+            eval_metric='logloss',
+            objective='binary:logistic'
         )
 
     def get_param_space(self):

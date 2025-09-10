@@ -1,11 +1,11 @@
 import os
 import json
 import time
+import numpy as np
 import pandas as pd
 from codecarbon import OfflineEmissionsTracker
 from dvclive import Live
 from loguru import logger
-from sklearn.model_selection import StratifiedGroupKFold
 
 from .evaluate import evaluate
 from .utils import bayes_search, NumpyEncoder
@@ -26,7 +26,7 @@ def run_standard_workflow(trainer):
 
     if not os.path.exists(train_path) or not os.path.exists(test_path):
         raise FileNotFoundError(
-            f"Preprocessed data not found. Please run prepare_standard_split first."
+            "Preprocessed data not found. Please run prepare_standard_split first."
         )
 
     train_df = pd.read_csv(train_path)
@@ -36,9 +36,9 @@ def run_standard_workflow(trainer):
 
     # Separate features and labels
     feature_cols = [col for col in train_df.columns if col != 'labels']
-    X_train = train_df[feature_cols].values
+    X_train = pd.DataFrame(train_df[feature_cols])  # Explicitly cast to DataFrame
     y_train = train_df['labels'].values
-    X_test = test_df[feature_cols].values
+    X_test = pd.DataFrame(test_df[feature_cols])    # Explicitly cast to DataFrame
     y_test = test_df['labels'].values
 
     logger.info(f"Features: {len(feature_cols)}, Train samples: {len(X_train)}, Test samples: {len(X_test)}")
@@ -126,7 +126,34 @@ def run_standard_workflow(trainer):
         if hasattr(trainer, 'log_model_specific_metrics'):
             trainer.log_model_specific_metrics(final_model, live)
 
-        logger.info(f"Model evaluation completed. Test accuracy: {metrics.get('test_accuracy', 'N/A'):.4f}")
+        # Get accuracy from metrics, handling different return types
+        accuracy_info = "N/A"
+
+        if metrics is None:
+            logger.info("No metrics returned from evaluation")
+        elif isinstance(metrics, dict):
+            if 'test_accuracy' in metrics:
+                try:
+                    value = metrics['test_accuracy']
+                    if isinstance(value, np.ndarray):
+                        # Handle numpy array
+                        accuracy_info = "See logs for details"
+                        logger.info(f"Accuracy metrics returned as array: {value}")
+                    else:
+                        # Regular value
+                        accuracy_info = f"{float(value):.4f}"
+                except (TypeError, ValueError) as e:
+                    logger.warning(f"Could not format accuracy value: {e}")
+            else:
+                logger.info(f"Metrics dictionary doesn't contain 'test_accuracy' key: {list(metrics.keys())}")
+        elif isinstance(metrics, np.ndarray):
+            # Handle direct numpy array return
+            logger.info(f"Metrics returned as numpy array: {metrics}")
+            accuracy_info = "See logs for details"
+        else:
+            # Unknown type
+            logger.warning(f"Metrics of unexpected type: {type(metrics)}")
+        logger.info(f"Model evaluation completed. Test accuracy: {accuracy_info}")
 
     # Save final trained model
     model_filename = f"{trainer.model_name}_standard.joblib"
@@ -151,9 +178,9 @@ def load_standard_data():
 
     feature_cols = [col for col in train_df.columns if col != 'labels']
 
-    X_train = train_df[feature_cols].values
+    X_train = pd.DataFrame(train_df[feature_cols])  # Explicitly cast to DataFrame
     y_train = train_df['labels'].values
-    X_test = test_df[feature_cols].values
+    X_test = pd.DataFrame(test_df[feature_cols])    # Explicitly cast to DataFrame
     y_test = test_df['labels'].values
 
     return X_train, X_test, y_train, y_test, feature_cols

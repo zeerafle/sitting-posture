@@ -3,7 +3,7 @@ import os
 import sys
 import numpy as np
 from sklearn.ensemble import AdaBoostClassifier
-from skopt.space import Categorical, Real
+from skopt.space import Integer, Real
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.abspath(os.path.join(current_dir, "..", ".."))
@@ -29,11 +29,11 @@ class AdaBoostLOSOTrainer(BaseTrainer):
 
     def get_param_space(self):
         return {
-            "n_estimators": Categorical(list(range(
+            "n_estimators": Integer(
                 self.params["adaboost"]["n_estimators_min"],
                 self.params["adaboost"]["n_estimators_max"] + 1,
                 50
-            ))),
+            ),
             "learning_rate": Real(0.01, 2.0, prior='log-uniform')
         }
 

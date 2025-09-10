@@ -9,8 +9,8 @@ configure_logging()
 
 from .base_trainer       import BaseTrainer
 from .evaluate           import evaluate
-from .training_workflow  import run_standard
-from .loso_workflow      import loso_training as run_loso
+from .standard_workflow  import run_standard_workflow
+from .loso_workflow      import run_loso_workflow as run_loso
 
 __all__ = [
     "BaseTrainer",
@@ -20,6 +20,6 @@ __all__ = [
     "bayes_search",
     "extract_subject_ids",
     "NumpyEncoder",
-    "run_standard",
+    "run_standard_workflow",
     "run_loso",
 ]

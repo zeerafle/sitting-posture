@@ -1,0 +1,8 @@
+alpha: 4.3693399475103194e-05
+layer1: 407
+layer2: 972
+learning_rate_init: 0.0001
+cv_strategy: StratifiedKFold
+cv_error: MLPTwoLayersWrapper should either be a classifier to be used with 
+  response_method=predict_proba or the response_method should be 'predict'. Got 
+  a regressor with response_method=predict_proba instead.

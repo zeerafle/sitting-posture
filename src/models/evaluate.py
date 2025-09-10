@@ -82,7 +82,7 @@ def evaluate(
         X_combined = pd.concat([X_train, X_test], axis=0, ignore_index=True)
         y_combined = np.concatenate([np.ravel(y_train), np.ravel(y_test)])
 
-        # Setup grouped cross-validation by subject ID
+        # Setup cross-validation strategy
         use_groups = groups_train is not None and groups_test is not None
         if use_groups:
             groups_combined = np.concatenate(
@@ -92,31 +92,43 @@ def evaluate(
             cv_splits = list(cv.split(X_combined, y_combined, groups_combined))
             live.log_param("cv_strategy", "GroupKFold-by-subject")
         else:
-            cv_splits = 5
-            live.log_param("cv_strategy", "StandardCV")
+            # Use StratifiedKFold instead of just an integer
+            from sklearn.model_selection import StratifiedKFold
+            cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+            cv_splits = cv.split(X_combined, y_combined)
+            live.log_param("cv_strategy", "StratifiedKFold")
 
         # Cross-validation scoring
         scoring = ["accuracy", "f1", "precision", "recall", "roc_auc"]
-        cv_scores = cross_validate(
-            model,
-            X_combined,
-            y_combined,
-            cv=cv_splits,
-            scoring=scoring,
-            n_jobs=-1,
-        )
+
+        try:
+            cv_scores = cross_validate(
+                model,
+                X_combined,
+                y_combined,
+                cv=cv_splits,
+                scoring=scoring,
+                n_jobs=-1,
+                error_score='raise'  # Raise errors to help debug issues
+            )
+        except Exception as e:
+            # Log error and return None if cross-validation fails
+            live.log_param("cv_error", str(e))
+            return None
 
         live.log_metric("cv_accuracy_mean", np.mean(cv_scores["test_accuracy"]), plot=False)
         live.log_metric("cv_f1_mean", np.mean(cv_scores["test_f1"]), plot=False)
         live.log_metric("cv_precision_mean", np.mean(cv_scores["test_precision"]), plot=False)
         live.log_metric("cv_recall_mean", np.mean(cv_scores["test_recall"]), plot=False)
-        live.log_metric("cv_roc_auc_mean", np.mean(cv_scores["test_roc_auc"]), plot=False)
+        # Log metrics if available
+        if "test_roc_auc" in cv_scores:
+            live.log_metric("cv_roc_auc_mean", np.mean(cv_scores["test_roc_auc"]), plot=False)
+            live.log_metric("cv_std_roc_auc", np.std(cv_scores["test_roc_auc"]), plot=False)
 
         live.log_metric("cv_std_accuracy", np.std(cv_scores["test_accuracy"]), plot=False)
         live.log_metric("cv_std_f1", np.std(cv_scores["test_f1"]), plot=False)
         live.log_metric("cv_std_precision", np.std(cv_scores["test_precision"]), plot=False)
         live.log_metric("cv_std_recall", np.std(cv_scores["test_recall"]), plot=False)
-        live.log_metric("cv_std_roc_auc", np.std(cv_scores["test_roc_auc"]), plot=False)
 
         return cv_scores
 

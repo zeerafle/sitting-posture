@@ -51,7 +51,6 @@ stages:
     - adaboost
     - nn
     - xgb
-    - cnn
     do:
       cmd: uv run python src/models/${item}/train_standard.py
       deps:
@@ -62,13 +61,10 @@ stages:
       - src/models/utils.py
       - data/processed/standard_split/
       params:
-      - params.yaml:${item}
-      - params.yaml:random_state
-      - params.yaml:n_iter
-      - params.yaml:cv
-      - params.yaml:scoring
+      - params.yaml:
       outs:
       - models/${item}/${item}_standard.joblib
+      - dvclive/${item}/standard/y_pred.csv
       metrics:
       - dvclive/${item}/standard/metrics.json
       - dvclive/${item}/standard/hyperparameter_results.json
@@ -80,7 +76,6 @@ stages:
     - adaboost
     - nn
     - xgb
-    - cnn
     do:
       cmd: uv run python src/models/${item}/train_loso.py
       deps:
@@ -91,20 +86,76 @@ stages:
       - src/models/utils.py
       - data/processed/loso/
       params:
-      - params.yaml:${item}
-      - params.yaml:random_state
-      - params.yaml:cv_folds
+      - params.yaml:
       outs:
       - models/${item}/${item}_loso.joblib
       metrics:
       - dvclive/${item}/loso/fold_metrics.json
       - dvclive/${item}/loso/aggregated_metrics.json
 
-  # Statistical analysis of LOSO results to determine best model
-  statistical_analysis_loso:
+  # Train CNN separately with standard train-test split
+  train_cnn_standard:
+    cmd: uv run python src/models/cnn/train_standard.py
+    deps:
+    - src/models/cnn/train_standard.py
+    - src/models/cnn/trainer.py
+    - src/models/base_trainer.py
+    - src/models/standard_workflow.py
+    - src/models/evaluate.py
+    - src/models/utils.py
+    - data/processed/standard_split/
+    params:
+    - params.yaml
+    outs:
+    - models/cnn/cnn_standard.keras
+    metrics:
+    - dvclive/cnn/standard/metrics.json
+    - dvclive/cnn/standard/test_predictions.csv
+
+  # Train CNN separately with LOSO (grouped 5-fold CV by participant)
+  train_cnn_loso:
+    cmd: uv run python src/models/cnn/train_loso.py
+    deps:
+    - src/models/cnn/train_loso.py
+    - src/models/cnn/trainer.py
+    - src/models/base_trainer.py
+    - src/models/loso_workflow.py
+    - src/models/evaluate.py
+    - src/models/utils.py
+    - data/processed/loso/
+    params:
+    - params.yaml
+    outs:
+    - models/cnn/cnn_loso.keras
+    metrics:
+    - dvclive/cnn/loso/fold_metrics.json
+    - dvclive/cnn/loso/aggregated_metrics.json
+
+  # Statistical analysis of LOSO results (feature-based models only)
+  statistical_analysis_loso_features:
     foreach: [accuracy, f1]
     do:
-      cmd: uv run python src/analysis/statistical_analysis.py --models adaboost nn xgb cnn --metric ${item} --analysis-type loso --output-dir dvclive/analysis/loso
+      cmd: uv run python src/analysis/statistical_analysis.py --models adaboost 
+        nn xgb --metric ${item} --analysis-type loso --output-dir 
+        dvclive/analysis/loso_features
+      deps:
+      - src/analysis/statistical_analysis.py
+      - src/analysis/statistical/
+      - dvclive/adaboost/loso/fold_metrics.json
+      - dvclive/nn/loso/fold_metrics.json
+      - dvclive/xgb/loso/fold_metrics.json
+      outs:
+      - dvclive/analysis/loso_features/statistical_results_${item}.json
+      - dvclive/analysis/loso_features/critical_difference_diagram_${item}.png
+      - dvclive/analysis/loso_features/model_rankings_${item}.csv
+
+  # Statistical analysis of LOSO results (all models including CNN)
+  statistical_analysis_loso_all:
+    foreach: [accuracy, f1]
+    do:
+      cmd: uv run python src/analysis/statistical_analysis.py --models adaboost 
+        nn xgb cnn --metric ${item} --analysis-type loso --output-dir 
+        dvclive/analysis/loso_all
       deps:
       - src/analysis/statistical_analysis.py
       - src/analysis/statistical/
@@ -113,17 +164,18 @@ stages:
       - dvclive/xgb/loso/fold_metrics.json
       - dvclive/cnn/loso/fold_metrics.json
       outs:
-      - dvclive/analysis/loso/statistical_results_${item}.json
-      - dvclive/analysis/loso/critical_difference_diagram_${item}.png
-      - dvclive/analysis/loso/model_rankings_${item}.csv
+      - dvclive/analysis/loso_all/statistical_results_${item}.json
+      - dvclive/analysis/loso_all/critical_difference_diagram_${item}.png
+      - dvclive/analysis/loso_all/model_rankings_${item}.csv
 
-  # Determine best model from statistical analysis
+  # Determine best model from statistical analysis (feature-based models only)
   select_best_model:
-    cmd: uv run python src/analysis/select_best_model.py --metric accuracy --analysis-dir dvclive/analysis/loso
+    cmd: uv run python src/analysis/select_best_model.py --metric accuracy 
+      --analysis-dir dvclive/analysis/loso_features
     deps:
     - src/analysis/select_best_model.py
-    - dvclive/analysis/loso/statistical_results_accuracy.json
-    - dvclive/analysis/loso/model_rankings_accuracy.csv
+    - dvclive/analysis/loso_features/statistical_results_accuracy.json
+    - dvclive/analysis/loso_features/model_rankings_accuracy.csv
     outs:
     - dvclive/analysis/best_model.json
 
@@ -132,7 +184,8 @@ stages:
     matrix:
       data_mode: [real, synthetic, all]
       feature_mode: [keypoints_only, all_features]
-    cmd: uv run python src/prepare_ablation.py --data-mode ${item.data_mode} --feature-mode ${item.feature_mode}
+    cmd: uv run python src/prepare_ablation.py --data-mode ${item.data_mode} 
+      --feature-mode ${item.feature_mode}
     deps:
     - data/data_with_features.csv
     - src/prepare_ablation.py
@@ -146,7 +199,9 @@ stages:
     matrix:
       data_mode: [real, synthetic, all]
       feature_mode: [keypoints_only, all_features]
-    cmd: uv run python src/models/train_ablation.py --data-mode ${item.data_mode} --feature-mode ${item.feature_mode} --best-model-config dvclive/analysis/best_model.json
+    cmd: uv run python src/models/train_ablation.py --data-mode 
+      ${item.data_mode} --feature-mode ${item.feature_mode} --best-model-config 
+      dvclive/analysis/best_model.json
     deps:
     - src/models/train_ablation.py
     - src/models/base_trainer.py
@@ -156,8 +211,7 @@ stages:
     - data/processed/ablation/${item.data_mode}_${item.feature_mode}/
     - dvclive/analysis/best_model.json
     params:
-    - params.yaml:random_state
-    - params.yaml:cv_folds
+    - params.yaml
     outs:
     - models/ablation/best_model_${item.data_mode}_${item.feature_mode}.joblib
     metrics:
@@ -168,7 +222,10 @@ stages:
   statistical_analysis_ablation_data_modes:
     foreach: [accuracy, f1]
     do:
-      cmd: uv run python src/analysis/statistical_analysis.py --models real_keypoints_only synthetic_keypoints_only all_keypoints_only --metric ${item} --analysis-type ablation --experiment-type data_modes --output-dir dvclive/analysis/ablation/data_modes
+      cmd: uv run python src/analysis/statistical_analysis.py --models 
+        real_keypoints_only synthetic_keypoints_only all_keypoints_only --metric
+        ${item} --analysis-type ablation --experiment-type data_modes 
+        --output-dir dvclive/analysis/ablation/data_modes
       deps:
       - src/analysis/statistical_analysis.py
       - src/analysis/statistical/
@@ -183,7 +240,10 @@ stages:
   statistical_analysis_ablation_feature_modes:
     foreach: [accuracy, f1]
     do:
-      cmd: uv run python src/analysis/statistical_analysis.py --models all_keypoints_only all_all_features --metric ${item} --analysis-type ablation --experiment-type feature_modes --output-dir dvclive/analysis/ablation/feature_modes
+      cmd: uv run python src/analysis/statistical_analysis.py --models 
+        all_keypoints_only all_all_features --metric ${item} --analysis-type 
+        ablation --experiment-type feature_modes --output-dir 
+        dvclive/analysis/ablation/feature_modes
       deps:
       - src/analysis/statistical_analysis.py
       - src/analysis/statistical/
@@ -197,7 +257,11 @@ stages:
   statistical_analysis_ablation_full:
     foreach: [accuracy, f1]
     do:
-      cmd: uv run python src/analysis/statistical_analysis.py --models real_keypoints_only real_all_features synthetic_keypoints_only synthetic_all_features all_keypoints_only all_all_features --metric ${item} --analysis-type ablation --experiment-type full --output-dir dvclive/analysis/ablation/full
+      cmd: uv run python src/analysis/statistical_analysis.py --models 
+        real_keypoints_only real_all_features synthetic_keypoints_only 
+        synthetic_all_features all_keypoints_only all_all_features --metric 
+        ${item} --analysis-type ablation --experiment-type full --output-dir 
+        dvclive/analysis/ablation/full
       deps:
       - src/analysis/statistical_analysis.py
       - src/analysis/statistical/
@@ -214,34 +278,21 @@ stages:
 
   # Generate comprehensive analysis report
   generate_analysis_report:
-    cmd: uv run python src/analysis/generate_report.py --output-dir dvclive/analysis/final_report
+    cmd: uv run python src/analysis/generate_report.py --output-dir 
+      dvclive/analysis/final_report
     deps:
     - src/analysis/generate_report.py
-    - dvclive/analysis/loso/
+    - dvclive/analysis/loso_features/
+    - dvclive/analysis/loso_all/
     - dvclive/analysis/ablation/
     - dvclive/analysis/best_model.json
     outs:
     - dvclive/analysis/final_report/comprehensive_analysis_report.html
     - dvclive/analysis/final_report/summary_statistics.csv
 
-params:
-- params.yaml:random_state
-- params.yaml:n_iter
-- params.yaml:cv
-- params.yaml:cv_folds
-- params.yaml:scoring
-- params.yaml:adaboost
-- params.yaml:nn
-- params.yaml:xgb
 
 metrics:
-- dvclive/adaboost/standard/metrics.json
-- dvclive/nn/standard/metrics.json
-- dvclive/xgb/standard/metrics.json
 - dvclive/cnn/standard/metrics.json
-- dvclive/adaboost/loso/aggregated_metrics.json
-- dvclive/nn/loso/aggregated_metrics.json
-- dvclive/xgb/loso/aggregated_metrics.json
 - dvclive/cnn/loso/aggregated_metrics.json
 - dvclive/ablation/real_keypoints_only/aggregated_metrics.json
 - dvclive/ablation/real_all_features/aggregated_metrics.json
@@ -249,3 +300,33 @@ metrics:
 - dvclive/ablation/synthetic_all_features/aggregated_metrics.json
 - dvclive/ablation/all_keypoints_only/aggregated_metrics.json
 - dvclive/ablation/all_all_features/aggregated_metrics.json
+- dvclive/adaboost/standard/metrics.json
+- dvclive/xgb/standard/metrics.json
+- dvclive/nn/standard/metrics.json
+- dvclive/adaboost/loso/metrics.json
+- dvclive/nn/loso/metrics.json
+- dvclive/xgb/loso/metrics.json
+params:
+- dvclive/adaboost/standard/params.yaml
+- dvclive/xgb/standard/params.yaml
+- dvclive/nn/standard/params.yaml
+plots:
+- dvclive/adaboost/standard/plots/metrics:
+    x: step
+- dvclive/adaboost/standard/plots/images
+- dvclive/xgb/standard/plots/metrics:
+    x: step
+- dvclive/xgb/standard/plots/images
+- dvclive/nn/standard/plots/metrics:
+    x: step
+- dvclive/nn/standard/plots/images
+- dvclive/adaboost/loso/plots/metrics:
+    x: step
+- dvclive/nn/loso/plots/metrics:
+    x: step
+- dvclive/xgb/loso/plots/metrics:
+    x: step
+artifacts:
+  y_pred:
+    path: dvclive/nn/standard/y_pred.csv
+    type: predictions

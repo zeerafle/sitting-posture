@@ -13,18 +13,37 @@ import jinja2
 
 def load_loso_analysis_results(analysis_dir):
     """Load LOSO analysis results."""
-    results = {}
+    results = {
+        'features_only': {},
+        'all_models': {}
+    }
 
+    # Load feature-only analysis results
     for metric in ['accuracy', 'f1']:
-        results_path = os.path.join(analysis_dir, 'loso', f'statistical_results_{metric}.json')
-        rankings_path = os.path.join(analysis_dir, 'loso', f'model_rankings_{metric}.csv')
+        results_path = os.path.join(analysis_dir, 'loso_features', f'statistical_results_{metric}.json')
+        rankings_path = os.path.join(analysis_dir, 'loso_features', f'model_rankings_{metric}.csv')
 
         if os.path.exists(results_path) and os.path.exists(rankings_path):
             with open(results_path, 'r') as f:
                 statistical_results = json.load(f)
             rankings = pd.read_csv(rankings_path)
 
-            results[metric] = {
+            results['features_only'][metric] = {
+                'statistical_results': statistical_results,
+                'model_rankings': rankings
+            }
+
+    # Load all models analysis results
+    for metric in ['accuracy', 'f1']:
+        results_path = os.path.join(analysis_dir, 'loso_all', f'statistical_results_{metric}.json')
+        rankings_path = os.path.join(analysis_dir, 'loso_all', f'model_rankings_{metric}.csv')
+
+        if os.path.exists(results_path) and os.path.exists(rankings_path):
+            with open(results_path, 'r') as f:
+                statistical_results = json.load(f)
+            rankings = pd.read_csv(rankings_path)
+
+            results['all_models'][metric] = {
                 'statistical_results': statistical_results,
                 'model_rankings': rankings
             }
@@ -214,12 +233,25 @@ def generate_summary_statistics(loso_results, ablation_results, model_results, b
     """Generate summary statistics table."""
     summary_data = []
 
-    # LOSO model comparison
-    if 'accuracy' in loso_results:
-        loso_rankings = loso_results['accuracy']['model_rankings']
+    # LOSO model comparison (features only)
+    if 'features_only' in loso_results and 'accuracy' in loso_results['features_only']:
+        loso_rankings = loso_results['features_only']['accuracy']['model_rankings']
         for _, row in loso_rankings.iterrows():
             summary_data.append({
-                'Analysis': 'LOSO Model Comparison',
+                'Analysis': 'LOSO Features Only',
+                'Configuration': row['model'],
+                'Metric': 'Accuracy',
+                'Mean': f"{row['mean_score']:.4f}",
+                'Std': f"{row['std_score']:.4f}",
+                'Rank': f"{row['average_rank']:.2f}"
+            })
+
+    # LOSO model comparison (all models)
+    if 'all_models' in loso_results and 'accuracy' in loso_results['all_models']:
+        loso_rankings = loso_results['all_models']['accuracy']['model_rankings']
+        for _, row in loso_rankings.iterrows():
+            summary_data.append({
+                'Analysis': 'LOSO All Models',
                 'Configuration': row['model'],
                 'Metric': 'Accuracy',
                 'Mean': f"{row['mean_score']:.4f}",
@@ -321,37 +353,75 @@ def generate_html_report(loso_results, ablation_results, model_results, best_mod
         <div class="section">
             <h2>Model Comparison Results (LOSO)</h2>
             {% if loso_results %}
-                {% for metric, results in loso_results.items() %}
-                <h3>{{ metric.title() }} Analysis</h3>
+                <h3>Feature-Based Models Only</h3>
+                {% if loso_results.features_only %}
+                    {% for metric, results in loso_results.features_only.items() %}
+                    <h4>{{ metric.title() }} Analysis (AdaBoost, NN, XGBoost)</h4>
 
-                <div class="statistical-result">
-                    <h4>Statistical Test Results</h4>
-                    <p><strong>Friedman Test p-value:</strong> {{ "%.6f"|format(results.statistical_results.friedman_test.p_value) }}</p>
-                    <p><strong>Significant Differences:</strong> {{ "Yes" if results.statistical_results.friedman_test.significant else "No" }}</p>
-                    <p><strong>Kendall's W:</strong> {{ "%.4f"|format(results.statistical_results.kendalls_w.kendalls_w) }}</p>
-                </div>
+                    <div class="statistical-result">
+                        <h5>Statistical Test Results</h5>
+                        <p><strong>Friedman Test p-value:</strong> {{ "%.6f"|format(results.statistical_results.friedman_test.p_value) }}</p>
+                        <p><strong>Significant Differences:</strong> {{ "Yes" if results.statistical_results.friedman_test.significant else "No" }}</p>
+                        <p><strong>Kendall's W:</strong> {{ "%.4f"|format(results.statistical_results.kendalls_w.kendalls_w) }}</p>
+                    </div>
 
-                <table class="metrics-table">
-                    <thead>
-                        <tr>
-                            <th>Model</th>
-                            <th>Average Rank</th>
-                            <th>Mean {{ metric.title() }}</th>
-                            <th>Std {{ metric.title() }}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for _, row in results.model_rankings.iterrows() %}
-                        <tr>
-                            <td>{{ row.model }}</td>
-                            <td>{{ "%.3f"|format(row.average_rank) }}</td>
-                            <td>{{ "%.4f"|format(row.mean_score) }}</td>
-                            <td>{{ "%.4f"|format(row.std_score) }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-                {% endfor %}
+                    <table class="metrics-table">
+                        <thead>
+                            <tr>
+                                <th>Model</th>
+                                <th>Average Rank</th>
+                                <th>Mean {{ metric.title() }}</th>
+                                <th>Std {{ metric.title() }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for _, row in results.model_rankings.iterrows() %}
+                            <tr>
+                                <td>{{ row.model }}</td>
+                                <td>{{ "%.3f"|format(row.average_rank) }}</td>
+                                <td>{{ "%.4f"|format(row.mean_score) }}</td>
+                                <td>{{ "%.4f"|format(row.std_score) }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% endfor %}
+                {% endif %}
+
+                <h3>All Models Including CNN</h3>
+                {% if loso_results.all_models %}
+                    {% for metric, results in loso_results.all_models.items() %}
+                    <h4>{{ metric.title() }} Analysis (AdaBoost, NN, XGBoost, CNN)</h4>
+
+                    <div class="statistical-result">
+                        <h5>Statistical Test Results</h5>
+                        <p><strong>Friedman Test p-value:</strong> {{ "%.6f"|format(results.statistical_results.friedman_test.p_value) }}</p>
+                        <p><strong>Significant Differences:</strong> {{ "Yes" if results.statistical_results.friedman_test.significant else "No" }}</p>
+                        <p><strong>Kendall's W:</strong> {{ "%.4f"|format(results.statistical_results.kendalls_w.kendalls_w) }}</p>
+                    </div>
+
+                    <table class="metrics-table">
+                        <thead>
+                            <tr>
+                                <th>Model</th>
+                                <th>Average Rank</th>
+                                <th>Mean {{ metric.title() }}</th>
+                                <th>Std {{ metric.title() }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for _, row in results.model_rankings.iterrows() %}
+                            <tr>
+                                <td>{{ row.model }}</td>
+                                <td>{{ "%.3f"|format(row.average_rank) }}</td>
+                                <td>{{ "%.4f"|format(row.mean_score) }}</td>
+                                <td>{{ "%.4f"|format(row.std_score) }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% endfor %}
+                {% endif %}
             {% endif %}
         </div>
 
