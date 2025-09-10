@@ -303,9 +303,9 @@ metrics:
 - dvclive/adaboost/standard/metrics.json
 - dvclive/xgb/standard/metrics.json
 - dvclive/nn/standard/metrics.json
-- dvclive/adaboost/loso/metrics.json
-- dvclive/nn/loso/metrics.json
 - dvclive/xgb/loso/metrics.json
+- dvclive/nn/loso/metrics.json
+- dvclive/adaboost/loso/metrics.json
 params:
 - dvclive/adaboost/standard/params.yaml
 - dvclive/xgb/standard/params.yaml
@@ -320,11 +320,11 @@ plots:
 - dvclive/nn/standard/plots/metrics:
     x: step
 - dvclive/nn/standard/plots/images
-- dvclive/adaboost/loso/plots/metrics:
+- dvclive/xgb/loso/plots/metrics:
     x: step
 - dvclive/nn/loso/plots/metrics:
     x: step
-- dvclive/xgb/loso/plots/metrics:
+- dvclive/adaboost/loso/plots/metrics:
     x: step
 artifacts:
   y_pred:

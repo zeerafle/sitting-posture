@@ -2707,8 +2707,8 @@ stages:
       nfiles: 2
     - path: src/models/adaboost/train_loso.py
       hash: md5
-      md5: e7b2c0e8362165ea44587e8478879d18
-      size: 2057
+      md5: 178db9d471a24f00c91caa211c45f5a1
+      size: 1937
       isexec: true
     - path: src/models/base_trainer.py
       hash: md5
@@ -2735,9 +2735,9 @@ stages:
         adaboost:
           n_estimators_min: 10
           n_estimators_max: 2000
-        cv: 2
+        cv: 5
         cv_folds: 5
-        n_iter: 2
+        n_iter: 30
         nn:
           first_hidden_layer_sizes_min: 128
           first_hidden_layer_sizes_max: 512
@@ -2782,16 +2782,16 @@ stages:
     outs:
     - path: dvclive/adaboost/loso/aggregated_metrics.json
       hash: md5
-      md5: 478cda87c0b9c1432d02c89b99fe8b50
-      size: 377
+      md5: 7f95d294abfca44fe8376d5299a66f68
+      size: 379
     - path: dvclive/adaboost/loso/fold_metrics.json
       hash: md5
-      md5: 07f79ee1c4a80d307c4a682c24c1f2c3
-      size: 3962
+      md5: 2a6bf5478d928042d1925403ded3f9ce
+      size: 3976
     - path: models/adaboost/adaboost_loso.joblib
       hash: md5
-      md5: 7dc5d8f6661acd04d003461d3276c354
-      size: 935860
+      md5: 1def940d69b7e152f0c97e4fa4b0d60b
+      size: 1280820
   train_loso@nn:
     cmd: uv run python src/models/nn/train_loso.py
     deps:
@@ -2817,8 +2817,8 @@ stages:
       isexec: true
     - path: src/models/nn/train_loso.py
       hash: md5
-      md5: 4fb20a831bb833f2c8c5a416f0fd0049
-      size: 4106
+      md5: 959b22bea58bbde6b161d6bf38120edb
+      size: 4115
       isexec: true
     - path: src/models/utils.py
       hash: md5
@@ -2830,9 +2830,9 @@ stages:
         adaboost:
           n_estimators_min: 10
           n_estimators_max: 2000
-        cv: 2
+        cv: 5
         cv_folds: 5
-        n_iter: 2
+        n_iter: 30
         nn:
           first_hidden_layer_sizes_min: 128
           first_hidden_layer_sizes_max: 512
@@ -2885,7 +2885,7 @@ stages:
       size: 3978
     - path: models/nn/nn_loso.joblib
       hash: md5
-      md5: 27c42ed2374177a005cea5d05aa6d597
+      md5: bc365f302ee588d18535a0c1df51fa7a
       size: 150007
   train_loso@xgb:
     cmd: uv run python src/models/xgb/train_loso.py
@@ -2925,9 +2925,9 @@ stages:
         adaboost:
           n_estimators_min: 10
           n_estimators_max: 2000
-        cv: 2
+        cv: 5
         cv_folds: 5
-        n_iter: 2
+        n_iter: 30
         nn:
           first_hidden_layer_sizes_min: 128
           first_hidden_layer_sizes_max: 512
@@ -2972,13 +2972,13 @@ stages:
     outs:
     - path: dvclive/xgb/loso/aggregated_metrics.json
       hash: md5
-      md5: 9484abd1d693861ff84005104479c8a2
-      size: 376
+      md5: f84fb4b088456da2331e716e3920d801
+      size: 378
     - path: dvclive/xgb/loso/fold_metrics.json
       hash: md5
-      md5: bffa07e57f743f7678b887c827341a63
+      md5: 0340618081a0ddae96a3c980706a7985
       size: 3979
     - path: models/xgb/xgb_loso.joblib
       hash: md5
-      md5: 7d4d630d1c64c0528b59c793965157e5
-      size: 49276
+      md5: b89dff06173613068e6e15512597703f
+      size: 246346

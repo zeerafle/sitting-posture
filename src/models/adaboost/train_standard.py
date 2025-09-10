@@ -24,7 +24,6 @@ class AdaBoostStandardTrainer(BaseTrainer):
     def get_estimator(self):
         return AdaBoostClassifier(
             random_state=self.params["random_state"],
-            algorithm='SAMME'
         )
 
     def get_param_space(self):
@@ -33,7 +32,6 @@ class AdaBoostStandardTrainer(BaseTrainer):
                 self.params["adaboost"]["n_estimators_min"],
                 self.params["adaboost"]["n_estimators_max"]
             ),
-            "learning_rate": Real(0.01, 2.0, prior='log-uniform')
         }
 
     def log_model_specific_metrics(self, model, live):

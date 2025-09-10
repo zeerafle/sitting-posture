@@ -4,7 +4,7 @@ import sys
 import numpy as np
 from sklearn.neural_network import MLPClassifier
 from sklearn.base import BaseEstimator, ClassifierMixin
-from skopt.space import Categorical
+from skopt.space import Integer, Categorical
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.abspath(os.path.join(current_dir, "..", ".."))
