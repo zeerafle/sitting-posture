@@ -102,10 +102,11 @@ class CNNLOSOTrainer(BaseTrainer):
             num_parallel_calls=tf.data.AUTOTUNE
         )
 
+        # Cache to prevent re-execution of map for each epoch
+        dataset = dataset.cache()
+
         # Apply training-specific transformations
         if is_training:
-            # Cache to prevent re-execution of map for each epoch
-            dataset = dataset.cache()
             # Shuffle with a large buffer
             dataset = dataset.shuffle(buffer_size=min(10000, len(file_paths)))
             # Apply data augmentation here if needed
@@ -275,7 +276,7 @@ class CNNLOSOTrainer(BaseTrainer):
 
                     # PHASE 1: Initial training with frozen base model
                     logger.info(f"Fold {fold_idx} - Phase 1: Initial training with frozen base")
-                    model.fit(train_dataset, epochs=1, verbose=1)
+                    model.fit(train_dataset, epochs=5, verbose=1)
 
                     # PHASE 2: Fine-tuning with last block unfrozen
                     logger.info(f"Fold {fold_idx} - Phase 2: Fine-tuning with last block unfrozen")
@@ -290,7 +291,7 @@ class CNNLOSOTrainer(BaseTrainer):
                         callbacks=[
                             tf.keras.callbacks.EarlyStopping(
                                 monitor='loss',
-                                patience=1,
+                                patience=15,
                                 restore_best_weights=True
                             )
                         ],

@@ -1462,8 +1462,8 @@ stages:
       isexec: true
     - path: src/models/cnn/train_loso.py
       hash: md5
-      md5: d820571afc7095b7d8ea4ec5f9810833
-      size: 16243
+      md5: c53b4aa141ec4d51bd4e4beff998f25e
+      size: 16237
       isexec: true
     - path: src/models/cnn/trainer.py
       hash: md5
@@ -1488,16 +1488,12 @@ stages:
     outs:
     - path: dvclive/cnn/loso/aggregated_metrics.json
       hash: md5
-      md5: b5cf48fb836ebead8e0e44e07ebeefa2
-      size: 375
+      md5: 9a08d06d0a8807cea4fe783f7ddbde89
+      size: 378
     - path: dvclive/cnn/loso/fold_metrics.json
       hash: md5
-      md5: 92b265b1cd90888b7578de6d207668e5
-      size: 3992
-    - path: models/cnn/cnn_loso.keras
-      hash: md5
-      md5: e0bf5a5f9a92fb955788c032f10e87eb
-      size: 9642744
+      md5: cd1703fdb8780234eb4cf5642dbdee74
+      size: 3980
   prepare_ablation_combined@all-all_features:
     cmd: uv run python src/prepare.py --loso --combined --data-mode all 
       --feature-mode all_features
@@ -3018,13 +3014,13 @@ stages:
       isexec: true
     - path: src/models/cnn/train_standard.py
       hash: md5
-      md5: 3e1e043b716d1f2e6f02393b10bece4d
-      size: 16127
+      md5: a05b64dbe2790c9a414a4db971018f88
+      size: 16074
       isexec: true
     - path: src/models/cnn/trainer.py
       hash: md5
-      md5: 442fd78d6d0e7580452d61b689b7c071
-      size: 3667
+      md5: d38babf803f7d4ab2c5fea08fcd03093
+      size: 3570
       isexec: true
     - path: src/models/evaluate.py
       hash: md5
@@ -3044,13 +3040,13 @@ stages:
     outs:
     - path: dvclive/cnn/standard/metrics.json
       hash: md5
-      md5: 94a7bed2f6a2bfdf10498045b0c0e18e
-      size: 614
+      md5: dfb026e11dd0139490fcd5dae7990a77
+      size: 2358
     - path: dvclive/cnn/standard/test_predictions.csv
       hash: md5
-      md5: 0814c8f38da9da6e0bbf2f345d9cb61e
-      size: 23844
+      md5: 7e6641e9cd3122deb9a4badfd36b2582
+      size: 23730
     - path: models/cnn/cnn_standard.keras
       hash: md5
-      md5: 086212aa7e2febddbc28d7ed1d44664c
+      md5: c50e279b585404e132e69304f5a65c73
       size: 18077323

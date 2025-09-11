@@ -121,8 +121,6 @@ stages:
     - src/models/evaluate.py
     - src/models/utils.py
     - data/processed/loso/
-    outs:
-    - models/cnn/cnn_loso.keras
     metrics:
     - dvclive/cnn/loso/fold_metrics.json
     - dvclive/cnn/loso/aggregated_metrics.json

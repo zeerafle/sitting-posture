@@ -243,12 +243,11 @@ class CNNStandardTrainer(BaseTrainer):
                 # Train for 10-15 more epochs with early stopping
                 fine_tune_history = model.fit(
                     train_dataset,
-                    validation_data=test_dataset,
                     epochs=15,  # Maximum number of epochs for fine-tuning
                     callbacks=[
                         tf.keras.callbacks.EarlyStopping(
-                            monitor='val_loss',
-                            patience=3,
+                            monitor='loss',
+                            patience=5,
                             restore_best_weights=True
                         )
                     ],
