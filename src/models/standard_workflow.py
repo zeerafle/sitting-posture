@@ -35,7 +35,7 @@ def run_standard_workflow(trainer):
     logger.info(f"Loaded train data: {train_df.shape}, test data: {test_df.shape}")
 
     # Separate features and labels
-    feature_cols = [col for col in train_df.columns if col != 'labels']
+    feature_cols = [col for col in train_df.columns if col not in ['labels', 'subject_id', 'file_name']]
     X_train = pd.DataFrame(train_df[feature_cols])  # Explicitly cast to DataFrame
     y_train = train_df['labels'].values
     X_test = pd.DataFrame(test_df[feature_cols])    # Explicitly cast to DataFrame

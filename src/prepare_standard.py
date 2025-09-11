@@ -117,6 +117,12 @@ def prepare_standard_split():
     else:
         raise KeyError("'class_no' column not found for labels")
 
+    # assign file_name and subject_id to train and test datasets
+    out_tr["file_name"] = train_df["file_name"]
+    out_tr["subject_id"] = train_df["subject_id"]
+    out_te["file_name"] = test_df["file_name"]
+    out_te["subject_id"] = test_df["subject_id"]
+
     # Create output directory
     output_dir = "data/processed/standard_split"
     os.makedirs(output_dir, exist_ok=True)

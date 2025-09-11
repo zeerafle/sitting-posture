@@ -2342,13 +2342,14 @@ stages:
       isexec: true
     - path: src/data_preparation/
       hash: md5
-      md5: 2c2befcdf4893154db3bec937a2374aa.dir
+      md5: 8b323f0f9516243fe4a8554fa9bd6318.dir
       size: 26426
       nfiles: 16
     - path: src/prepare_standard.py
       hash: md5
-      md5: 38cde66b36d0c28b9f362b142058a3cc
-      size: 5586
+      md5: f6abfa135aaf30e8f6b9fa295ae472c8
+      size: 5846
+      isexec: true
     outs:
     - path: data/processed/standard_split/preprocessors.joblib
       hash: md5
@@ -2356,12 +2357,12 @@ stages:
       size: 5615
     - path: data/processed/standard_split/test.csv
       hash: md5
-      md5: e0fdd11e27204427a4febd008ec7f63d
-      size: 1881614
+      md5: d3868e4aab48b2567617c6a1f97fd52c
+      size: 1972864
     - path: data/processed/standard_split/train.csv
       hash: md5
-      md5: cbcc55068df17014eaabdb0fc8581b8f
-      size: 7338355
+      md5: 6cef974418df66dabb239a857359d270
+      size: 7693573
   prepare_loso:
     cmd: uv run python src/prepare_loso.py
     deps:
@@ -2982,3 +2983,54 @@ stages:
       hash: md5
       md5: b89dff06173613068e6e15512597703f
       size: 246346
+  train_cnn_standard:
+    cmd: uv run python src/models/cnn/train_standard.py
+    deps:
+    - path: data/processed/standard_split/
+      hash: md5
+      md5: c8600c5947e532d270eca80ca4fc031e.dir
+      size: 9672052
+      nfiles: 3
+    - path: src/models/base_trainer.py
+      hash: md5
+      md5: a57f8eb114a0cc63aa652596546a1b48
+      size: 2372
+      isexec: true
+    - path: src/models/cnn/train_standard.py
+      hash: md5
+      md5: 01b9113dbf35b13ddcdd963705311045
+      size: 14702
+      isexec: true
+    - path: src/models/cnn/trainer.py
+      hash: md5
+      md5: 5c9f32d9e30e69cd0bdc9fe88d7bd797
+      size: 2509
+      isexec: true
+    - path: src/models/evaluate.py
+      hash: md5
+      md5: c901aed098fd676775dd31cba4ebf8bb
+      size: 5198
+      isexec: true
+    - path: src/models/standard_workflow.py
+      hash: md5
+      md5: 9388d8233ad529cc962521bfde254ce2
+      size: 7060
+      isexec: true
+    - path: src/models/utils.py
+      hash: md5
+      md5: c51d309800e3542813508b9671af8ba2
+      size: 5480
+      isexec: true
+    outs:
+    - path: dvclive/cnn/standard/metrics.json
+      hash: md5
+      md5: 5940d2b0cb8b6ad6651263542da10781
+      size: 519
+    - path: dvclive/cnn/standard/test_predictions.csv
+      hash: md5
+      md5: 32e3c238a2fbaa3dbf04d298e6cc242a
+      size: 23772
+    - path: models/cnn/cnn_standard.keras
+      hash: md5
+      md5: 6e3fc0f1bf7c0524c48d847903bec12c
+      size: 9631221

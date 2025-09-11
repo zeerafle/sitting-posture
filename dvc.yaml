@@ -104,8 +104,6 @@ stages:
     - src/models/evaluate.py
     - src/models/utils.py
     - data/processed/standard_split/
-    params:
-    - params.yaml
     outs:
     - models/cnn/cnn_standard.keras
     metrics:
@@ -292,7 +290,6 @@ stages:
 
 
 metrics:
-- dvclive/cnn/standard/metrics.json
 - dvclive/cnn/loso/aggregated_metrics.json
 - dvclive/ablation/real_keypoints_only/aggregated_metrics.json
 - dvclive/ablation/real_all_features/aggregated_metrics.json
@@ -306,6 +303,7 @@ metrics:
 - dvclive/xgb/loso/metrics.json
 - dvclive/nn/loso/metrics.json
 - dvclive/adaboost/loso/metrics.json
+- dvclive/cnn/standard/metrics.json
 params:
 - dvclive/adaboost/standard/params.yaml
 - dvclive/xgb/standard/params.yaml
@@ -325,6 +323,8 @@ plots:
 - dvclive/nn/loso/plots/metrics:
     x: step
 - dvclive/adaboost/loso/plots/metrics:
+    x: step
+- dvclive/cnn/standard/plots/metrics:
     x: step
 artifacts:
   y_pred:
