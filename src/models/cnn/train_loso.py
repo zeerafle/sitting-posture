@@ -22,6 +22,7 @@ class CNNLOSOTrainer(BaseTrainer):
             use_loso=True         # This is for LOSO
         )
         self.cnn_trainer = CNNTrainer()
+        self.data_dir = "/teamspace/studios/01-data-download-kaggle/.cache/kagglehub/datasets/zeerafle/sitting-posture/versions/6"
 
     def get_estimator(self):
         return self.cnn_trainer.get_estimator()
@@ -30,52 +31,131 @@ class CNNLOSOTrainer(BaseTrainer):
         # CNN uses fixed architecture for LOSO
         return {}
 
-    def load_image(self, file_path):
-        """Load and preprocess a single image"""
-        try:
-            raw = tf.io.read_file(file_path)
-            tensor = tf.io.decode_image(raw, channels=3)
-            tensor = tf.cast(tensor, tf.float32) / 255.0
-            tensor = tf.image.resize_with_pad(tensor, 224, 224)
-            return tf.keras.applications.mobilenet_v2.preprocess_input(tensor)
-        except Exception as e:
-            logger.error(f"Error loading image {file_path}: {e}")
-            # Return a black image as fallback
-            return tf.zeros((224, 224, 3), dtype=tf.float32)
+    def preprocess_image(self, image_path, label):
+        """Load and preprocess a single image for tf.data pipeline"""
+        # Define a wrapper function that handles exceptions
+        def _process_image_path_tensor(path_tensor):
+            path_str = path_tensor.numpy().decode('utf-8')
+            try:
+                # Read the image file
+                img = tf.io.read_file(path_tensor)
+                # Decode the image
+                img = tf.image.decode_image(img, channels=3, expand_animations=False)
+                # Resize the image
+                img = tf.image.resize(img, (224, 224))
+                # Apply MobileNetV2 preprocessing
+                img = tf.keras.applications.mobilenet_v2.preprocess_input(img)
+                return img
+            except Exception as e:
+                logger.error(f"Error processing image {path_str}: {str(e)}")
+                # Return a placeholder image on error
+                return tf.zeros((224, 224, 3), dtype=tf.float32)
 
-    def create_dataset(self, file_paths, labels, batch_size=32):
-        """Create a TensorFlow dataset from file paths and labels"""
-        dataset = tf.data.Dataset.from_tensor_slices((file_paths, labels))
+        # Use tf.py_function to wrap the Python function
+        img = tf.py_function(
+            _process_image_path_tensor,
+            [image_path],
+            tf.float32
+        )
+        # Ensure the image has the right shape
+        img.set_shape((224, 224, 3))
+        # Cast label to int32
+        label = tf.cast(label, tf.int32)
+        return img, label
+
+    def filter_valid_paths(self, path, label):
+        """Filter function to check if file exists"""
+        # Use py_function to wrap the file existence check
+        file_exists = tf.py_function(
+            lambda p: tf.constant(os.path.exists(p.numpy().decode('utf-8'))),
+            [path],
+            tf.bool
+        )
+        return file_exists
+
+    def create_dataset(self, file_paths, labels, batch_size=32, is_training=True):
+        """Create tf.data.Dataset for efficient data loading"""
+        logger.debug(f"Creating dataset with {len(file_paths)} images")
+
+        # Verify and filter file paths
+        valid_count = 0
+        for path in file_paths:
+            if tf.io.gfile.exists(path):
+                valid_count += 1
+
+        logger.info(f"Found {valid_count} valid images out of {len(file_paths)} total paths")
+
+        if valid_count == 0:
+            raise ValueError(f"No valid image paths found! Check your data directory: {self.data_dir}")
+
+        # Create dataset from tensors
+        paths_tensor = tf.convert_to_tensor(file_paths, dtype=tf.string)
+        labels_tensor = tf.convert_to_tensor(labels, dtype=tf.int32)
+        dataset = tf.data.Dataset.from_tensor_slices((paths_tensor, labels_tensor))
+
+        # Filter valid files
+        dataset = dataset.filter(lambda path, label: self.filter_valid_paths(path, label))
+
+        # Map preprocessing function to each element
         dataset = dataset.map(
-            lambda path, label: (tf.py_function(self.load_image, [path], tf.float32), label),
+            self.preprocess_image,
             num_parallel_calls=tf.data.AUTOTUNE
         )
-        dataset = dataset.batch(batch_size).prefetch(tf.data.AUTOTUNE)
+
+        # Apply training-specific transformations
+        if is_training:
+            # Cache to prevent re-execution of map for each epoch
+            dataset = dataset.cache()
+            # Shuffle with a large buffer
+            dataset = dataset.shuffle(buffer_size=min(10000, len(file_paths)))
+            # Apply data augmentation here if needed
+            # dataset = dataset.map(data_augmentation, num_parallel_calls=tf.data.AUTOTUNE)
+
+        # Batch and prefetch
+        dataset = dataset.batch(batch_size)
+        dataset = dataset.prefetch(tf.data.AUTOTUNE)
+
         return dataset
 
     def prepare_data(self):
-        """Prepare CNN data for LOSO evaluation"""
-        base_data_dir = "/teamspace/studios/01-data-download-kaggle/.cache/kagglehub/datasets/zeerafle/sitting-posture/versions/6"
+        """Prepare CNN data from processed LOSO CSV file"""
+        data_path = "data/processed/loso/data.csv"
 
-        # Get all image files and their labels
+        if not os.path.exists(data_path):
+            raise FileNotFoundError(f"LOSO CSV not found: {data_path}")
+
+        # Load the LOSO dataset
+        df = pd.read_csv(data_path)
+        logger.info(f"Loaded {len(df)} records from LOSO CSV")
+
+        # Check if file_name column exists
+        if 'file_name' not in df.columns:
+            raise ValueError("Required 'file_name' column not found in LOSO CSV")
+
+        # Check if subject_id column exists
+        if 'subject_id' not in df.columns:
+            raise ValueError("Required 'subject_id' column not found in LOSO CSV")
+
+        # Check if labels column exists
+        if 'labels' not in df.columns:
+            raise ValueError("Required 'labels' column not found in LOSO CSV")
+
+        # Construct full file paths
         all_files = []
         all_labels = []
         all_subjects = []
 
-        # Use the subject mapping from CNNTrainer
-        subject_mapping = self.cnn_trainer.subject_mapping
+        # Process the CSV data
+        for _, row in df.iterrows():
+            file_name = row['file_name']
+            subject_id = row['subject_id']
+            class_label = row['labels']
 
-        for file_path, subject_id in subject_mapping.items():
-            # Determine label from file path
-            if "non-ergonomis" in file_path:
-                label = 1  # non-ergonomic
-            elif "ergonomis" in file_path:
-                label = 0  # ergonomic
-            else:
-                continue  # skip files we can't classify
+            # Construct the full image path
+            image_path = os.path.join(self.data_dir, file_name)
 
-            all_files.append(file_path)
-            all_labels.append(label)
+            all_files.append(image_path)
+            all_labels.append(class_label)
             all_subjects.append(subject_id)
 
         # Convert to numpy arrays
@@ -126,10 +206,11 @@ class CNNLOSOTrainer(BaseTrainer):
             logger.info(f"Successfully created {len(subject_splits)} folds for CNN LOSO")
         except ValueError as e:
             logger.error(f"Error creating grouped folds: {e}")
+            raise ValueError(f"Error creating grouped folds: {e}")
             # Fallback to manual splitting
-            from sklearn.model_selection import StratifiedKFold
-            skf_simple = StratifiedKFold(n_splits=cv_folds, shuffle=True, random_state=42)
-            subject_splits = list(skf_simple.split(unique_subjects, subject_labels.values))
+            # from sklearn.model_selection import StratifiedKFold
+            # skf_simple = StratifiedKFold(n_splits=cv_folds, shuffle=True, random_state=42)
+            # subject_splits = list(skf_simple.split(unique_subjects, subject_labels.values))
 
         # Store fold-wise metrics
         fold_metrics = {
@@ -182,8 +263,8 @@ class CNNLOSOTrainer(BaseTrainer):
                 logger.info(f"Fold {fold_idx} - Train: {len(X_train_paths)} samples, Test: {len(X_test_paths)} samples")
 
                 # Create datasets
-                train_dataset = self.create_dataset(X_train_paths, y_train)
-                test_dataset = self.create_dataset(X_test_paths, y_test)
+                train_dataset = self.create_dataset(X_train_paths, y_train, is_training=True)
+                test_dataset = self.create_dataset(X_test_paths, y_test, is_training=False)
 
                 # Train model for this fold
                 model = self.get_estimator()
@@ -192,9 +273,29 @@ class CNNLOSOTrainer(BaseTrainer):
                 with OfflineEmissionsTracker(save_to_file=False) as train_tracker:
                     start_time = time.time()
 
-                    # Train with fewer epochs for LOSO to save time
-                    model.fit(train_dataset, epochs=5, verbose=0)
+                    # PHASE 1: Initial training with frozen base model
+                    logger.info(f"Fold {fold_idx} - Phase 1: Initial training with frozen base")
+                    model.fit(train_dataset, epochs=1, verbose=1)
 
+                    # PHASE 2: Fine-tuning with last block unfrozen
+                    logger.info(f"Fold {fold_idx} - Phase 2: Fine-tuning with last block unfrozen")
+
+                    # Unfreeze the last block and recompile with smaller learning rate
+                    model = self.cnn_trainer.unfreeze_last_block(model)
+
+                    # Train for 10-15 more epochs with early stopping
+                    model.fit(
+                        train_dataset,
+                        epochs=1,  # Maximum number of epochs for fine-tuning
+                        callbacks=[
+                            tf.keras.callbacks.EarlyStopping(
+                                monitor='loss',
+                                patience=1,
+                                restore_best_weights=True
+                            )
+                        ],
+                        verbose=0
+                    )
                     training_time = time.time() - start_time
 
                 # Track inference time and emissions
@@ -259,25 +360,22 @@ class CNNLOSOTrainer(BaseTrainer):
             with open(aggregated_metrics_path, "w") as f:
                 json.dump(aggregated_metrics, f, indent=2, cls=NumpyEncoder)
 
-        # Train final model on all data
-        logger.info("Training final CNN model on complete dataset")
-        final_model = self.get_estimator()
-        final_dataset = self.create_dataset(file_paths, labels)
-        final_model.fit(final_dataset, epochs=5, verbose=1)
-
-        # Save final model
-        model_filename = f"{self.model_name}_loso.keras"
-        model_path = os.path.join(self.models_dir, model_filename)
-        final_model.save(model_path)
-        logger.success(f"Saved final CNN model to {model_path}")
-
         logger.success("CNN LOSO workflow completed successfully")
-        return final_model, aggregated_metrics
+        return aggregated_metrics
 
 
 if __name__ == "__main__":
+    # Configure logger to show more details
+    logger.remove()
+    logger.add(sys.stderr, level="DEBUG")
+    logger.info("Starting CNN LOSO trainer script")
+
     parser = argparse.ArgumentParser(description="Train CNN model with LOSO grouped 5-fold cross validation")
     args = parser.parse_args()
 
-    trainer = CNNLOSOTrainer()
-    model, metrics = trainer.run()
+    try:
+        trainer = CNNLOSOTrainer()
+        metrics = trainer.run()
+    except Exception as e:
+        logger.exception("Fatal error during execution")
+        sys.exit(1)

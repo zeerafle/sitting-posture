@@ -95,16 +95,17 @@ def prepare_loso():
     # Verify no subject leakage in preparation
     logger.info("Verifying data integrity for LOSO...")
 
-    # Check that each subject has consistent class labels
-    subject_label_consistency = final_df.groupby('subject_id')['labels'].nunique()
-    inconsistent_subjects = subject_label_consistency[subject_label_consistency > 1]
+    # Check that each subject has exactly 2 class labels (ergonomic and non-ergonomic)
+    subject_label_counts = final_df.groupby('subject_id')['labels'].nunique()
+    subjects_without_both_classes = subject_label_counts[subject_label_counts != 2]
 
-    if len(inconsistent_subjects) > 0:
-        logger.warning(f"Found {len(inconsistent_subjects)} subjects with inconsistent labels:")
-        for subj_id, count in inconsistent_subjects.items():
-            logger.warning(f"  Subject {subj_id}: {count} different labels")
+    if len(subjects_without_both_classes) > 0:
+        logger.warning(f"Found {len(subjects_without_both_classes)} subjects without exactly 2 classes:")
+        for subj_id, count in subjects_without_both_classes.items():
+            subject_labels = final_df[final_df['subject_id'] == subj_id]['labels'].unique()
+            logger.warning(f"  Subject {subj_id}: {count} class(es) - {subject_labels}")
     else:
-        logger.info("All subjects have consistent class labels")
+        logger.info("All subjects have both ergonomic and non-ergonomic classes as expected")
 
     # Create output directory
     output_dir = "data/processed/loso"

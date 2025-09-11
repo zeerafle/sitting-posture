@@ -121,8 +121,6 @@ stages:
     - src/models/evaluate.py
     - src/models/utils.py
     - data/processed/loso/
-    params:
-    - params.yaml
     outs:
     - models/cnn/cnn_loso.keras
     metrics:
@@ -290,7 +288,6 @@ stages:
 
 
 metrics:
-- dvclive/cnn/loso/aggregated_metrics.json
 - dvclive/ablation/real_keypoints_only/aggregated_metrics.json
 - dvclive/ablation/real_all_features/aggregated_metrics.json
 - dvclive/ablation/synthetic_keypoints_only/aggregated_metrics.json
@@ -304,6 +301,7 @@ metrics:
 - dvclive/nn/loso/metrics.json
 - dvclive/adaboost/loso/metrics.json
 - dvclive/cnn/standard/metrics.json
+- dvclive/cnn/loso/metrics.json
 params:
 - dvclive/adaboost/standard/params.yaml
 - dvclive/xgb/standard/params.yaml
@@ -325,6 +323,8 @@ plots:
 - dvclive/adaboost/loso/plots/metrics:
     x: step
 - dvclive/cnn/standard/plots/metrics:
+    x: step
+- dvclive/cnn/loso/plots/metrics:
     x: step
 artifacts:
   y_pred:

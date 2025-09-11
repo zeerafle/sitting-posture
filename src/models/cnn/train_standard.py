@@ -225,13 +225,44 @@ class CNNStandardTrainer(BaseTrainer):
             with OfflineEmissionsTracker(save_to_file=False) as train_tracker:
                 start_time = time.time()
 
-                # Train model with tf.data dataset
+                # PHASE 1: Initial Training
+                logger.info("Starting Phase 1: Initial training with frozen base")
                 history = model.fit(
                     train_dataset,
                     validation_data=test_dataset,
-                    epochs=10,
+                    epochs=5,
                     verbose=1,
                 )
+
+                # PHASE 2: Fine-tuning with last block unfrozen
+                logger.info("Starting Phase 2: Fine-tuning with last block unfrozen")
+
+                # Unfreeze the last block and recompile with smaller learning rate
+                model = self.cnn_trainer.unfreeze_last_block(model)
+
+                # Train for 10-15 more epochs with early stopping
+                fine_tune_history = model.fit(
+                    train_dataset,
+                    validation_data=test_dataset,
+                    epochs=15,  # Maximum number of epochs for fine-tuning
+                    callbacks=[
+                        tf.keras.callbacks.EarlyStopping(
+                            monitor='val_loss',
+                            patience=3,
+                            restore_best_weights=True
+                        )
+                    ],
+                    verbose=1,
+                )
+
+                # Combine training history
+                if hasattr(history, 'history') and hasattr(fine_tune_history, 'history'):
+                    for key in fine_tune_history.history:
+                        if key in history.history:
+                            history.history[key].extend(fine_tune_history.history[key])
+                        else:
+                            history.history[key] = fine_tune_history.history[key]
+
 
                 training_time = time.time() - start_time
 

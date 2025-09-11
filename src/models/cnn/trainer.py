@@ -28,6 +28,11 @@ class CNNTrainer(BaseTrainer):
             )
 
             model = tf.keras.Sequential([
+                tf.keras.layers.RandomRotation(0.1),
+                tf.keras.layers.RandomZoom((0.8,1.0)),
+                tf.keras.layers.RandomFlip("horizontal"),
+                tf.keras.layers.RandomContrast((0.9, 1.1)),
+                tf.keras.layers.RandomBrightness(0.1),
                 mobilenet,
                 tf.keras.layers.Dense(1, activation='sigmoid')
             ])
@@ -36,11 +41,8 @@ class CNNTrainer(BaseTrainer):
             for layer in mobilenet.layers:
                 layer.trainable = False
 
-            # Print model summary for debugging
-            model.summary(print_fn=logger.info)
-
             model.compile(
-                optimizer=tf.keras.optimizers.Adam(learning_rate=0.00001),
+                optimizer=tf.keras.optimizers.Adam(learning_rate=0.001),
                 loss='binary_crossentropy',
                 metrics=['accuracy']
             )
@@ -50,6 +52,28 @@ class CNNTrainer(BaseTrainer):
         except Exception as e:
             logger.error(f"Error creating model: {str(e)}")
             raise
+
+    # Add this method after get_estimator()
+    def unfreeze_last_block(self, model):
+        """Unfreeze the last block of the MobileNetV2 model for fine-tuning"""
+        logger.info("Unfreezing last block of MobileNetV2 for fine-tuning...")
+
+        # The last block in MobileNetV2 starts around layer 140
+        # We'll unfreeze approximately the last 15-20 layers
+        mobilenet = model.layers[-2]  # Get the MobileNetV2 base
+
+        # Keep earlier layers frozen, unfreeze only the last block
+        for layer in mobilenet.layers[-20:]:
+            layer.trainable = True
+
+        # Recompile with a smaller learning rate for fine-tuning
+        model.compile(
+            optimizer=tf.keras.optimizers.Adam(learning_rate=0.00001),  # Smaller LR for fine-tuning
+            loss='binary_crossentropy',
+            metrics=['accuracy']
+        )
+
+        return model
 
     def get_param_space(self):
         """Return hyperparameter search space (not used for CNN)"""

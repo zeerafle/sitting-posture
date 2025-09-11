@@ -46,10 +46,28 @@ def load_combined_results(dvclive_path: str, model_name: str, metric: str) -> Li
 
 
 def load_loso_results(dvclive_path: str, model_name: str, metric: str) -> List[float]:
-    """Load LOSO results for a model."""
-    loso_path = os.path.join(dvclive_path, model_name, "combined_loso", "loso_metrics.json")
-    data = load_json_data(loso_path)
-    return extract_metric_values(data, metric)
+    """Load LOSO results for a model.
+
+    Checks for metrics in both fold_metrics.json and metrics.json in the loso directory.
+    """
+    # Try fold_metrics.json first
+    fold_metrics_path = os.path.join(dvclive_path, model_name, "loso", "fold_metrics.json")
+    data = load_json_data(fold_metrics_path)
+
+    if metric in data:
+        return extract_metric_values(data, metric)
+
+    # If not found, try metrics.json
+    metrics_path = os.path.join(dvclive_path, model_name, "loso", "metrics.json")
+    data = load_json_data(metrics_path)
+
+    # Extract metric values from individual folds in metrics.json
+    values = []
+    for fold_key in [k for k in data.keys() if k.startswith('fold_')]:
+        if metric in data[fold_key]:
+            values.append(float(data[fold_key][metric]))
+
+    return values
 
 
 def load_ablation_results(dvclive_path: str, model_configs: List[str], metric: str) -> Dict[str, List[float]]:

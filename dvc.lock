@@ -1450,35 +1450,54 @@ stages:
   train_cnn_loso:
     cmd: uv run python src/models/cnn/train_loso.py
     deps:
-    - path: 
-        /teamspace/studios/01-data-download-kaggle/.cache/kagglehub/datasets/zeerafle/sitting-posture/versions/6
+    - path: data/processed/loso/
       hash: md5
-      md5: 1150fe1ce4cfe5cea488d192792c3fe2.dir
-      size: 12435185764
-      nfiles: 8041
-    - path: data/data.csv
+      md5: a463c4f1663c8f1f943bbf944862b984.dir
+      size: 9810560
+      nfiles: 2
+    - path: src/models/base_trainer.py
       hash: md5
-      md5: d6ca8be1642022c83d9d6679bcfc66f7
-      size: 2936388
+      md5: a57f8eb114a0cc63aa652596546a1b48
+      size: 2372
       isexec: true
     - path: src/models/cnn/train_loso.py
       hash: md5
-      md5: 35498ae03f1a03fa8c9bdee0c153b778
-      size: 6508
+      md5: d820571afc7095b7d8ea4ec5f9810833
+      size: 16243
+      isexec: true
+    - path: src/models/cnn/trainer.py
+      hash: md5
+      md5: d38babf803f7d4ab2c5fea08fcd03093
+      size: 3570
+      isexec: true
+    - path: src/models/evaluate.py
+      hash: md5
+      md5: c901aed098fd676775dd31cba4ebf8bb
+      size: 5198
+      isexec: true
+    - path: src/models/loso_workflow.py
+      hash: md5
+      md5: c6c841edd45159be41132b71d7b3df83
+      size: 12074
+      isexec: true
+    - path: src/models/utils.py
+      hash: md5
+      md5: c51d309800e3542813508b9671af8ba2
+      size: 5480
       isexec: true
     outs:
-    - path: dvclive/cnn/combined_loso/loso_metrics.json
+    - path: dvclive/cnn/loso/aggregated_metrics.json
       hash: md5
-      md5: 0bb0cf8f2a375496399680feec9269d7
-      size: 619
-    - path: dvclive/cnn/combined_loso/metrics.json
+      md5: b5cf48fb836ebead8e0e44e07ebeefa2
+      size: 375
+    - path: dvclive/cnn/loso/fold_metrics.json
       hash: md5
-      md5: 3dbc7a1582a1428ee7961db7a9374859
-      size: 418
-    - path: models/cnn/cnn_combined_loso.keras
+      md5: 92b265b1cd90888b7578de6d207668e5
+      size: 3992
+    - path: models/cnn/cnn_loso.keras
       hash: md5
-      md5: 1a857ae13a91ccf03a2cff5328247f61
-      size: 9631247
+      md5: e0bf5a5f9a92fb955788c032f10e87eb
+      size: 9642744
   prepare_ablation_combined@all-all_features:
     cmd: uv run python src/prepare.py --loso --combined --data-mode all 
       --feature-mode all_features
@@ -2373,13 +2392,14 @@ stages:
       isexec: true
     - path: src/data_preparation/
       hash: md5
-      md5: 2c2befcdf4893154db3bec937a2374aa.dir
+      md5: 8b323f0f9516243fe4a8554fa9bd6318.dir
       size: 26426
       nfiles: 16
     - path: src/prepare_loso.py
       hash: md5
-      md5: 0583635f58bf59d7130287c153f4269e
-      size: 5523
+      md5: a704242914836232430514ef27ab57ba
+      size: 5704
+      isexec: true
     outs:
     - path: data/processed/loso/data.csv
       hash: md5
@@ -2998,13 +3018,13 @@ stages:
       isexec: true
     - path: src/models/cnn/train_standard.py
       hash: md5
-      md5: 01b9113dbf35b13ddcdd963705311045
-      size: 14702
+      md5: 3e1e043b716d1f2e6f02393b10bece4d
+      size: 16127
       isexec: true
     - path: src/models/cnn/trainer.py
       hash: md5
-      md5: 5c9f32d9e30e69cd0bdc9fe88d7bd797
-      size: 2509
+      md5: 442fd78d6d0e7580452d61b689b7c071
+      size: 3667
       isexec: true
     - path: src/models/evaluate.py
       hash: md5
@@ -3024,13 +3044,13 @@ stages:
     outs:
     - path: dvclive/cnn/standard/metrics.json
       hash: md5
-      md5: 5940d2b0cb8b6ad6651263542da10781
-      size: 519
+      md5: 94a7bed2f6a2bfdf10498045b0c0e18e
+      size: 614
     - path: dvclive/cnn/standard/test_predictions.csv
       hash: md5
-      md5: 32e3c238a2fbaa3dbf04d298e6cc242a
-      size: 23772
+      md5: 0814c8f38da9da6e0bbf2f345d9cb61e
+      size: 23844
     - path: models/cnn/cnn_standard.keras
       hash: md5
-      md5: 6e3fc0f1bf7c0524c48d847903bec12c
-      size: 9631221
+      md5: 086212aa7e2febddbc28d7ed1d44664c
+      size: 18077323
