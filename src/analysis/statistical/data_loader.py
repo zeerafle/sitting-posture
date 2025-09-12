@@ -74,7 +74,7 @@ def load_ablation_results(dvclive_path: str, model_configs: List[str], metric: s
     """Load ablation study results for multiple model configurations."""
     results = {}
     for config in model_configs:
-        loso_path = os.path.join(dvclive_path, config, "loso_metrics.json")
+        loso_path = os.path.join(dvclive_path, "ablation", config, "loso", "fold_metrics.json")
         data = load_json_data(loso_path)
         results[config] = extract_metric_values(data, metric)
     return results

@@ -3697,3 +3697,245 @@ stages:
       hash: md5
       md5: b89dff06173613068e6e15512597703f
       size: 246346
+  statistical_analysis_ablation_data_modes@accuracy:
+    cmd: uv run src/analysis/statistical_analysis.py --models 
+      real_keypoints_only synthetic_keypoints_only all_keypoints_only --metric 
+      accuracy --analysis-type ablation --experiment-type data_modes 
+      --output-dir dvclive/analysis/ablation/data_modes --approach bayesian
+    deps:
+    - path: dvclive/ablation/all_keypoints_only/loso/fold_metrics.json
+      hash: md5
+      md5: 60f99fcd9363c3a4807d54950401d474
+      size: 3977
+    - path: dvclive/ablation/real_keypoints_only/loso/fold_metrics.json
+      hash: md5
+      md5: fc7aa9ce047b2e8d69450d9cc37acdef
+      size: 3974
+    - path: dvclive/ablation/synthetic_keypoints_only/loso/fold_metrics.json
+      hash: md5
+      md5: b85ce3c0523cd754e386261fc3b236f5
+      size: 3974
+    - path: src/analysis/statistical/
+      hash: md5
+      md5: 725239508df5526e87c9a866773882e2.dir
+      size: 69095
+      nfiles: 15
+    - path: src/analysis/statistical_analysis.py
+      hash: md5
+      md5: 002edfaae4b9848198fde8f1a1987859
+      size: 8376
+      isexec: true
+    outs:
+    - path: dvclive/analysis/ablation/data_modes/model_rankings_accuracy.csv
+      hash: md5
+      md5: 238d009e222338204078c0b13c716750
+      size: 712
+    - path: 
+        dvclive/analysis/ablation/data_modes/statistical_results_accuracy.json
+      hash: md5
+      md5: 7976379128aaf40379e064a644f2655b
+      size: 1980
+  statistical_analysis_ablation_data_modes@f1:
+    cmd: uv run src/analysis/statistical_analysis.py --models 
+      real_keypoints_only synthetic_keypoints_only all_keypoints_only --metric 
+      f1 --analysis-type ablation --experiment-type data_modes --output-dir 
+      dvclive/analysis/ablation/data_modes --approach bayesian
+    deps:
+    - path: dvclive/ablation/all_keypoints_only/loso/fold_metrics.json
+      hash: md5
+      md5: 60f99fcd9363c3a4807d54950401d474
+      size: 3977
+    - path: dvclive/ablation/real_keypoints_only/loso/fold_metrics.json
+      hash: md5
+      md5: fc7aa9ce047b2e8d69450d9cc37acdef
+      size: 3974
+    - path: dvclive/ablation/synthetic_keypoints_only/loso/fold_metrics.json
+      hash: md5
+      md5: b85ce3c0523cd754e386261fc3b236f5
+      size: 3974
+    - path: src/analysis/statistical/
+      hash: md5
+      md5: 725239508df5526e87c9a866773882e2.dir
+      size: 69095
+      nfiles: 15
+    - path: src/analysis/statistical_analysis.py
+      hash: md5
+      md5: 002edfaae4b9848198fde8f1a1987859
+      size: 8376
+      isexec: true
+    outs:
+    - path: dvclive/analysis/ablation/data_modes/model_rankings_f1.csv
+      hash: md5
+      md5: b62effac2c43c78db9cacea7119e0344
+      size: 718
+    - path: dvclive/analysis/ablation/data_modes/statistical_results_f1.json
+      hash: md5
+      md5: a18d82265b7f2e84722ac55359a1ff08
+      size: 1972
+  statistical_analysis_ablation_feature_modes@accuracy:
+    cmd: uv run src/analysis/statistical_analysis.py --models all_keypoints_only
+      all_all_features --metric accuracy --analysis-type ablation 
+      --experiment-type feature_modes --output-dir 
+      dvclive/analysis/ablation/feature_modes --approach bayesian
+    deps:
+    - path: dvclive/ablation/all_all_features/loso/fold_metrics.json
+      hash: md5
+      md5: 0340618081a0ddae96a3c980706a7985
+      size: 3979
+    - path: dvclive/ablation/all_keypoints_only/loso/fold_metrics.json
+      hash: md5
+      md5: 60f99fcd9363c3a4807d54950401d474
+      size: 3977
+    - path: src/analysis/statistical/
+      hash: md5
+      md5: 725239508df5526e87c9a866773882e2.dir
+      size: 69095
+      nfiles: 15
+    - path: src/analysis/statistical_analysis.py
+      hash: md5
+      md5: 002edfaae4b9848198fde8f1a1987859
+      size: 8376
+      isexec: true
+    outs:
+    - path: dvclive/analysis/ablation/feature_modes/model_rankings_accuracy.csv
+      hash: md5
+      md5: 7959a1005512ca8e0347bd1a029a5424
+      size: 505
+    - path: 
+        dvclive/analysis/ablation/feature_modes/statistical_results_accuracy.json
+      hash: md5
+      md5: e9808587ec235f2b7f03dc536ca89c84
+      size: 1226
+  statistical_analysis_ablation_feature_modes@f1:
+    cmd: uv run src/analysis/statistical_analysis.py --models all_keypoints_only
+      all_all_features --metric f1 --analysis-type ablation --experiment-type 
+      feature_modes --output-dir dvclive/analysis/ablation/feature_modes 
+      --approach bayesian
+    deps:
+    - path: dvclive/ablation/all_all_features/loso/fold_metrics.json
+      hash: md5
+      md5: 0340618081a0ddae96a3c980706a7985
+      size: 3979
+    - path: dvclive/ablation/all_keypoints_only/loso/fold_metrics.json
+      hash: md5
+      md5: 60f99fcd9363c3a4807d54950401d474
+      size: 3977
+    - path: src/analysis/statistical/
+      hash: md5
+      md5: 725239508df5526e87c9a866773882e2.dir
+      size: 69095
+      nfiles: 15
+    - path: src/analysis/statistical_analysis.py
+      hash: md5
+      md5: 002edfaae4b9848198fde8f1a1987859
+      size: 8376
+      isexec: true
+    outs:
+    - path: dvclive/analysis/ablation/feature_modes/model_rankings_f1.csv
+      hash: md5
+      md5: 71337569e30f5d6899c62b256d81aeb8
+      size: 506
+    - path: dvclive/analysis/ablation/feature_modes/statistical_results_f1.json
+      hash: md5
+      md5: 2ea6486cd98f08293eb882aa55169370
+      size: 1219
+  statistical_analysis_ablation_full@accuracy:
+    cmd: uv run python src/analysis/statistical_analysis.py --models 
+      real_keypoints_only real_all_features synthetic_keypoints_only 
+      synthetic_all_features all_keypoints_only all_all_features --metric 
+      accuracy --analysis-type ablation --experiment-type full --output-dir 
+      dvclive/analysis/ablation/full --approach bayesian
+    deps:
+    - path: dvclive/ablation/all_all_features/loso/fold_metrics.json
+      hash: md5
+      md5: 0340618081a0ddae96a3c980706a7985
+      size: 3979
+    - path: dvclive/ablation/all_keypoints_only/loso/fold_metrics.json
+      hash: md5
+      md5: 60f99fcd9363c3a4807d54950401d474
+      size: 3977
+    - path: dvclive/ablation/real_all_features/loso/fold_metrics.json
+      hash: md5
+      md5: 97332c0c3fc06a7aafc270f20a2f6fc1
+      size: 3970
+    - path: dvclive/ablation/real_keypoints_only/loso/fold_metrics.json
+      hash: md5
+      md5: fc7aa9ce047b2e8d69450d9cc37acdef
+      size: 3974
+    - path: dvclive/ablation/synthetic_all_features/loso/fold_metrics.json
+      hash: md5
+      md5: 196c3f300682a1ce78e5643d7a337fb4
+      size: 3963
+    - path: dvclive/ablation/synthetic_keypoints_only/loso/fold_metrics.json
+      hash: md5
+      md5: b85ce3c0523cd754e386261fc3b236f5
+      size: 3974
+    - path: src/analysis/statistical/
+      hash: md5
+      md5: 725239508df5526e87c9a866773882e2.dir
+      size: 69095
+      nfiles: 15
+    - path: src/analysis/statistical_analysis.py
+      hash: md5
+      md5: 002edfaae4b9848198fde8f1a1987859
+      size: 8376
+      isexec: true
+    outs:
+    - path: dvclive/analysis/ablation/full/model_rankings_accuracy.csv
+      hash: md5
+      md5: 9dd5c9dd003991850100721dc46cbdc7
+      size: 1328
+    - path: dvclive/analysis/ablation/full/statistical_results_accuracy.json
+      hash: md5
+      md5: bd543d72335d274112ab1267c16191ae
+      size: 4166
+  statistical_analysis_ablation_full@f1:
+    cmd: uv run python src/analysis/statistical_analysis.py --models 
+      real_keypoints_only real_all_features synthetic_keypoints_only 
+      synthetic_all_features all_keypoints_only all_all_features --metric f1 
+      --analysis-type ablation --experiment-type full --output-dir 
+      dvclive/analysis/ablation/full --approach bayesian
+    deps:
+    - path: dvclive/ablation/all_all_features/loso/fold_metrics.json
+      hash: md5
+      md5: 0340618081a0ddae96a3c980706a7985
+      size: 3979
+    - path: dvclive/ablation/all_keypoints_only/loso/fold_metrics.json
+      hash: md5
+      md5: 60f99fcd9363c3a4807d54950401d474
+      size: 3977
+    - path: dvclive/ablation/real_all_features/loso/fold_metrics.json
+      hash: md5
+      md5: 97332c0c3fc06a7aafc270f20a2f6fc1
+      size: 3970
+    - path: dvclive/ablation/real_keypoints_only/loso/fold_metrics.json
+      hash: md5
+      md5: fc7aa9ce047b2e8d69450d9cc37acdef
+      size: 3974
+    - path: dvclive/ablation/synthetic_all_features/loso/fold_metrics.json
+      hash: md5
+      md5: 196c3f300682a1ce78e5643d7a337fb4
+      size: 3963
+    - path: dvclive/ablation/synthetic_keypoints_only/loso/fold_metrics.json
+      hash: md5
+      md5: b85ce3c0523cd754e386261fc3b236f5
+      size: 3974
+    - path: src/analysis/statistical/
+      hash: md5
+      md5: 725239508df5526e87c9a866773882e2.dir
+      size: 69095
+      nfiles: 15
+    - path: src/analysis/statistical_analysis.py
+      hash: md5
+      md5: 002edfaae4b9848198fde8f1a1987859
+      size: 8376
+      isexec: true
+    outs:
+    - path: dvclive/analysis/ablation/full/model_rankings_f1.csv
+      hash: md5
+      md5: c97892b99ae6e0c363bfbe07b65a12a2
+      size: 1323
+    - path: dvclive/analysis/ablation/full/statistical_results_f1.json
+      hash: md5
+      md5: ba933016b0973627e8ae1e51fcecec03
+      size: 4157

@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 import os
 import sys
 import argparse
@@ -6,13 +5,13 @@ from pathlib import Path
 import numpy as np
 import matplotlib.pyplot as plt
 import json
-import autorank  # New import
+import autorank
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent))
 from statistical.data_loader import load_model_results
 from statistical.tests import prepare_data_matrix, convert_to_dataframe, run_autorank_analysis, create_result_summary
-from statistical.output import print_results, save_results, print_data_summary
+from statistical.output import print_results, save_results
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description='Perform statistical tests to compare model performance using autorank')
