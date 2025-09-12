@@ -3,9 +3,8 @@ import json
 import argparse
 import pandas as pd
 from loguru import logger
-import importlib
 
-from .loso_workflow import run_loso_workflow
+from loso_workflow import run_loso_workflow
 
 
 def load_best_model_config(config_path):
@@ -38,13 +37,13 @@ def get_trainer_class(model_name):
         class: Trainer class for the model
     """
     if model_name == 'xgb':
-        from .xgb.train_loso import XGBoostLOSOTrainer
+        from xgb.train_loso import XGBoostLOSOTrainer
         return XGBoostLOSOTrainer
     elif model_name == 'nn':
-        from .nn.train_loso import NeuralNetworkLOSOTrainer
+        from nn.train_loso import NeuralNetworkLOSOTrainer
         return NeuralNetworkLOSOTrainer
     elif model_name == 'adaboost':
-        from .adaboost.train_loso import AdaBoostLOSOTrainer
+        from adaboost.train_loso import AdaBoostLOSOTrainer
         return AdaBoostLOSOTrainer
     else:
         raise ValueError(f"Unknown model name: {model_name}")

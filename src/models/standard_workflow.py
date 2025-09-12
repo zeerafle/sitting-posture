@@ -7,8 +7,8 @@ from codecarbon import OfflineEmissionsTracker
 from dvclive import Live
 from loguru import logger
 
-from .evaluate import evaluate
-from .utils import bayes_search, NumpyEncoder
+from evaluate import evaluate
+from utils import bayes_search, NumpyEncoder
 
 
 def run_standard_workflow(trainer):

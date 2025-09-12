@@ -11,7 +11,7 @@ from sklearn.metrics import (
 )
 from codecarbon import OfflineEmissionsTracker
 
-from .utils import NumpyEncoder
+from utils import NumpyEncoder
 
 
 def run_loso_workflow(trainer, data_path=None):
@@ -238,14 +238,25 @@ def _verify_data_distribution(df, groups, y):
 
 def _load_best_params(trainer):
     """Load best hyperparameters from previous standard training if available."""
-    params_path = os.path.join(trainer.dvclive_dir, "standard", "hyperparameter_results.json")
+    # Check if this is an ablation run by examining the dvclive_dir path
+    is_ablation = "ablation" in trainer.dvclive_dir
 
+    if is_ablation:
+        # For ablation, get the model name to load the corresponding standard model hyperparameters
+        model_name = trainer.model_name
+        # Use the standard path instead of the ablation path
+        params_path = os.path.join("dvclive", f"{model_name}", "standard", "hyperparameter_results.json")
+    else:
+        # For standard training, use the normal path
+        params_path = os.path.join(trainer.dvclive_dir, "hyperparameter_results.json")
+
+    logger.debug(f"Loading best hyperparameters from {params_path}")
     if os.path.exists(params_path):
         try:
             with open(params_path, "r") as f:
                 results = json.load(f)
             best_params = results.get("best_params", {})
-            logger.info(f"Loaded best hyperparameters from standard training: {best_params}")
+            logger.info(f"Loaded best hyperparameters from {'ablation' if is_ablation else 'standard'} training: {best_params}")
             return best_params
         except Exception as e:
             logger.warning(f"Could not load best parameters: {e}")

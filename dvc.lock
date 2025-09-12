@@ -3409,3 +3409,291 @@ stages:
       hash: md5
       md5: ce23e4b8c419c62d028d23371315d731
       size: 2192
+  train_ablation@real-keypoints_only:
+    cmd: uv run python src/models/train_ablation.py --data-mode real 
+      --feature-mode keypoints_only --best-model-config 
+      dvclive/analysis/best_model.json
+    deps:
+    - path: data/processed/ablation/real_keypoints_only/
+      hash: md5
+      md5: 6619e1fe749b79662c0696a895695ea1.dir
+      size: 1667328
+      nfiles: 2
+    - path: dvclive/analysis/best_model.json
+      hash: md5
+      md5: ce23e4b8c419c62d028d23371315d731
+      size: 2192
+    - path: src/models/base_trainer.py
+      hash: md5
+      md5: a57f8eb114a0cc63aa652596546a1b48
+      size: 2372
+      isexec: true
+    - path: src/models/evaluate.py
+      hash: md5
+      md5: c901aed098fd676775dd31cba4ebf8bb
+      size: 5198
+      isexec: true
+    - path: src/models/loso_workflow.py
+      hash: md5
+      md5: e2640cb988452355a18e5ecf23c1a859
+      size: 12685
+      isexec: true
+    - path: src/models/train_ablation.py
+      hash: md5
+      md5: 29fe09e6526bd976132b919e2e61075f
+      size: 7400
+      isexec: true
+    - path: src/models/utils.py
+      hash: md5
+      md5: c51d309800e3542813508b9671af8ba2
+      size: 5480
+      isexec: true
+    outs:
+    - path: dvclive/ablation/real_keypoints_only/ablation_info.json
+      hash: md5
+      md5: 48afbfc92b4caa01b88cca3924964366
+      size: 2910
+    - path: models/ablation/xgb_loso.joblib
+      hash: md5
+      md5: e1697a4b50600ec36f68cff3060b29e9
+      size: 158875
+  train_ablation@real-all_features:
+    cmd: uv run python src/models/train_ablation.py --data-mode real 
+      --feature-mode all_features --best-model-config 
+      dvclive/analysis/best_model.json
+    deps:
+    - path: data/processed/ablation/real_all_features/
+      hash: md5
+      md5: 67368e30fdc6bc99ed71bb10a51b49fe.dir
+      size: 3332635
+      nfiles: 2
+    - path: dvclive/analysis/best_model.json
+      hash: md5
+      md5: ce23e4b8c419c62d028d23371315d731
+      size: 2192
+    - path: src/models/base_trainer.py
+      hash: md5
+      md5: a57f8eb114a0cc63aa652596546a1b48
+      size: 2372
+      isexec: true
+    - path: src/models/evaluate.py
+      hash: md5
+      md5: c901aed098fd676775dd31cba4ebf8bb
+      size: 5198
+      isexec: true
+    - path: src/models/loso_workflow.py
+      hash: md5
+      md5: e2640cb988452355a18e5ecf23c1a859
+      size: 12685
+      isexec: true
+    - path: src/models/train_ablation.py
+      hash: md5
+      md5: 29fe09e6526bd976132b919e2e61075f
+      size: 7400
+      isexec: true
+    - path: src/models/utils.py
+      hash: md5
+      md5: c51d309800e3542813508b9671af8ba2
+      size: 5480
+      isexec: true
+    outs:
+    - path: dvclive/ablation/real_all_features/ablation_info.json
+      hash: md5
+      md5: d377228926f8f9cdae0e9718826261df
+      size: 2908
+    - path: models/ablation/xgb_loso.joblib
+      hash: md5
+      md5: 1b461826e6c8a5946ee4bb2890cd3d35
+      size: 160714
+  train_ablation@synthetic-keypoints_only:
+    cmd: uv run python src/models/train_ablation.py --data-mode synthetic 
+      --feature-mode keypoints_only --best-model-config 
+      dvclive/analysis/best_model.json
+    deps:
+    - path: data/processed/ablation/synthetic_keypoints_only/
+      hash: md5
+      md5: 35790a8ae64f362baf152d8910a4094f.dir
+      size: 3241827
+      nfiles: 2
+    - path: dvclive/analysis/best_model.json
+      hash: md5
+      md5: ce23e4b8c419c62d028d23371315d731
+      size: 2192
+    - path: src/models/base_trainer.py
+      hash: md5
+      md5: a57f8eb114a0cc63aa652596546a1b48
+      size: 2372
+      isexec: true
+    - path: src/models/evaluate.py
+      hash: md5
+      md5: c901aed098fd676775dd31cba4ebf8bb
+      size: 5198
+      isexec: true
+    - path: src/models/loso_workflow.py
+      hash: md5
+      md5: e2640cb988452355a18e5ecf23c1a859
+      size: 12685
+      isexec: true
+    - path: src/models/train_ablation.py
+      hash: md5
+      md5: 29fe09e6526bd976132b919e2e61075f
+      size: 7400
+      isexec: true
+    - path: src/models/utils.py
+      hash: md5
+      md5: c51d309800e3542813508b9671af8ba2
+      size: 5480
+      isexec: true
+    outs:
+    - path: dvclive/ablation/synthetic_keypoints_only/ablation_info.json
+      hash: md5
+      md5: 85210641c90c4e3d33132c4131fce951
+      size: 2916
+    - path: models/ablation/xgb_loso.joblib
+      hash: md5
+      md5: c9892db7c84f5685fc6978e9fef6577c
+      size: 198196
+  train_ablation@synthetic-all_features:
+    cmd: uv run python src/models/train_ablation.py --data-mode synthetic 
+      --feature-mode all_features --best-model-config 
+      dvclive/analysis/best_model.json
+    deps:
+    - path: data/processed/ablation/synthetic_all_features/
+      hash: md5
+      md5: a70009d587b209bb93d93ffc84788880.dir
+      size: 6489138
+      nfiles: 2
+    - path: dvclive/analysis/best_model.json
+      hash: md5
+      md5: ce23e4b8c419c62d028d23371315d731
+      size: 2192
+    - path: src/models/base_trainer.py
+      hash: md5
+      md5: a57f8eb114a0cc63aa652596546a1b48
+      size: 2372
+      isexec: true
+    - path: src/models/evaluate.py
+      hash: md5
+      md5: c901aed098fd676775dd31cba4ebf8bb
+      size: 5198
+      isexec: true
+    - path: src/models/loso_workflow.py
+      hash: md5
+      md5: e2640cb988452355a18e5ecf23c1a859
+      size: 12685
+      isexec: true
+    - path: src/models/train_ablation.py
+      hash: md5
+      md5: 29fe09e6526bd976132b919e2e61075f
+      size: 7400
+      isexec: true
+    - path: src/models/utils.py
+      hash: md5
+      md5: c51d309800e3542813508b9671af8ba2
+      size: 5480
+      isexec: true
+    outs:
+    - path: dvclive/ablation/synthetic_all_features/ablation_info.json
+      hash: md5
+      md5: d0b1a91946b3faa4705d9cf31273e637
+      size: 2915
+    - path: models/ablation/xgb_loso.joblib
+      hash: md5
+      md5: ec754b0ec9c94854e09ec02db1ac97de
+      size: 202205
+  train_ablation@all-keypoints_only:
+    cmd: uv run python src/models/train_ablation.py --data-mode all 
+      --feature-mode keypoints_only --best-model-config 
+      dvclive/analysis/best_model.json
+    deps:
+    - path: data/processed/ablation/all_keypoints_only/
+      hash: md5
+      md5: 21ced0d4ee8ff14b9a3ba8c22baf715f.dir
+      size: 4908030
+      nfiles: 2
+    - path: dvclive/analysis/best_model.json
+      hash: md5
+      md5: ce23e4b8c419c62d028d23371315d731
+      size: 2192
+    - path: src/models/base_trainer.py
+      hash: md5
+      md5: a57f8eb114a0cc63aa652596546a1b48
+      size: 2372
+      isexec: true
+    - path: src/models/evaluate.py
+      hash: md5
+      md5: c901aed098fd676775dd31cba4ebf8bb
+      size: 5198
+      isexec: true
+    - path: src/models/loso_workflow.py
+      hash: md5
+      md5: e2640cb988452355a18e5ecf23c1a859
+      size: 12685
+      isexec: true
+    - path: src/models/train_ablation.py
+      hash: md5
+      md5: 29fe09e6526bd976132b919e2e61075f
+      size: 7400
+      isexec: true
+    - path: src/models/utils.py
+      hash: md5
+      md5: c51d309800e3542813508b9671af8ba2
+      size: 5480
+      isexec: true
+    outs:
+    - path: dvclive/ablation/all_keypoints_only/ablation_info.json
+      hash: md5
+      md5: ac76998d5b470decd5eab8d4743b8bbe
+      size: 2909
+    - path: models/ablation/xgb_loso.joblib
+      hash: md5
+      md5: 174bf6a1963b2911e007264de29cfe95
+      size: 237165
+  train_ablation@all-all_features:
+    cmd: uv run python src/models/train_ablation.py --data-mode all 
+      --feature-mode all_features --best-model-config 
+      dvclive/analysis/best_model.json
+    deps:
+    - path: data/processed/ablation/all_all_features/
+      hash: md5
+      md5: 52c1b98b1b2e4b8a77b1a6cc1f9086ba.dir
+      size: 9810608
+      nfiles: 2
+    - path: dvclive/analysis/best_model.json
+      hash: md5
+      md5: ce23e4b8c419c62d028d23371315d731
+      size: 2192
+    - path: src/models/base_trainer.py
+      hash: md5
+      md5: a57f8eb114a0cc63aa652596546a1b48
+      size: 2372
+      isexec: true
+    - path: src/models/evaluate.py
+      hash: md5
+      md5: c901aed098fd676775dd31cba4ebf8bb
+      size: 5198
+      isexec: true
+    - path: src/models/loso_workflow.py
+      hash: md5
+      md5: e2640cb988452355a18e5ecf23c1a859
+      size: 12685
+      isexec: true
+    - path: src/models/train_ablation.py
+      hash: md5
+      md5: 29fe09e6526bd976132b919e2e61075f
+      size: 7400
+      isexec: true
+    - path: src/models/utils.py
+      hash: md5
+      md5: c51d309800e3542813508b9671af8ba2
+      size: 5480
+      isexec: true
+    outs:
+    - path: dvclive/ablation/all_all_features/ablation_info.json
+      hash: md5
+      md5: cfaafa516e89c3fe633b354b9fccf5cd
+      size: 2907
+    - path: models/ablation/xgb_loso.joblib
+      hash: md5
+      md5: b89dff06173613068e6e15512597703f
+      size: 246346

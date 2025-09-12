@@ -203,10 +203,9 @@ stages:
     - data/processed/ablation/${item.data_mode}_${item.feature_mode}/
     - dvclive/analysis/best_model.json
     outs:
-    - models/ablation/best_model_${item.data_mode}_${item.feature_mode}.joblib
+    - models/ablation/xgb_loso.joblib
     metrics:
-    - dvclive/ablation/${item.data_mode}_${item.feature_mode}/fold_metrics.json
-    - dvclive/ablation/${item.data_mode}_${item.feature_mode}/aggregated_metrics.json
+    - dvclive/ablation/${item.data_mode}_${item.feature_mode}/ablation_info.json
 
   # Statistical analysis of ablation experiment results
   statistical_analysis_ablation_data_modes:
@@ -297,6 +296,11 @@ metrics:
 - dvclive/cnn/standard/metrics.json
 - dvclive/cnn/loso/metrics.json
 - dvclive/ablation/real_keypoints_only/loso/metrics.json
+- dvclive/ablation/real_all_features/loso/metrics.json
+- dvclive/ablation/synthetic_keypoints_only/loso/metrics.json
+- dvclive/ablation/synthetic_all_features/loso/metrics.json
+- dvclive/ablation/all_keypoints_only/loso/metrics.json
+- dvclive/ablation/all_all_features/loso/metrics.json
 params:
 - dvclive/adaboost/standard/params.yaml
 - dvclive/xgb/standard/params.yaml
@@ -322,6 +326,16 @@ plots:
 - dvclive/cnn/loso/plots/metrics:
     x: step
 - dvclive/ablation/real_keypoints_only/loso/plots/metrics:
+    x: step
+- dvclive/ablation/real_all_features/loso/plots/metrics:
+    x: step
+- dvclive/ablation/synthetic_keypoints_only/loso/plots/metrics:
+    x: step
+- dvclive/ablation/synthetic_all_features/loso/plots/metrics:
+    x: step
+- dvclive/ablation/all_keypoints_only/loso/plots/metrics:
+    x: step
+- dvclive/ablation/all_all_features/loso/plots/metrics:
     x: step
 artifacts:
   y_pred:
