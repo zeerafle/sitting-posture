@@ -83,13 +83,16 @@ def prepare_ablation(data_mode: str, feature_mode: str):
     )
     logger.info("Created landmark embeddings")
 
+    print(X_features_df)
+    print(X_features_df.empty)
+
     # Combine embeddings + engineered features
     X_combined = pd.concat([embeddings, X_features_df], axis=1) if not X_features_df.empty else embeddings
 
     # Create final dataset with all required columns for LOSO
     final_df = pd.concat([
         X_combined,
-        df_filtered[['subject_id', 'class_no', 'class_name', 'file_name', 'view_type']].reset_index(drop=True)
+        df_filtered[['subject_id', 'class_no', 'class_name', 'file_name', 'view_type']]
     ], axis=1)
 
     # Rename class_no to labels for consistency

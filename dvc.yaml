@@ -129,8 +129,8 @@ stages:
   statistical_analysis_loso_features:
     foreach: [accuracy, f1]
     do:
-      cmd: uv run src/analysis/statistical_analysis.py --models adaboost
-        nn xgb --metric ${item} --analysis-type loso --output-dir
+      cmd: uv run src/analysis/statistical_analysis.py --models adaboost nn xgb 
+        --metric ${item} --analysis-type loso --output-dir 
         dvclive/analysis/loso_features --approach bayesian
       deps:
       - src/analysis/statistical_analysis.py
@@ -146,8 +146,8 @@ stages:
   statistical_analysis_loso_all:
     foreach: [accuracy, f1]
     do:
-      cmd: uv run python src/analysis/statistical_analysis.py --models adaboost
-        nn xgb cnn --metric ${item} --analysis-type loso --output-dir
+      cmd: uv run python src/analysis/statistical_analysis.py --models adaboost 
+        nn xgb cnn --metric ${item} --analysis-type loso --output-dir 
         dvclive/analysis/loso_all --approach bayesian
       deps:
       - src/analysis/statistical_analysis.py
@@ -162,7 +162,7 @@ stages:
 
   # Determine best model from statistical analysis (feature-based models only)
   select_best_model:
-    cmd: uv run python src/analysis/select_best_model.py --metric accuracy
+    cmd: uv run src/analysis/select_best_model.py --metric accuracy 
       --analysis-dir dvclive/analysis/loso_features
     deps:
     - src/analysis/select_best_model.py
@@ -176,7 +176,7 @@ stages:
     matrix:
       data_mode: [real, synthetic, all]
       feature_mode: [keypoints_only, all_features]
-    cmd: uv run python src/prepare_ablation.py --data-mode ${item.data_mode}
+    cmd: uv run python src/prepare_ablation.py --data-mode ${item.data_mode} 
       --feature-mode ${item.feature_mode}
     deps:
     - data/data_with_features.csv
@@ -191,8 +191,8 @@ stages:
     matrix:
       data_mode: [real, synthetic, all]
       feature_mode: [keypoints_only, all_features]
-    cmd: uv run python src/models/train_ablation.py --data-mode
-      ${item.data_mode} --feature-mode ${item.feature_mode} --best-model-config
+    cmd: uv run python src/models/train_ablation.py --data-mode 
+      ${item.data_mode} --feature-mode ${item.feature_mode} --best-model-config 
       dvclive/analysis/best_model.json
     deps:
     - src/models/train_ablation.py
@@ -202,8 +202,6 @@ stages:
     - src/models/utils.py
     - data/processed/ablation/${item.data_mode}_${item.feature_mode}/
     - dvclive/analysis/best_model.json
-    params:
-    - params.yaml
     outs:
     - models/ablation/best_model_${item.data_mode}_${item.feature_mode}.joblib
     metrics:
@@ -214,9 +212,9 @@ stages:
   statistical_analysis_ablation_data_modes:
     foreach: [accuracy, f1]
     do:
-      cmd: uv run python src/analysis/statistical_analysis.py --models
+      cmd: uv run python src/analysis/statistical_analysis.py --models 
         real_keypoints_only synthetic_keypoints_only all_keypoints_only --metric
-        ${item} --analysis-type ablation --experiment-type data_modes
+        ${item} --analysis-type ablation --experiment-type data_modes 
         --output-dir dvclive/analysis/ablation/data_modes
       deps:
       - src/analysis/statistical_analysis.py
@@ -232,9 +230,9 @@ stages:
   statistical_analysis_ablation_feature_modes:
     foreach: [accuracy, f1]
     do:
-      cmd: uv run python src/analysis/statistical_analysis.py --models
-        all_keypoints_only all_all_features --metric ${item} --analysis-type
-        ablation --experiment-type feature_modes --output-dir
+      cmd: uv run python src/analysis/statistical_analysis.py --models 
+        all_keypoints_only all_all_features --metric ${item} --analysis-type 
+        ablation --experiment-type feature_modes --output-dir 
         dvclive/analysis/ablation/feature_modes
       deps:
       - src/analysis/statistical_analysis.py
@@ -249,10 +247,10 @@ stages:
   statistical_analysis_ablation_full:
     foreach: [accuracy, f1]
     do:
-      cmd: uv run python src/analysis/statistical_analysis.py --models
-        real_keypoints_only real_all_features synthetic_keypoints_only
-        synthetic_all_features all_keypoints_only all_all_features --metric
-        ${item} --analysis-type ablation --experiment-type full --output-dir
+      cmd: uv run python src/analysis/statistical_analysis.py --models 
+        real_keypoints_only real_all_features synthetic_keypoints_only 
+        synthetic_all_features all_keypoints_only all_all_features --metric 
+        ${item} --analysis-type ablation --experiment-type full --output-dir 
         dvclive/analysis/ablation/full
       deps:
       - src/analysis/statistical_analysis.py
@@ -270,7 +268,7 @@ stages:
 
   # Generate comprehensive analysis report
   generate_analysis_report:
-    cmd: uv run python src/analysis/generate_report.py --output-dir
+    cmd: uv run python src/analysis/generate_report.py --output-dir 
       dvclive/analysis/final_report
     deps:
     - src/analysis/generate_report.py
@@ -298,6 +296,7 @@ metrics:
 - dvclive/adaboost/loso/metrics.json
 - dvclive/cnn/standard/metrics.json
 - dvclive/cnn/loso/metrics.json
+- dvclive/ablation/real_keypoints_only/loso/metrics.json
 params:
 - dvclive/adaboost/standard/params.yaml
 - dvclive/xgb/standard/params.yaml
@@ -321,6 +320,8 @@ plots:
 - dvclive/cnn/standard/plots/metrics:
     x: step
 - dvclive/cnn/loso/plots/metrics:
+    x: step
+- dvclive/ablation/real_keypoints_only/loso/plots/metrics:
     x: step
 artifacts:
   y_pred:

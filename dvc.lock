@@ -3232,8 +3232,8 @@ stages:
       nfiles: 16
     - path: src/prepare_ablation.py
       hash: md5
-      md5: bd088a747ee68eeda2e79c24faae2cde
-      size: 6704
+      md5: ad030d415041c10249bc5a6da74e9219
+      size: 6738
       isexec: true
     outs:
     - path: data/processed/ablation/all_all_features/data.csv
@@ -3260,14 +3260,14 @@ stages:
       nfiles: 16
     - path: src/prepare_ablation.py
       hash: md5
-      md5: bd088a747ee68eeda2e79c24faae2cde
-      size: 6704
+      md5: ad030d415041c10249bc5a6da74e9219
+      size: 6738
       isexec: true
     outs:
     - path: data/processed/ablation/synthetic_all_features/data.csv
       hash: md5
-      md5: 2d0868a15f87ae2f866d61797ada19fc
-      size: 6589953
+      md5: cf3ce5695ac68cd3b8fb6fc7e2cea10c
+      size: 6483469
     - path: data/processed/ablation/synthetic_all_features/preprocessors.joblib
       hash: md5
       md5: f990267b468ae73d872d23f04745077f
@@ -3288,14 +3288,14 @@ stages:
       nfiles: 16
     - path: src/prepare_ablation.py
       hash: md5
-      md5: bd088a747ee68eeda2e79c24faae2cde
-      size: 6704
+      md5: ad030d415041c10249bc5a6da74e9219
+      size: 6738
       isexec: true
     outs:
     - path: data/processed/ablation/real_keypoints_only/data.csv
       hash: md5
-      md5: 578c099009bde3b710725aa9e39bf273
-      size: 1760656
+      md5: 8309454d1ba439a78970ab3aa2418d5e
+      size: 1666584
     - path: data/processed/ablation/real_keypoints_only/preprocessors.joblib
       hash: md5
       md5: 3fcfe58cfac9af8dda2739e661caa207
@@ -3316,8 +3316,8 @@ stages:
       nfiles: 16
     - path: src/prepare_ablation.py
       hash: md5
-      md5: bd088a747ee68eeda2e79c24faae2cde
-      size: 6704
+      md5: ad030d415041c10249bc5a6da74e9219
+      size: 6738
       isexec: true
     outs:
     - path: data/processed/ablation/all_keypoints_only/data.csv
@@ -3344,14 +3344,14 @@ stages:
       nfiles: 16
     - path: src/prepare_ablation.py
       hash: md5
-      md5: bd088a747ee68eeda2e79c24faae2cde
-      size: 6704
+      md5: ad030d415041c10249bc5a6da74e9219
+      size: 6738
       isexec: true
     outs:
     - path: data/processed/ablation/real_all_features/data.csv
       hash: md5
-      md5: 978924fb7bac612fc0639b05cb3c5d34
-      size: 3504247
+      md5: 41239fd54ca32647acacd4e43b96ce36
+      size: 3326971
     - path: data/processed/ablation/real_all_features/preprocessors.joblib
       hash: md5
       md5: 37e753dd449377ce47a4dcc2d23ed71c
@@ -3372,16 +3372,40 @@ stages:
       nfiles: 16
     - path: src/prepare_ablation.py
       hash: md5
-      md5: bd088a747ee68eeda2e79c24faae2cde
-      size: 6704
+      md5: ad030d415041c10249bc5a6da74e9219
+      size: 6738
       isexec: true
     outs:
     - path: data/processed/ablation/synthetic_keypoints_only/data.csv
       hash: md5
-      md5: a1560a2617598977d702f43f50d49724
-      size: 3304968
+      md5: 3f1800500e6ba8fb2be4ab9ced2cb610
+      size: 3241078
     - path: 
         data/processed/ablation/synthetic_keypoints_only/preprocessors.joblib
       hash: md5
       md5: b38df9e13969bf5093787cdcae8703ce
       size: 749
+  select_best_model:
+    cmd: uv run src/analysis/select_best_model.py --metric accuracy 
+      --analysis-dir dvclive/analysis/loso_features
+    deps:
+    - path: dvclive/analysis/loso_features/model_rankings_accuracy.csv
+      hash: md5
+      md5: eb168146a270e8f0e515f047826efe9d
+      size: 671
+      isexec: true
+    - path: dvclive/analysis/loso_features/statistical_results_accuracy.json
+      hash: md5
+      md5: 802462f1af247d2ecf45ed193eb06bdb
+      size: 1598
+      isexec: true
+    - path: src/analysis/select_best_model.py
+      hash: md5
+      md5: 733cf83a5044c003a31dc1b208810f17
+      size: 9397
+      isexec: true
+    outs:
+    - path: dvclive/analysis/best_model.json
+      hash: md5
+      md5: ce23e4b8c419c62d028d23371315d731
+      size: 2192

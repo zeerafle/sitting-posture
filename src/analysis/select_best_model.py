@@ -43,10 +43,11 @@ def load_model_rankings(analysis_dir, metric):
     if not os.path.exists(rankings_path):
         raise FileNotFoundError(f"Model rankings not found: {rankings_path}")
 
-    return pd.read_csv(rankings_path)
+    # Load the CSV with first column as index
+    return pd.read_csv(rankings_path, index_col=0)
 
 
-def select_best_model(statistical_results, model_rankings, metric, selection_criteria="average_rank"):
+def select_best_model(statistical_results, model_rankings, metric, selection_criteria="mean_score"):
     """
     Select the best model based on statistical analysis results.
 
@@ -54,78 +55,91 @@ def select_best_model(statistical_results, model_rankings, metric, selection_cri
         statistical_results: Statistical analysis results
         model_rankings: DataFrame with model rankings
         metric: Metric being analyzed
-        selection_criteria: Criteria for selection ("average_rank", "mean_score", "statistical_significance")
+        selection_criteria: Criteria for selection ("mean_score", "statistical_significance", "effect_size")
 
     Returns:
         dict: Best model information
     """
     logger.info(f"Selecting best model based on {selection_criteria} for {metric}")
 
-    # Check if there are significant differences
-    friedman_significant = statistical_results['friedman_test']['significant']
+    # For Bayesian analysis, there's no omnibus test like Friedman
+    # Instead, we look at pairwise model comparisons
 
-    if selection_criteria == "average_rank":
-        # Select model with best (lowest) average rank
-        best_model_idx = model_rankings['average_rank'].idxmin()
-        best_model = model_rankings.loc[best_model_idx]
+    if selection_criteria == "mean_score":
+        # Sort by mean score (descending for metrics where higher is better)
+        higher_is_better = statistical_results.get('higher_is_better', True)
+        if higher_is_better:
+            best_model_name = model_rankings.iloc[0].name  # First row is already highest mean
+        else:
+            best_model_name = model_rankings.iloc[-1].name  # Last row is lowest mean
 
-        selection_reason = f"Best average rank ({best_model['average_rank']:.3f})"
+        best_model = model_rankings.loc[best_model_name]
+        selection_reason = f"Highest mean {metric} ({best_model['mean']:.4f})"
 
-    elif selection_criteria == "mean_score":
-        # Select model with highest mean score
-        best_model_idx = model_rankings['mean_score'].idxmax()
-        best_model = model_rankings.loc[best_model_idx]
+    elif selection_criteria == "effect_size":
+        # Select model with smallest effect size compared to the best model
+        # (which is always 0 for the top model)
+        best_model_name = model_rankings.iloc[0].name
+        best_model = model_rankings.loc[best_model_name]
 
-        selection_reason = f"Highest mean {metric} ({best_model['mean_score']:.4f})"
+        selection_reason = "Best model by effect size comparison"
 
     elif selection_criteria == "statistical_significance":
-        # If there are significant differences, use average rank
-        # Otherwise, use the model with highest mean score
-        if friedman_significant:
-            best_model_idx = model_rankings['average_rank'].idxmin()
-            best_model = model_rankings.loc[best_model_idx]
-            selection_reason = f"Statistically significant differences found, selected by rank ({best_model['average_rank']:.3f})"
+        # Select top performing model that has definitive statistical advantage
+        best_model_name = model_rankings.iloc[0].name
+        best_model = model_rankings.loc[best_model_name]
+
+        # Check decisions for all other models compared to this one
+        significant_advantage = False
+        for idx, row in model_rankings.iterrows():
+            if idx == best_model_name:
+                continue
+
+            if row['decision'] == 'smaller':
+                significant_advantage = True
+                break
+
+        if significant_advantage:
+            selection_reason = "Statistically significant advantage over other models"
         else:
-            best_model_idx = model_rankings['mean_score'].idxmax()
-            best_model = model_rankings.loc[best_model_idx]
-            selection_reason = f"No significant differences, selected by mean score ({best_model['mean_score']:.4f})"
+            selection_reason = "Top performing model, but without statistically significant advantage"
     else:
         raise ValueError(f"Unknown selection criteria: {selection_criteria}")
 
-    # Get additional information
-    model_name = best_model['model']
-
-    # Check for statistical significance in pairwise comparisons
-    pairwise_results = statistical_results.get('pairwise_comparisons', {})
-    significantly_better_than = []
-
-    if pairwise_results and 'comparisons' in pairwise_results:
-        for comparison in pairwise_results['comparisons']:
-            if comparison['model1'] == model_name and comparison['significant']:
-                significantly_better_than.append(comparison['model2'])
-            elif comparison['model2'] == model_name and comparison['significant']:
-                significantly_better_than.append(comparison['model1'])
-
     # Prepare best model information
     best_model_info = {
-        'model_name': model_name,
+        'model_name': best_model_name,
         'metric': metric,
         'selection_criteria': selection_criteria,
         'selection_reason': selection_reason,
         'performance': {
-            'average_rank': float(best_model['average_rank']),
-            'mean_score': float(best_model['mean_score']),
-            'std_score': float(best_model['std_score'])
+            'mean_score': float(best_model['mean']),
+            'std_score': float(best_model['std']),
+            'ci_lower': float(best_model['ci_lower']),
+            'ci_upper': float(best_model['ci_upper'])
         },
         'statistical_analysis': {
-            'friedman_test_significant': friedman_significant,
-            'friedman_p_value': statistical_results['friedman_test']['p_value'],
-            'kendalls_w': statistical_results['kendalls_w']['kendalls_w'],
-            'significantly_better_than': significantly_better_than
+            'omnibus_test': statistical_results['omnibus_test'],
+            'posthoc_test': statistical_results['posthoc_test'],
+            'significant_comparisons': []
         },
         'model_rankings': model_rankings.to_dict('records'),
         'selection_timestamp': pd.Timestamp.now().isoformat()
     }
+
+    # Add information about which models this model is significantly better than
+    for idx, row in model_rankings.iterrows():
+        if idx == best_model_name:
+            continue
+
+        if row['decision'] == 'smaller':
+            best_model_info['statistical_analysis']['significant_comparisons'].append({
+                'compared_to': idx,
+                'effect_size': float(row['effect_size']),
+                'magnitude': row['magnitude'],
+                'p_smaller': float(row['p_smaller']),
+                'decision': row['decision']
+            })
 
     return best_model_info
 
@@ -151,32 +165,35 @@ def print_best_model_summary(best_model_info):
     model_name = best_model_info['model_name']
     metric = best_model_info['metric']
 
-    print(f"\n=== BEST MODEL SELECTION SUMMARY ===")
+    print("\n=== BEST MODEL SELECTION SUMMARY ===")
     print(f"Selected Model: {model_name}")
     print(f"Metric: {metric}")
     print(f"Selection Criteria: {best_model_info['selection_criteria']}")
     print(f"Reason: {best_model_info['selection_reason']}")
 
-    print(f"\nPerformance:")
+    print("\nPerformance:")
     perf = best_model_info['performance']
-    print(f"  Average Rank: {perf['average_rank']:.3f}")
     print(f"  Mean {metric}: {perf['mean_score']:.4f} ± {perf['std_score']:.4f}")
+    print(f"  95% CI: [{perf['ci_lower']:.4f}, {perf['ci_upper']:.4f}]")
 
     stats = best_model_info['statistical_analysis']
-    print(f"\nStatistical Analysis:")
-    print(f"  Friedman Test Significant: {stats['friedman_test_significant']}")
-    print(f"  Friedman p-value: {stats['friedman_p_value']:.6f}")
-    print(f"  Kendall's W: {stats['kendalls_w']:.4f}")
+    print("\nStatistical Analysis:")
+    print(f"  Analysis Type: {stats['omnibus_test']}")
+    print(f"  Post-hoc Test: {stats['posthoc_test']}")
 
-    if stats['significantly_better_than']:
-        print(f"  Significantly better than: {', '.join(stats['significantly_better_than'])}")
+    if stats['significant_comparisons']:
+        print("  Significantly better than:")
+        for comparison in stats['significant_comparisons']:
+            print(f"    - {comparison['compared_to']}: effect_size={comparison['effect_size']:.4f} "
+                 f"({comparison['magnitude']}), p_smaller={comparison['p_smaller']:.4f}")
     else:
-        print(f"  No statistically significant differences found")
+        print("  No statistically significant advantages found")
 
-    print(f"\nAll Model Rankings:")
-    for rank_info in best_model_info['model_rankings']:
-        print(f"  {rank_info['model']}: rank={rank_info['average_rank']:.3f}, "
-              f"score={rank_info['mean_score']:.4f}±{rank_info['std_score']:.4f}")
+    print("\nAll Model Rankings:")
+    for i, model_data in enumerate(best_model_info['model_rankings']):
+        model = model_data.get('model', model_data.get('index', f'Model {i}'))
+        print(f"  {model}: mean={model_data['mean']:.4f}±{model_data['std']:.4f}, "
+              f"effect_size={model_data['effect_size']:.4f} ({model_data['magnitude']})")
 
 
 def main():

@@ -253,3 +253,5 @@ cython_debug/
 /dumps/weights*
 
 **/.gradio
+
+*.zip
