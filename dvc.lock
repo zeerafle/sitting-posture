@@ -3050,3 +3050,169 @@ stages:
       hash: md5
       md5: c50e279b585404e132e69304f5a65c73
       size: 18077323
+  statistical_analysis_loso_features@accuracy:
+    cmd: uv run src/analysis/statistical_analysis.py --models adaboost nn xgb 
+      --metric accuracy --analysis-type loso --output-dir 
+      dvclive/analysis/loso_features --approach bayesian
+    deps:
+    - path: dvclive/adaboost/loso/fold_metrics.json
+      hash: md5
+      md5: 2a6bf5478d928042d1925403ded3f9ce
+      size: 3976
+      isexec: true
+    - path: dvclive/nn/loso/fold_metrics.json
+      hash: md5
+      md5: 4aec6e990a548836ea0aaa2739ea9cb1
+      size: 3978
+      isexec: true
+    - path: dvclive/xgb/loso/fold_metrics.json
+      hash: md5
+      md5: 0340618081a0ddae96a3c980706a7985
+      size: 3979
+      isexec: true
+    - path: src/analysis/statistical/
+      hash: md5
+      md5: 8f4bede6229a9bd04e0a62365d60e504.dir
+      size: 69071
+      nfiles: 15
+    - path: src/analysis/statistical_analysis.py
+      hash: md5
+      md5: b37dda7f94cc0b8dd109e28b74f7f798
+      size: 8432
+      isexec: true
+    outs:
+    - path: dvclive/analysis/loso_features/model_rankings_accuracy.csv
+      hash: md5
+      md5: eb168146a270e8f0e515f047826efe9d
+      size: 671
+    - path: dvclive/analysis/loso_features/statistical_results_accuracy.json
+      hash: md5
+      md5: 802462f1af247d2ecf45ed193eb06bdb
+      size: 1598
+  statistical_analysis_loso_features@f1:
+    cmd: uv run src/analysis/statistical_analysis.py --models adaboost nn xgb 
+      --metric f1 --analysis-type loso --output-dir 
+      dvclive/analysis/loso_features --approach bayesian
+    deps:
+    - path: dvclive/adaboost/loso/fold_metrics.json
+      hash: md5
+      md5: 2a6bf5478d928042d1925403ded3f9ce
+      size: 3976
+      isexec: true
+    - path: dvclive/nn/loso/fold_metrics.json
+      hash: md5
+      md5: 4aec6e990a548836ea0aaa2739ea9cb1
+      size: 3978
+      isexec: true
+    - path: dvclive/xgb/loso/fold_metrics.json
+      hash: md5
+      md5: 0340618081a0ddae96a3c980706a7985
+      size: 3979
+      isexec: true
+    - path: src/analysis/statistical/
+      hash: md5
+      md5: 8f4bede6229a9bd04e0a62365d60e504.dir
+      size: 69071
+      nfiles: 15
+    - path: src/analysis/statistical_analysis.py
+      hash: md5
+      md5: b37dda7f94cc0b8dd109e28b74f7f798
+      size: 8432
+      isexec: true
+    outs:
+    - path: dvclive/analysis/loso_features/model_rankings_f1.csv
+      hash: md5
+      md5: 2cdbea0a1a833db86f4bdf943fe876b0
+      size: 670
+    - path: dvclive/analysis/loso_features/statistical_results_f1.json
+      hash: md5
+      md5: b964e707a2f2eb74407568d5b0a549b1
+      size: 1591
+  statistical_analysis_loso_all@accuracy:
+    cmd: uv run python src/analysis/statistical_analysis.py --models adaboost nn
+      xgb cnn --metric accuracy --analysis-type loso --output-dir 
+      dvclive/analysis/loso_all --approach bayesian
+    deps:
+    - path: dvclive/adaboost/loso/fold_metrics.json
+      hash: md5
+      md5: 2a6bf5478d928042d1925403ded3f9ce
+      size: 3976
+      isexec: true
+    - path: dvclive/cnn/loso/fold_metrics.json
+      hash: md5
+      md5: cd1703fdb8780234eb4cf5642dbdee74
+      size: 3980
+      isexec: true
+    - path: dvclive/nn/loso/fold_metrics.json
+      hash: md5
+      md5: 4aec6e990a548836ea0aaa2739ea9cb1
+      size: 3978
+      isexec: true
+    - path: dvclive/xgb/loso/fold_metrics.json
+      hash: md5
+      md5: 0340618081a0ddae96a3c980706a7985
+      size: 3979
+      isexec: true
+    - path: src/analysis/statistical/
+      hash: md5
+      md5: 8f4bede6229a9bd04e0a62365d60e504.dir
+      size: 69071
+      nfiles: 15
+    - path: src/analysis/statistical_analysis.py
+      hash: md5
+      md5: b37dda7f94cc0b8dd109e28b74f7f798
+      size: 8432
+      isexec: true
+    outs:
+    - path: dvclive/analysis/loso_all/model_rankings_accuracy.csv
+      hash: md5
+      md5: 6426be4fbaf22d517907f5a5f0b79b62
+      size: 847
+    - path: dvclive/analysis/loso_all/statistical_results_accuracy.json
+      hash: md5
+      md5: 0c9877c85170cec06c4834da7956159f
+      size: 2726
+  statistical_analysis_loso_all@f1:
+    cmd: uv run python src/analysis/statistical_analysis.py --models adaboost nn
+      xgb cnn --metric f1 --analysis-type loso --output-dir 
+      dvclive/analysis/loso_all --approach bayesian
+    deps:
+    - path: dvclive/adaboost/loso/fold_metrics.json
+      hash: md5
+      md5: 2a6bf5478d928042d1925403ded3f9ce
+      size: 3976
+      isexec: true
+    - path: dvclive/cnn/loso/fold_metrics.json
+      hash: md5
+      md5: cd1703fdb8780234eb4cf5642dbdee74
+      size: 3980
+      isexec: true
+    - path: dvclive/nn/loso/fold_metrics.json
+      hash: md5
+      md5: 4aec6e990a548836ea0aaa2739ea9cb1
+      size: 3978
+      isexec: true
+    - path: dvclive/xgb/loso/fold_metrics.json
+      hash: md5
+      md5: 0340618081a0ddae96a3c980706a7985
+      size: 3979
+      isexec: true
+    - path: src/analysis/statistical/
+      hash: md5
+      md5: 8f4bede6229a9bd04e0a62365d60e504.dir
+      size: 69071
+      nfiles: 15
+    - path: src/analysis/statistical_analysis.py
+      hash: md5
+      md5: b37dda7f94cc0b8dd109e28b74f7f798
+      size: 8432
+      isexec: true
+    outs:
+    - path: dvclive/analysis/loso_all/model_rankings_f1.csv
+      hash: md5
+      md5: 69b383955ab6a7080ef39e28120802d4
+      size: 849
+    - path: dvclive/analysis/loso_all/statistical_results_f1.json
+      hash: md5
+      md5: 4a3230689be41799c1dabd9723ea95d2
+      size: 2721

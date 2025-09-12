@@ -1,349 +1,194 @@
+#!/usr/bin/env python
 import os
 import sys
-import json
 import argparse
-import pandas as pd
-import numpy as np
 from pathlib import Path
-from loguru import logger
+import numpy as np
 import matplotlib.pyplot as plt
-import seaborn as sns
+import json
+import autorank  # New import
 
 # Add parent directory to path for imports
-current_dir = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, current_dir)
-
-# Import statistical analysis modules
+sys.path.insert(0, str(Path(__file__).parent))
 from statistical.data_loader import load_model_results
-from statistical.tests import (
-    prepare_data_matrix, friedman_test, kendalls_w,
-    pairwise_comparisons, create_result_summary,
-    pairwise_bayesian_signed_rank, posthoc_after_friedman, average_ranks
-)
+from statistical.tests import prepare_data_matrix, convert_to_dataframe, run_autorank_analysis, create_result_summary
 from statistical.output import print_results, save_results, print_data_summary
-from statistical.plots import draw_cd_diagram
 
+def parse_arguments():
+    parser = argparse.ArgumentParser(description='Perform statistical tests to compare model performance using autorank')
+    parser.add_argument('--models', nargs='+', required=True, help='Model names or config names for comparison')
+    parser.add_argument('--metric', type=str, default='accuracy', help='Metric to compare')
+    parser.add_argument('--alpha', type=float, default=0.05, help='Significance level')
+    parser.add_argument('--output-dir', type=str, required=True, help='Output directory for results')
 
-def load_loso_results(models, metric, dvclive_path="dvclive"):
-    """
-    Load LOSO fold-wise results for statistical analysis.
+    # Analysis type argument - maintain backward compatibility
+    parser.add_argument('--analysis-type', type=str, choices=['loso', 'individual', 'combined', 'ablation'],
+                        default='individual', help='Analysis type')
 
-    Args:
-        models: List of model names
-        metric: Metric to analyze
-        dvclive_path: Path to DVCLive logs
+    # Experiment type for ablation studies
+    parser.add_argument('--experiment-type', type=str, default=None,
+                        help='Experiment type for ablation studies (data_modes, feature_modes, full)')
 
-    Returns:
-        pd.DataFrame: DataFrame with columns [model, fold, metric_value]
-    """
-    results = []
+    # Approach options
+    parser.add_argument('--approach', type=str, choices=['frequentist', 'bayesian'],
+                        default='frequentist', help='Statistical approach (default: frequentist)')
 
-    for model in models:
-        fold_metrics_path = os.path.join(dvclive_path, model, "loso", "fold_metrics.json")
+    # Bayesian options
+    parser.add_argument('--rope', type=float, default=None,
+                        help='ROPE width for Bayesian approach (default: None, autorank will determine automatically)')
 
-        if not os.path.exists(fold_metrics_path):
-            logger.warning(f"Fold metrics not found for {model}: {fold_metrics_path}")
-            continue
+    # Higher is better for ranking
+    parser.add_argument('--higher-is-better', action='store_true', default=True,
+                        help='Set if higher metric value is better (default True). For losses, use --lower-is-better')
+    parser.add_argument('--lower-is-better', dest='higher_is_better', action='store_false',
+                        help='Set if lower metric value is better (e.g., for loss metrics)')
 
-        with open(fold_metrics_path, 'r') as f:
-            fold_data = json.load(f)
+    # Verbose output
+    parser.add_argument('--verbose', action='store_true', help='Print verbose output from autorank')
 
-        if metric not in fold_data:
-            logger.warning(f"Metric '{metric}' not found in {model} results")
-            continue
+    return parser.parse_args()
 
-        metric_values = fold_data[metric]
-        for fold_idx, value in enumerate(metric_values, 1):
-            results.append({
-                'model': model,
-                'fold': fold_idx,
-                'metric_value': value
-            })
-
-    return pd.DataFrame(results)
-
-
-def load_ablation_results(models, metric, dvclive_path="dvclive"):
-    """
-    Load ablation experiment results for statistical analysis.
-
-    Args:
-        models: List of model configurations (e.g., ['real_keypoints_only', 'all_all_features'])
-        metric: Metric to analyze
-        dvclive_path: Path to DVCLive logs
-
-    Returns:
-        pd.DataFrame: DataFrame with columns [model, fold, metric_value]
-    """
-    results = []
-
-    for model_config in models:
-        fold_metrics_path = os.path.join(dvclive_path, "ablation", model_config, "fold_metrics.json")
-
-        if not os.path.exists(fold_metrics_path):
-            logger.warning(f"Ablation metrics not found for {model_config}: {fold_metrics_path}")
-            continue
-
-        with open(fold_metrics_path, 'r') as f:
-            fold_data = json.load(f)
-
-        if metric not in fold_data:
-            logger.warning(f"Metric '{metric}' not found in {model_config} results")
-            continue
-
-        metric_values = fold_data[metric]
-        for fold_idx, value in enumerate(metric_values, 1):
-            results.append({
-                'model': model_config,
-                'fold': fold_idx,
-                'metric_value': value
-            })
-
-    return pd.DataFrame(results)
-
-
-def perform_statistical_analysis(df, models, metric, output_dir, alpha=0.05):
-    """
-    Perform comprehensive statistical analysis on model results.
-
-    Args:
-        df: DataFrame with columns [model, fold, metric_value]
-        models: List of model names
-        metric: Metric being analyzed
-        output_dir: Directory to save results
-        alpha: Significance level
-
-    Returns:
-        dict: Statistical analysis results
-    """
-    logger.info(f"Performing statistical analysis for {metric} on {len(models)} models")
-
-    # Prepare data matrix for analysis
-    data_matrix = prepare_data_matrix(df, models, metric)
-
-    if data_matrix is None or data_matrix.empty:
-        logger.error("Failed to prepare data matrix")
-        return None
-
-    logger.info(f"Data matrix shape: {data_matrix.shape}")
-    print_data_summary(data_matrix, models)
-
-    # Perform Friedman test
-    friedman_result = friedman_test(data_matrix, alpha)
-    logger.info(f"Friedman test p-value: {friedman_result['p_value']:.6f}")
-
-    # Calculate Kendall's W
-    kendalls_result = kendalls_w(data_matrix)
-    logger.info(f"Kendall's W: {kendalls_result['kendalls_w']:.4f}")
-
-    # Calculate average ranks
-    ranks_result = average_ranks(data_matrix)
-
-    # Perform pairwise comparisons
-    pairwise_result = None
-    bayesian_result = None
-    posthoc_result = None
-
-    # Always perform pairwise tests for detailed comparison
-    logger.info("Performing pairwise comparisons")
-    pairwise_result = pairwise_comparisons(data_matrix, alpha)
-
-    # Bayesian signed-rank test
-    try:
-        logger.info("Performing Bayesian signed-rank tests")
-        bayesian_result = pairwise_bayesian_signed_rank(
-            data_matrix,
-            rope=0.01,
-            nsamples=20000,
-            prior=0.5,
-            random_state=42
-        )
-    except Exception as e:
-        logger.warning(f"Bayesian analysis failed: {e}")
-
-    # Post-hoc analysis if significant
-    if friedman_result['significant']:
-        logger.info("Performing post-hoc analysis (Nemenyi test)")
-        posthoc_result = posthoc_after_friedman(data_matrix, alpha, method='nemenyi')
-
-    # Compile results
-    results = {
-        'metric': metric,
-        'models': models,
-        'data_summary': {
-            'n_models': len(models),
-            'n_folds': len(data_matrix),
-            'data_matrix': data_matrix.to_dict('records')
-        },
-        'friedman_test': friedman_result,
-        'kendalls_w': kendalls_result,
-        'average_ranks': ranks_result,
-        'pairwise_comparisons': pairwise_result,
-        'bayesian_comparisons': bayesian_result,
-        'posthoc_analysis': posthoc_result,
-        'analysis_timestamp': pd.Timestamp.now().isoformat()
-    }
-
-    # Save results
-    os.makedirs(output_dir, exist_ok=True)
-
-    # Save JSON results
-    results_path = os.path.join(output_dir, f"statistical_results_{metric}.json")
-    with open(results_path, 'w') as f:
-        json.dump(results, f, indent=2, default=str)
-
-    logger.info(f"Saved statistical results to {results_path}")
-
-    # Create and save critical difference diagram
-    try:
-        cd_diagram_path = os.path.join(output_dir, f"critical_difference_diagram_{metric}.png")
-        draw_cd_diagram(
-            ranks_result['average_ranks'],
-            models,
-            cd_diagram_path,
-            alpha=alpha,
-            title=f"Critical Difference Diagram - {metric.capitalize()}"
-        )
-        logger.info(f"Saved critical difference diagram to {cd_diagram_path}")
-    except Exception as e:
-        logger.warning(f"Failed to create CD diagram: {e}")
-
-    # Create model rankings CSV
-    rankings_df = pd.DataFrame({
-        'model': models,
-        'average_rank': [ranks_result['average_ranks'][model] for model in models],
-        'mean_score': [data_matrix[model].mean() for model in models],
-        'std_score': [data_matrix[model].std() for model in models]
-    }).sort_values('average_rank')
-
-    rankings_path = os.path.join(output_dir, f"model_rankings_{metric}.csv")
-    rankings_df.to_csv(rankings_path, index=False)
-    logger.info(f"Saved model rankings to {rankings_path}")
-
-    # Print summary
-    print_results(results)
-
-    return results
-
-
-def create_summary_plots(df, models, metric, output_dir):
-    """Create summary plots for the analysis."""
-    os.makedirs(output_dir, exist_ok=True)
-
-    # Box plot
-    plt.figure(figsize=(12, 8))
-    sns.boxplot(data=df, x='model', y='metric_value')
-    plt.title(f'{metric.capitalize()} Distribution by Model')
-    plt.xlabel('Model')
-    plt.ylabel(f'{metric.capitalize()}')
-    plt.xticks(rotation=45, ha='right')
-    plt.tight_layout()
-
-    boxplot_path = os.path.join(output_dir, f"boxplot_{metric}.png")
-    plt.savefig(boxplot_path, dpi=300, bbox_inches='tight')
-    plt.close()
-
-    logger.info(f"Saved boxplot to {boxplot_path}")
-
-    # Performance comparison plot
-    summary_stats = df.groupby('model')['metric_value'].agg(['mean', 'std']).reset_index()
-
-    plt.figure(figsize=(12, 8))
-    x_pos = range(len(summary_stats))
-    plt.errorbar(x_pos, summary_stats['mean'], yerr=summary_stats['std'],
-                fmt='o', capsize=5, capthick=2, markersize=8)
-    plt.xlabel('Model')
-    plt.ylabel(f'Mean {metric.capitalize()} ± Std')
-    plt.title(f'Model Performance Comparison - {metric.capitalize()}')
-    plt.xticks(x_pos, summary_stats['model'], rotation=45, ha='right')
-    plt.grid(True, alpha=0.3)
-    plt.tight_layout()
-
-    performance_path = os.path.join(output_dir, f"performance_comparison_{metric}.png")
-    plt.savefig(performance_path, dpi=300, bbox_inches='tight')
-    plt.close()
-
-    logger.info(f"Saved performance comparison to {performance_path}")
-
+def extract_loso_metrics(data, metric):
+    """Extract metrics from LOSO data structure."""
+    metrics = []
+    # Check if data is a dictionary with fold keys
+    if isinstance(data, dict):
+        for fold, fold_data in data.items():
+            if isinstance(fold_data, dict) and metric in fold_data:
+                metrics.append(float(fold_data[metric]))
+    return metrics
 
 def main():
-    parser = argparse.ArgumentParser(description='Perform statistical analysis on model results')
-    parser.add_argument('--models', nargs='+', required=True,
-                       help='Model names or configurations to analyze')
-    parser.add_argument('--metric', type=str, required=True,
-                       help='Metric to analyze (accuracy, f1, etc.)')
-    parser.add_argument('--analysis-type', type=str, choices=['loso', 'ablation'], required=True,
-                       help='Type of analysis: loso or ablation')
-    parser.add_argument('--experiment-type', type=str,
-                       choices=['data_modes', 'feature_modes', 'full'], default=None,
-                       help='For ablation: type of experiment being analyzed')
-    parser.add_argument('--output-dir', type=str, required=True,
-                       help='Directory to save analysis results')
-    parser.add_argument('--dvclive-path', type=str, default='dvclive',
-                       help='Path to DVCLive logs')
-    parser.add_argument('--alpha', type=float, default=0.05,
-                       help='Significance level for statistical tests')
-
-    args = parser.parse_args()
-
-    # Create output directory
+    args = parse_arguments()
     os.makedirs(args.output_dir, exist_ok=True)
 
-    # Load results based on analysis type
-    if args.analysis_type == 'loso':
-        df = load_loso_results(args.models, args.metric, args.dvclive_path)
-    elif args.analysis_type == 'ablation':
-        df = load_ablation_results(args.models, args.metric, args.dvclive_path)
-    else:
-        raise ValueError(f"Unknown analysis type: {args.analysis_type}")
+    print(f"Analysis Type: {args.analysis_type.upper()}")
+    if args.analysis_type == 'ablation' and args.experiment_type:
+        print(f"Experiment Type: {args.experiment_type}")
+    print(f"Models: {args.models}")
+    print(f"Metric: {args.metric}")
+    print(f"Statistical Approach: {args.approach.upper()}")
+    print(f"Output Directory: {args.output_dir}")
 
-    if df.empty:
-        logger.error("No data loaded for analysis")
-        return
+    try:
+        # Use the existing data loader for compatibility
+        dvclive_path = 'dvclive'
+        results = load_model_results(dvclive_path, args.models, args.metric, args.analysis_type)
 
-    logger.info(f"Loaded {len(df)} data points for {len(args.models)} models")
+        # If results are empty, try loading directly
+        if not results or all(len(scores) == 0 for scores in results.values()):
+            print("Trying direct loading of fold_metrics.json files...")
+            results = {}
 
-    # Verify we have data for all models
-    missing_models = set(args.models) - set(df['model'].unique())
-    if missing_models:
-        logger.warning(f"Missing data for models: {missing_models}")
+            for model in args.models:
+                if args.analysis_type == 'loso':
+                    file_path = os.path.join(dvclive_path, model, 'loso', 'fold_metrics.json')
+                    try:
+                        with open(file_path, 'r') as f:
+                            data = json.load(f)
+                            # Extract metric per fold
+                            metrics = extract_loso_metrics(data, args.metric)
+                            if metrics:
+                                results[model] = metrics
+                                print(f"Loaded {len(metrics)} metrics for {model}")
+                    except Exception as e:
+                        print(f"Warning: Could not load data from {file_path}: {e}")
 
-    available_models = [m for m in args.models if m in df['model'].unique()]
+                        # Try alternative file structure
+                        try:
+                            alt_path = os.path.join(dvclive_path, model, 'loso', 'aggregated_metrics.json')
+                            with open(alt_path, 'r') as f:
+                                data = json.load(f)
+                                if 'fold_metrics' in data:
+                                    fold_metrics = data['fold_metrics']
+                                    metrics = [fold.get(args.metric) for fold in fold_metrics if fold.get(args.metric) is not None]
+                                    if metrics:
+                                        results[model] = metrics
+                                        print(f"Loaded {len(metrics)} metrics for {model} from aggregated_metrics.json")
+                        except Exception as e2:
+                            print(f"Warning: Could not load alternative data for {model}: {e2}")
 
-    if len(available_models) < 2:
-        logger.error("Need at least 2 models with data for statistical analysis")
-        return
+        # Print summary of loaded data
+        print("\nData Summary:")
+        for model, scores in results.items():
+            if scores:
+                print(f"{model}: {len(scores)} observations, mean={np.mean(scores):.4f}, std={np.std(scores):.4f}")
+            else:
+                print(f"{model}: No data loaded")
 
-    # Perform statistical analysis
-    results = perform_statistical_analysis(
-        df, available_models, args.metric, args.output_dir, args.alpha
-    )
+        if not results or all(len(scores) == 0 for scores in results.values()):
+            raise ValueError("No valid data loaded for any model.")
 
-    if results:
-        # Create summary plots
-        create_summary_plots(df, available_models, args.metric, args.output_dir)
+        # Prepare data matrix
+        data_matrix = prepare_data_matrix(results, args.models)
 
-        logger.success(f"Statistical analysis completed successfully")
-        logger.info(f"Results saved to: {args.output_dir}")
+        # Convert to DataFrame for autorank
+        df = convert_to_dataframe(data_matrix, args.models)
 
-        # Print key findings
-        friedman_p = results['friedman_test']['p_value']
-        kendalls_w = results['kendalls_w']['kendalls_w']
+        # Run autorank analysis
+        if args.approach == 'bayesian':
+            # For Bayesian approach, use the specified rope or default
+            rope_value = 0.01 if args.rope is None else args.rope
+            autorank_result = run_autorank_analysis(
+                data_matrix,
+                args.models,
+                alpha=args.alpha,
+                approach=args.approach,
+                verbose=args.verbose,
+                rope=rope_value
+            )
+        else:
+            # For frequentist approach, don't pass the rope parameter
+            autorank_result = run_autorank_analysis(
+                data_matrix,
+                args.models,
+                alpha=args.alpha,
+                approach=args.approach,
+                verbose=args.verbose
+            )
 
-        print(f"\n=== KEY FINDINGS ===")
-        print(f"Metric: {args.metric}")
-        print(f"Models analyzed: {len(available_models)}")
-        print(f"Friedman test p-value: {friedman_p:.6f}")
-        print(f"Significant differences: {'Yes' if friedman_p < args.alpha else 'No'}")
-        print(f"Kendall's W (effect size): {kendalls_w:.4f}")
+        # Generate CD diagram
+        cd_file = os.path.join(args.output_dir, f"critical_difference_diagram_{args.metric}.png")
 
-        # Show best performing model
-        rankings = results['average_ranks']['average_ranks']
-        best_model = min(rankings.keys(), key=lambda k: rankings[k])
-        print(f"Best performing model: {best_model} (rank: {rankings[best_model]:.2f})")
-    else:
-        logger.error("Statistical analysis failed")
+        try:
+            fig = autorank.plot_stats(autorank_result)
+            fig.savefig(cd_file, bbox_inches='tight')
+            plt.close(fig)
+        except Exception as e:
+            print(f"Warning: Failed to create CD diagram: {e}")
+            cd_file = None
 
+        # Create result summary
+        result = create_result_summary(
+            autorank_result,
+            args.models,
+            data_matrix,
+            args.alpha,
+            args.analysis_type,
+            args.metric,
+            higher_is_better=args.higher_is_better,
+            cd_diagram_file=cd_file
+        )
+
+        # Print and save results
+        print_results(result)
+
+        # Save the model rankings
+        rankings_file = os.path.join(args.output_dir, f"model_rankings_{args.metric}.csv")
+        if hasattr(autorank_result, 'rankdf'):
+            autorank_result.rankdf.to_csv(rankings_file)
+
+        # Save the full statistical results
+        results_file = os.path.join(args.output_dir, f"statistical_results_{args.metric}.json")
+        save_results(result, args.output_dir, args.models, args.analysis_type, args.metric)
+
+        print(f"\nResults saved to {args.output_dir}")
+
+    except Exception as e:
+        print(f"Error: {e}")
+        import traceback
+        traceback.print_exc()
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()
