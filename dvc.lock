@@ -3216,3 +3216,172 @@ stages:
       hash: md5
       md5: 4a3230689be41799c1dabd9723ea95d2
       size: 2721
+  prepare_ablation@all-all_features:
+    cmd: uv run python src/prepare_ablation.py --data-mode all --feature-mode 
+      all_features
+    deps:
+    - path: data/data_with_features.csv
+      hash: md5
+      md5: e5f4a47ed665f32bdd29e3a52a99964e
+      size: 7114898
+      isexec: true
+    - path: src/data_preparation/
+      hash: md5
+      md5: 8b323f0f9516243fe4a8554fa9bd6318.dir
+      size: 26426
+      nfiles: 16
+    - path: src/prepare_ablation.py
+      hash: md5
+      md5: bd088a747ee68eeda2e79c24faae2cde
+      size: 6704
+      isexec: true
+    outs:
+    - path: data/processed/ablation/all_all_features/data.csv
+      hash: md5
+      md5: 5765d651ac37804795180ad1d5899fba
+      size: 9804945
+    - path: data/processed/ablation/all_all_features/preprocessors.joblib
+      hash: md5
+      md5: 7b7aaa4a4e4c5a1af53df3624aa8d868
+      size: 5663
+  prepare_ablation@synthetic-all_features:
+    cmd: uv run python src/prepare_ablation.py --data-mode synthetic 
+      --feature-mode all_features
+    deps:
+    - path: data/data_with_features.csv
+      hash: md5
+      md5: e5f4a47ed665f32bdd29e3a52a99964e
+      size: 7114898
+      isexec: true
+    - path: src/data_preparation/
+      hash: md5
+      md5: 8b323f0f9516243fe4a8554fa9bd6318.dir
+      size: 26426
+      nfiles: 16
+    - path: src/prepare_ablation.py
+      hash: md5
+      md5: bd088a747ee68eeda2e79c24faae2cde
+      size: 6704
+      isexec: true
+    outs:
+    - path: data/processed/ablation/synthetic_all_features/data.csv
+      hash: md5
+      md5: 2d0868a15f87ae2f866d61797ada19fc
+      size: 6589953
+    - path: data/processed/ablation/synthetic_all_features/preprocessors.joblib
+      hash: md5
+      md5: f990267b468ae73d872d23f04745077f
+      size: 5669
+  prepare_ablation@real-keypoints_only:
+    cmd: uv run python src/prepare_ablation.py --data-mode real --feature-mode 
+      keypoints_only
+    deps:
+    - path: data/data_with_features.csv
+      hash: md5
+      md5: e5f4a47ed665f32bdd29e3a52a99964e
+      size: 7114898
+      isexec: true
+    - path: src/data_preparation/
+      hash: md5
+      md5: 8b323f0f9516243fe4a8554fa9bd6318.dir
+      size: 26426
+      nfiles: 16
+    - path: src/prepare_ablation.py
+      hash: md5
+      md5: bd088a747ee68eeda2e79c24faae2cde
+      size: 6704
+      isexec: true
+    outs:
+    - path: data/processed/ablation/real_keypoints_only/data.csv
+      hash: md5
+      md5: 578c099009bde3b710725aa9e39bf273
+      size: 1760656
+    - path: data/processed/ablation/real_keypoints_only/preprocessors.joblib
+      hash: md5
+      md5: 3fcfe58cfac9af8dda2739e661caa207
+      size: 744
+  prepare_ablation@all-keypoints_only:
+    cmd: uv run python src/prepare_ablation.py --data-mode all --feature-mode 
+      keypoints_only
+    deps:
+    - path: data/data_with_features.csv
+      hash: md5
+      md5: e5f4a47ed665f32bdd29e3a52a99964e
+      size: 7114898
+      isexec: true
+    - path: src/data_preparation/
+      hash: md5
+      md5: 8b323f0f9516243fe4a8554fa9bd6318.dir
+      size: 26426
+      nfiles: 16
+    - path: src/prepare_ablation.py
+      hash: md5
+      md5: bd088a747ee68eeda2e79c24faae2cde
+      size: 6704
+      isexec: true
+    outs:
+    - path: data/processed/ablation/all_keypoints_only/data.csv
+      hash: md5
+      md5: 7a0ef1b1a3aec9d3e2a003f66052b3e5
+      size: 4907287
+    - path: data/processed/ablation/all_keypoints_only/preprocessors.joblib
+      hash: md5
+      md5: 0093509a76cc3a839b082c695d2d841c
+      size: 743
+  prepare_ablation@real-all_features:
+    cmd: uv run python src/prepare_ablation.py --data-mode real --feature-mode 
+      all_features
+    deps:
+    - path: data/data_with_features.csv
+      hash: md5
+      md5: e5f4a47ed665f32bdd29e3a52a99964e
+      size: 7114898
+      isexec: true
+    - path: src/data_preparation/
+      hash: md5
+      md5: 8b323f0f9516243fe4a8554fa9bd6318.dir
+      size: 26426
+      nfiles: 16
+    - path: src/prepare_ablation.py
+      hash: md5
+      md5: bd088a747ee68eeda2e79c24faae2cde
+      size: 6704
+      isexec: true
+    outs:
+    - path: data/processed/ablation/real_all_features/data.csv
+      hash: md5
+      md5: 978924fb7bac612fc0639b05cb3c5d34
+      size: 3504247
+    - path: data/processed/ablation/real_all_features/preprocessors.joblib
+      hash: md5
+      md5: 37e753dd449377ce47a4dcc2d23ed71c
+      size: 5664
+  prepare_ablation@synthetic-keypoints_only:
+    cmd: uv run python src/prepare_ablation.py --data-mode synthetic 
+      --feature-mode keypoints_only
+    deps:
+    - path: data/data_with_features.csv
+      hash: md5
+      md5: e5f4a47ed665f32bdd29e3a52a99964e
+      size: 7114898
+      isexec: true
+    - path: src/data_preparation/
+      hash: md5
+      md5: 8b323f0f9516243fe4a8554fa9bd6318.dir
+      size: 26426
+      nfiles: 16
+    - path: src/prepare_ablation.py
+      hash: md5
+      md5: bd088a747ee68eeda2e79c24faae2cde
+      size: 6704
+      isexec: true
+    outs:
+    - path: data/processed/ablation/synthetic_keypoints_only/data.csv
+      hash: md5
+      md5: a1560a2617598977d702f43f50d49724
+      size: 3304968
+    - path: 
+        data/processed/ablation/synthetic_keypoints_only/preprocessors.joblib
+      hash: md5
+      md5: b38df9e13969bf5093787cdcae8703ce
+      size: 749

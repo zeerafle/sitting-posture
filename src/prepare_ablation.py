@@ -3,11 +3,12 @@ import time
 import argparse
 import pandas as pd
 from loguru import logger
+import joblib
 
-from .data_preparation.imputer import Imputer
-from .data_preparation.scaler import FeatureScaler
-from .data_preparation.embedding import landmarks_to_embedding
-from .data_preparation.data_filter import filter_dataset, filter_features
+from data_preparation.imputer import Imputer
+from data_preparation.scaler import FeatureScaler
+from data_preparation.embedding import landmarks_to_embedding
+from data_preparation.data_filter import filter_dataset, filter_features
 
 
 def prepare_ablation(data_mode: str, feature_mode: str):
@@ -126,19 +127,17 @@ def prepare_ablation(data_mode: str, feature_mode: str):
     logger.info(f"Saved ablation dataset to {data_path}")
 
     # Save preprocessors
-    if scaler is not None or imp is not None:
-        import joblib
-        preprocessors = {
-            'scaler': scaler,
-            'imputer': imp,
-            'feature_cols': feature_cols,
-            'landmark_cols': landmark_cols,
-            'data_mode': data_mode,
-            'feature_mode': feature_mode
-        }
-        preprocessor_path = os.path.join(output_dir, "preprocessors.joblib")
-        joblib.dump(preprocessors, preprocessor_path)
-        logger.info(f"Saved preprocessors to {preprocessor_path}")
+    preprocessors = {
+        'scaler': scaler,
+        'imputer': imp,
+        'feature_cols': feature_cols,
+        'landmark_cols': landmark_cols,
+        'data_mode': data_mode,
+        'feature_mode': feature_mode
+    }
+    preprocessor_path = os.path.join(output_dir, "preprocessors.joblib")
+    joblib.dump(preprocessors, preprocessor_path)
+    logger.info(f"Saved preprocessors to {preprocessor_path}")
 
     # Log final statistics
     logger.info(f"Final dataset shape: {final_df.shape}")
