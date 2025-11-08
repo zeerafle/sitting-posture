@@ -48,23 +48,29 @@ stages:
       md5: d6c921e9dc18c2a3331d14a2b6ec776a.dir
       size: 870545
       nfiles: 2
+    - path: ../base_trainer.py
+      hash: md5
+      md5: 50f183caf5c53efc0290661eeae0ef60
+      size: 7465
     - path: ../evaluate.py
       hash: md5
-      md5: 67de29a54b69131f18ae5681386d2f54
-      size: 2494
+      md5: 2f182d12588126e3c01a506aa9ec92cf
+      size: 4613
+      isexec: true
     - path: ../utils.py
       hash: md5
-      md5: c445f2bf885014492fc80afb9e23bd4c
-      size: 1812
+      md5: b626bbdf3a4dce1303cfcf65d761c4c9
+      size: 2259
+      isexec: true
     - path: train.py
       hash: md5
-      md5: a4333ca2076a4d34dacbbc537e21fdf9
-      size: 2416
+      md5: 6cd1a4e1d75610cbb5e8763eb843c832
+      size: 1217
+      isexec: true
     params:
       ../../../params.yaml:
         adaboost:
-          n_estimators_min: 10
-          n_estimators_max: 2000
+          n_estimators_min: 50
         cv: 5
         n_iter: 30
         nn:
@@ -111,28 +117,36 @@ stages:
     outs:
     - path: ../../../dvclive/nn/cv_results.json
       hash: md5
-      md5: 45f21042f29dfecd85d1e08a833fd15b
-      size: 2132
+      md5: cb3e39fce24903e50fc00c80b3a6dba1
+      size: 2133
     - path: ../../../dvclive/nn/emissions.csv
       hash: md5
-      md5: 8543f32f697300070baff19ba1dce130
-      size: 743
+      md5: 822b4ad7c86857017b268991961c6727
+      size: 733
     - path: ../../../dvclive/nn/emissions_inference.csv
       hash: md5
-      md5: 25659da4544c6ab6eddd2414f3216311
-      size: 745
+      md5: 6e24e39f7fab22aaf476ade57c6b79c0
+      size: 744
     - path: ../../../dvclive/nn/metrics.json
       hash: md5
-      md5: 86e0d649e41c3929c23efd92dd698c3b
-      size: 702
+      md5: 87d06ca0265abd7821ea97e39144d439
+      size: 506
     - path: ../../../dvclive/nn/plots/metrics
       hash: md5
-      md5: 0652fdb7a71d5c703133306c4ae03ff7.dir
-      size: 4349
+      md5: 232cf786a0153669e4b1691063412e89.dir
+      size: 4352
       nfiles: 2
+    - path: ../../../dvclive/nn/y_pred.csv
+      hash: md5
+      md5: 32af57dab5f1afe2db9ae21c87452733
+      size: 40500
+    - path: ../../../dvclive/nn/y_pred_proba.csv
+      hash: md5
+      md5: f955a70378a16de9808f211568f82827
+      size: 40500
     - path: ../../../models/nn
       hash: md5
-      md5: 3bbe19f40cfaa422ba7eba8d1be26828.dir
+      md5: 5b0a941ea382ac375876d8fcca65e2c0.dir
       size: 101768
       nfiles: 1
   download:
@@ -257,23 +271,29 @@ stages:
       md5: d6c921e9dc18c2a3331d14a2b6ec776a.dir
       size: 870545
       nfiles: 2
+    - path: ../base_trainer.py
+      hash: md5
+      md5: 50f183caf5c53efc0290661eeae0ef60
+      size: 7465
     - path: ../evaluate.py
       hash: md5
-      md5: 67de29a54b69131f18ae5681386d2f54
-      size: 2494
+      md5: 2f182d12588126e3c01a506aa9ec92cf
+      size: 4613
+      isexec: true
     - path: ../utils.py
       hash: md5
-      md5: c445f2bf885014492fc80afb9e23bd4c
-      size: 1812
+      md5: b626bbdf3a4dce1303cfcf65d761c4c9
+      size: 2259
+      isexec: true
     - path: train.py
       hash: md5
-      md5: a2b3c6ed2b5d389b4de21f97d17b2a76
-      size: 2219
+      md5: f4c628dc2ce6a6df27c78074ee9344cc
+      size: 1229
+      isexec: true
     params:
       ../../../params.yaml:
         adaboost:
-          n_estimators_min: 10
-          n_estimators_max: 2000
+          n_estimators_min: 50
         cv: 5
         n_iter: 30
         nn:
@@ -320,29 +340,37 @@ stages:
     outs:
     - path: ../../../dvclive/xgb/cv_results.json
       hash: md5
-      md5: ed814de8fc7bdd42d1ccc23aedd2b2e7
-      size: 2139
+      md5: 454478ee0bddf830a591d2bcf82b38fe
+      size: 2127
     - path: ../../../dvclive/xgb/emissions.csv
       hash: md5
-      md5: 42010dc051edb2bccf44c162aadb8365
-      size: 744
+      md5: b499f8ed7658a6d1fb653533fcd0ca1a
+      size: 739
     - path: ../../../dvclive/xgb/emissions_inference.csv
       hash: md5
-      md5: 46ddf1d974a2cda4470cc544a0fe7146
-      size: 729
+      md5: f177f40448530d7a713ace62dde5a115
+      size: 728
     - path: ../../../dvclive/xgb/metrics.json
       hash: md5
-      md5: d74f3f47297720dd0704d15110ad4e35
-      size: 680
+      md5: 52b701ae87cf9d691e3a926290985d05
+      size: 483
     - path: ../../../dvclive/xgb/plots/metrics
       hash: md5
-      md5: 66a7566b7a171ac0f244bd53b0284462.dir
+      md5: c1742041e4d6d9083f1257a91daebfac.dir
       size: 51
       nfiles: 1
+    - path: ../../../dvclive/xgb/y_pred.csv
+      hash: md5
+      md5: d57c0c20697e8287159d44eb6d8be0d3
+      size: 40500
+    - path: ../../../dvclive/xgb/y_pred_proba.csv
+      hash: md5
+      md5: 4a2257d7a75318cc9eadadb3226416a6
+      size: 40500
     - path: ../../../models/xgb
       hash: md5
-      md5: 37b738162872ab0d3a32c96465f7fb16.dir
-      size: 182095
+      md5: cdc0e6c646437ca91f7f35825ae3a313.dir
+      size: 203028
       nfiles: 1
   train@adaboost:
     cmd: uv run python train.py
@@ -352,23 +380,29 @@ stages:
       md5: d6c921e9dc18c2a3331d14a2b6ec776a.dir
       size: 870545
       nfiles: 2
+    - path: ../base_trainer.py
+      hash: md5
+      md5: 50f183caf5c53efc0290661eeae0ef60
+      size: 7465
     - path: ../evaluate.py
       hash: md5
-      md5: 67de29a54b69131f18ae5681386d2f54
-      size: 2494
+      md5: 2f182d12588126e3c01a506aa9ec92cf
+      size: 4613
+      isexec: true
     - path: ../utils.py
       hash: md5
-      md5: c445f2bf885014492fc80afb9e23bd4c
-      size: 1812
+      md5: b626bbdf3a4dce1303cfcf65d761c4c9
+      size: 2259
+      isexec: true
     - path: train.py
       hash: md5
-      md5: 9017eca857e0a5e1aa8a9fef789b56e3
-      size: 2448
+      md5: 1a74a917f4d90b490c1bd1a696fc401c
+      size: 1267
+      isexec: true
     params:
       ../../../params.yaml:
         adaboost:
-          n_estimators_min: 10
-          n_estimators_max: 2000
+          n_estimators_min: 50
         cv: 5
         n_iter: 30
         nn:
@@ -415,27 +449,35 @@ stages:
     outs:
     - path: ../../../dvclive/adaboost/cv_results.json
       hash: md5
-      md5: b83eb4f8b34fde17cb183b14b5b76493
-      size: 2149
+      md5: 7edee9d2cab653014e8fb83d5ecf3b77
+      size: 2148
     - path: ../../../dvclive/adaboost/emissions.csv
       hash: md5
-      md5: f8ef9ac7a56965a9e2fcc3acb64829cf
-      size: 744
+      md5: 2de2e13b9956524b32273dd17a053c76
+      size: 742
     - path: ../../../dvclive/adaboost/emissions_inference.csv
       hash: md5
-      md5: 3f32b861aeb1533a60ea0eefa0901a02
-      size: 730
+      md5: e50f5dc12a67df43a20eefa8b6827603
+      size: 746
     - path: ../../../dvclive/adaboost/metrics.json
       hash: md5
-      md5: 7c215f0f451e989dcac3f31e611a044a
-      size: 728
+      md5: eb199eaeae089fff4ae9b5b4c2433462
+      size: 532
     - path: ../../../dvclive/adaboost/plots/metrics
       hash: md5
-      md5: 43eeb4e833332df77651b08860c324ab.dir
-      size: 100
+      md5: aebaf8f736e2e2a94a75a76d263741f4.dir
+      size: 101
       nfiles: 2
+    - path: ../../../dvclive/adaboost/y_pred.csv
+      hash: md5
+      md5: 19436972af56bddd287343b112ff95ab
+      size: 40500
+    - path: ../../../dvclive/adaboost/y_pred_proba.csv
+      hash: md5
+      md5: e683b8daa706b8b60ba6a23f0bf4d6d7
+      size: 40500
     - path: ../../../models/adaboost
       hash: md5
-      md5: 1eca6d8e8db70ca6752fe89abbec7909.dir
+      md5: 51aa1f8b7c1eafe44e9e76d5b519f460.dir
       size: 33988
       nfiles: 1

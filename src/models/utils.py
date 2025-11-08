@@ -11,11 +11,12 @@ import numpy as np
 def log_confusion_matrix(live, cm, class_names, title=None, cmap="Blues"):
     """Plots the confusion matrix."""
     plt.rcParams["font.family"] = "serif"
-    plt.rcParams["font.size"] = 11
+    plt.rcParams["font.size"] = 14
     fig, ax = plt.subplots(figsize=(7, 6), dpi=300)
     sns.heatmap(
         cm,
         annot=True,
+        fmt="g",
         cmap=cmap,
         ax=ax,
         annot_kws={"fontsize": 15},
@@ -39,6 +40,7 @@ def log_roc_auc_curve(live, y_true, y_pred_proba):
 
 
 def load_data(base_path):
+    """Load split train/test data."""
     train = pl.read_csv(os.path.join(base_path, "train.csv"))
     test = pl.read_csv(os.path.join(base_path, "test.csv"))
 
@@ -48,6 +50,20 @@ def load_data(base_path):
     y_test = test.select("labels")
 
     return X_train, X_test, y_train, y_test
+
+
+def load_all_data(base_path):
+    """Load all data (train + test combined) for cross-validation."""
+    train = pl.read_csv(os.path.join(base_path, "train.csv"))
+    test = pl.read_csv(os.path.join(base_path, "test.csv"))
+
+    # Combine train and test
+    all_data = pl.concat([train, test])
+
+    X = all_data.select(pl.exclude("labels"))
+    y = all_data.select("labels")
+
+    return X, y
 
 
 class NumpyEncoder(json.JSONEncoder):

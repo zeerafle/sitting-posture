@@ -1,1 +1,8 @@
 /ablation
+/adaboost/*.joblib
+/nn/*.joblib
+/xgb/*.json
+/xgb/*.ubj
+/adaboost
+/nn
+/xgb

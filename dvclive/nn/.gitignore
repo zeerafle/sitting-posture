@@ -1,3 +1,5 @@
 /emissions.csv
 /emissions_inference.csv
 /cv_results.json
+/y_pred.csv
+/y_pred_proba.csv

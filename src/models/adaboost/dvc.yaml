@@ -5,6 +5,9 @@ plots:
     x: step
 - ../../../dvclive/adaboost/plots/images
 artifacts:
+  adaboost:
+    path: ../../../models/adaboost/adaboost.joblib
+    type: model
   emissions:
     path: ../../../dvclive/adaboost/emissions.csv
     type: emissions

@@ -1,5 +1,5 @@
 {
-    "feature_importance_mean": 0.03846154361963272,
+    "feature_importance_mean": 0.03846153989434242,
     "cv_accuracy_mean": 0.9302469135802468,
     "cv_f1_mean": 0.9292365251664739,
     "cv_precision_mean": 0.9462228604728604,
@@ -9,10 +9,5 @@
     "cv_std_f1": 0.018619765809427688,
     "cv_std_precision": 0.03229139050762072,
     "cv_std_recall": 0.019125843684974903,
-    "cv_std_roc_auc": 0.009785532930234656,
-    "test_accuracy": 0.9351851851851852,
-    "test_recall": 0.9256756756756757,
-    "test_precision": 0.9319727891156463,
-    "test_f1": 0.9288135593220339,
-    "test_roc_auc": 0.9712070024570025
+    "cv_std_roc_auc": 0.009785532930234656
 }

@@ -5,6 +5,9 @@ plots:
     x: step
 - ../../../dvclive/xgb/plots/images
 artifacts:
+  xgb:
+    path: ../../../models/xgb/xgb.json
+    type: model
   emissions:
     path: ../../../dvclive/xgb/emissions.csv
     type: emissions

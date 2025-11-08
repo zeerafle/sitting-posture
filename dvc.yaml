@@ -36,14 +36,16 @@ stages:
       - ../../../data/processed
       - ../evaluate.py
       - ../utils.py
+      - ../base_trainer.py
       params:
         - ../../../params.yaml:
       outs:
-      - ../../../models/${item}:
-          cache: false
+      - ../../../models/${item}
       - ../../../dvclive/${item}/emissions.csv
       - ../../../dvclive/${item}/emissions_inference.csv
       - ../../../dvclive/${item}/cv_results.json
+      - ../../../dvclive/${item}/y_pred.csv
+      - ../../../dvclive/${item}/y_pred_proba.csv
       metrics:
       - ../../../dvclive/${item}/metrics.json:
           cache: false

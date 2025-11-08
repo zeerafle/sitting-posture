@@ -6,8 +6,7 @@ scoring: accuracy
 
 # Model-specific parameters
 adaboost:
-  n_estimators_min: 10
-  n_estimators_max: 2000
+  n_estimators_min: 50
 
 nn:
   first_hidden_layer_sizes_min: 128

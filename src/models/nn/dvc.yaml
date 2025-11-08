@@ -1,4 +1,7 @@
 artifacts:
+  nn:
+    path: ../../../models/nn/nn.joblib
+    type: model
   emissions:
     path: ../../../dvclive/nn/emissions.csv
     type: emissions
