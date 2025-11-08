@@ -16,7 +16,7 @@ from models.utils import log_confusion_matrix, log_roc_auc_curve
 
 def evaluate_with_cv(model, X: pl.DataFrame, y: pl.Series, live: Live, cv: int = 10):
     """
-    Evaluate model using only cross-validation on all data.
+    Evaluate model using cross-validation on all data.
 
     Args:
         model: Trained model
@@ -60,7 +60,8 @@ def evaluate_with_cv(model, X: pl.DataFrame, y: pl.Series, live: Live, cv: int =
     log_confusion_matrix(live, cm, class_names=["ergonomic", "non-ergonomic"])
     log_roc_auc_curve(live, y_true, y_pred_proba)
 
-    return cv_scores
+    # Return CV scores AND predictions
+    return cv_scores, y_pred, y_pred_proba
 
 
 def evaluate(

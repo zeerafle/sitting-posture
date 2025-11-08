@@ -11,9 +11,6 @@ artifacts:
   emissions:
     path: ../../../dvclive/adaboost/emissions.csv
     type: emissions
-  emissions_inference:
-    path: ../../../dvclive/adaboost/emissions_inference.csv
-    type: emissions_inference
   cv_results:
     path: ../../../dvclive/adaboost/cv_results.json
     type: cv_results

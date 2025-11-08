@@ -142,8 +142,7 @@ class BaseTrainer:
         if os.path.exists(emissions_inference_path):
             live.log_artifact(emissions_inference_path, type="emissions_inference")
 
-    def run_training_pipeline(self, X, y, evaluate_fn, live: Live,
-                              model_path: str, holdout_size: Optional[float] = 0.2):
+    def run_training_pipeline(self, X, y, evaluate_fn, live: Live, model_path: str):
         """
         Run the complete training pipeline with cross-validation.
 
@@ -153,10 +152,16 @@ class BaseTrainer:
             evaluate_fn: Evaluation function that performs CV
             live: DVCLive instance
             model_path: Path to save the trained model
-            holdout_size: Optional holdout set size for additional evaluation (0 to disable)
         """
-        # Train on all data
-        print(f"Training {self.model_name} on all data...")
+        # First perform cross-validation evaluation to get unbiased predictions
+        print(f"Performing cross-validation on {self.model_name}...")
+        cv_scores, y_pred_cv, y_pred_proba_cv = evaluate_fn(self.model, X, y, live)
+
+        # Log CV predictions (these are out-of-fold predictions)
+        self.log_predictions(y_pred_cv, y_pred_proba_cv)
+
+        # Train final model on all data
+        print(f"Training {self.model_name} on all data for final model...")
         self.train(X, y)
 
         # Log model-specific metrics
@@ -165,19 +170,7 @@ class BaseTrainer:
         # Save the trained model
         print(f"Saving model to {model_path}...")
         self.save_model(model_path)
-
-        # Log the saved model as an artifact
         live.log_artifact(model_path, type="model", name=self.model_name)
-
-        # Generate predictions on all data for DVC compatibility
-        # This creates the expected output files even though we use CV for evaluation
-        print(f"Generating predictions...")
-        y_pred, y_pred_proba = self.predict(X)
-        self.log_predictions(y_pred, y_pred_proba)
-
-        # Perform cross-validation evaluation
-        print(f"Performing cross-validation...")
-        cv_scores = evaluate_fn(self.model, X, y, live)
 
         # Log results
         self.log_emissions(live)

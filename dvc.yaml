@@ -42,7 +42,6 @@ stages:
       outs:
       - ../../../models/${item}
       - ../../../dvclive/${item}/emissions.csv
-      - ../../../dvclive/${item}/emissions_inference.csv
       - ../../../dvclive/${item}/cv_results.json
       - ../../../dvclive/${item}/y_pred.csv
       - ../../../dvclive/${item}/y_pred_proba.csv
