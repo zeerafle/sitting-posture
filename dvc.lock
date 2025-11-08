@@ -469,3 +469,32 @@ stages:
       md5: 51aa1f8b7c1eafe44e9e76d5b519f460.dir
       size: 33988
       nfiles: 1
+  plot_combined_roc:
+    cmd: uv run python src/plot_combined_roc.py
+    deps:
+    - path: data/processed
+      hash: md5
+      md5: d6c921e9dc18c2a3331d14a2b6ec776a.dir
+      size: 870545
+      nfiles: 2
+    - path: dvclive/adaboost/y_pred_proba.csv
+      hash: md5
+      md5: 46e7677acb39754b0cad75968678ee9a
+      size: 40500
+    - path: dvclive/nn/y_pred_proba.csv
+      hash: md5
+      md5: e7fe3483d55f2e0e72291442cb42d106
+      size: 40500
+    - path: dvclive/xgb/y_pred_proba.csv
+      hash: md5
+      md5: 21f49dcd766c6a7e8ab066211f4b3dd0
+      size: 40500
+    - path: src/plot_combined_roc.py
+      hash: md5
+      md5: cf2223fe7831ae431c12c308c33d385e
+      size: 4938
+    outs:
+    - path: dvclive/combined_roc_curves.png
+      hash: md5
+      md5: a3c145f8bea9eebb2121bc9f7b661f8e
+      size: 302281

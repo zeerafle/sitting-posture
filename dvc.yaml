@@ -52,3 +52,15 @@ stages:
       - ../../../dvclive/${item}/plots/metrics:
           cache: false
           x: step
+
+  plot_combined_roc:
+    cmd: uv run python src/plot_combined_roc.py
+    deps:
+    - src/plot_combined_roc.py
+    - data/processed
+    - dvclive/adaboost/y_pred_proba.csv
+    - dvclive/nn/y_pred_proba.csv
+    - dvclive/xgb/y_pred_proba.csv
+    plots:
+    - dvclive/combined_roc_curves.png:
+        cache: false
