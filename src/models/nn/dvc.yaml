@@ -1,15 +1,13 @@
-params:
-- ../../../dvclive/nn/params.yaml
 artifacts:
-  cv_results:
-    path: ../../../dvclive/nn/cv_results.json
-    type: cv_results
   emissions:
     path: ../../../dvclive/nn/emissions.csv
     type: emissions
   emissions_inference:
     path: ../../../dvclive/nn/emissions_inference.csv
     type: emissions_inference
+  cv_results:
+    path: ../../../dvclive/nn/cv_results.json
+    type: cv_results
 metrics:
 - ../../../dvclive/nn/metrics.json
 plots:

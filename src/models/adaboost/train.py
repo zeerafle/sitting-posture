@@ -3,10 +3,8 @@ import sys
 
 from sklearn.ensemble import AdaBoostClassifier
 import numpy as np
-from skopt import BayesSearchCV
-from skopt.space import Integer
 
-from dvclive import Live
+from dvclive.live import Live
 import dvc.api
 import joblib
 import json
@@ -28,44 +26,12 @@ params = dvc.api.params_show()
 X_train, X_test, y_train, y_test = load_data(os.path.join(parent_dir, "../data/processed"))
 
 with Live(dvclive_path) as live:
-    param_space = {
-        "n_estimators": Integer(
-            params["adaboost"]["n_estimators_min"],
-            params["adaboost"]["n_estimators_max"],
-        ),  # like the paper: varies by dataset size
-    }
-
-    # Setup Bayesian optimization
-    opt = BayesSearchCV(
-        estimator=AdaBoostClassifier(random_state=params["random_state"]),
-        search_spaces=param_space,
-        n_iter=params["n_iter"],
-        cv=params["cv"],
-        scoring=params["scoring"],
-        random_state=params["random_state"],
-        n_jobs=-1,
-        verbose=1,
-    )
-
-    opt.fit(X_train, np.ravel(y_train))
-    model = opt.best_estimator_
-
-    # log hyperparameters
-    live.log_params(opt.best_params_)
-    live.log_param("htcv_best_score", float(opt.best_score_))
-    htcv_results_json_path = os.path.join(dvclive_path, "htcv_results.json")
-    with open(htcv_results_json_path, "w") as f:
-        json.dump(opt.cv_results_, f, indent=4, cls=NumpyEncoder)
-    live.log_artifact(htcv_results_json_path, type="htcv_results")
+    adaboost = AdaBoostClassifier(random_state=params["random_state"])
 
     # re-train the model with the best hyperparameters
     with OfflineEmissionsTracker(
         output_file=os.path.join(dvclive_path, "emissions.csv")
     ) as training_tracker:
-        adaboost = AdaBoostClassifier(
-            n_estimators=opt.best_params_["n_estimators"],
-            random_state=params["random_state"],
-        )
         model = adaboost.fit(X_train, np.ravel(y_train))
     live.log_artifact(
         os.path.join(dvclive_path, "emissions.csv"),
@@ -88,7 +54,7 @@ with Live(dvclive_path) as live:
         joblib.dump(model, f)
 
     # Classify pose in the TEST dataset using the trained model
-    y_pred_proba = model.decision_function(X_test)
+    y_pred_proba = model.predict_proba(X_test)[:, 1]
 
     # log emissions while inference
     with OfflineEmissionsTracker(

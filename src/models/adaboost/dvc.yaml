@@ -1,5 +1,3 @@
-params:
-- ../../../dvclive/adaboost/params.yaml
 metrics:
 - ../../../dvclive/adaboost/metrics.json
 plots:
@@ -7,9 +5,6 @@ plots:
     x: step
 - ../../../dvclive/adaboost/plots/images
 artifacts:
-  htcv_results:
-    path: ../../../dvclive/adaboost/htcv_results.json
-    type: htcv_results
   emissions:
     path: ../../../dvclive/adaboost/emissions.csv
     type: emissions

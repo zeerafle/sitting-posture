@@ -1,16 +1,13 @@
 import os
 import sys
 
-from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.neural_network import MLPClassifier
-from skopt import BayesSearchCV
-from skopt.space import Integer, Categorical
 import numpy as np
 
-from dvclive import Live
+from dvclive.live import Live
 import dvc.api
-import json
 import joblib
+import json
 from codecarbon import OfflineEmissionsTracker
 
 
@@ -29,75 +26,12 @@ params = dvc.api.params_show()
 X_train, X_test, y_train, y_test = load_data(os.path.join(parent_dir, "../data/processed"))
 
 
-class MLPWrapper(BaseEstimator, ClassifierMixin):
-    def __init__(self, layer1=10, learning_rate_init=0.001):
-        self.layer1 = layer1
-        self.learning_rate_init = learning_rate_init
-
-    def fit(self, X, y):
-        model = MLPClassifier(
-            hidden_layer_sizes=[self.layer1],
-            batch_size=params["nn"]["batch_size"],
-            max_iter=params["nn"]["epochs"],
-            random_state=params["random_state"],
-            learning_rate_init=self.learning_rate_init,
-        )
-        model.fit(X, y)
-        self.model = model
-        return self
-
-    def predict(self, X):
-        return self.model.predict(X)
-
-    def score(self, X, y):
-        return self.model.score(X, y)
-
-
 with Live(dvclive_path) as live:
-    param_space = {
-        "layer1": Integer(
-            params["nn"]["first_hidden_layer_sizes_min"],
-            params["nn"]["first_hidden_layer_sizes_max"],
-        ),
-        "learning_rate_init": Categorical(params["nn"]["learning_rates"]),
-    }
-    # Setup Bayesian optimization
-    opt = BayesSearchCV(
-        estimator=MLPWrapper(),
-        search_spaces=param_space,
-        n_iter=params["n_iter"],
-        cv=params["cv"],
-        scoring=params["scoring"],
-        random_state=params["random_state"],
-        n_jobs=-1,
-        verbose=1,
-    )
+    mlp = MLPClassifier(random_state=params["random_state"])
 
-    opt.fit(X_train, np.ravel(y_train))
-
-    # log hyperparameters
-    live.log_params(opt.best_params_)
-    live.log_param("htcv_best_score", float(opt.best_score_))
-    htcv_results_json_path = os.path.join(
-        dvclive_path, "cv_results.json"
-    )
-    with open(htcv_results_json_path, "w") as f:
-        json.dump(opt.cv_results_, f, indent=4, cls=NumpyEncoder)
-    live.log_artifact(htcv_results_json_path, type="htcv_results")
-
-    # re-train the model with the best hyperparameters
     with OfflineEmissionsTracker(
         output_file=os.path.join(dvclive_path, "emissions.csv")
     ) as training_tracker:
-        mlp = MLPClassifier(
-            hidden_layer_sizes=(
-                opt.best_params_["layer1"],
-            ),
-            batch_size=params["nn"]["batch_size"],
-            max_iter=params["nn"]["epochs"],
-            random_state=params["random_state"],
-            learning_rate_init=opt.best_params_["learning_rate_init"],
-        )
         model = mlp.fit(X_train, np.ravel(y_train))
     live.log_artifact(
         os.path.join(dvclive_path, "emissions.csv"),

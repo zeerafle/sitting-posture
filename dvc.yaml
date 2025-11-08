@@ -41,6 +41,9 @@ stages:
       outs:
       - ../../../models/${item}:
           cache: false
+      - ../../../dvclive/${item}/emissions.csv
+      - ../../../dvclive/${item}/emissions_inference.csv
+      - ../../../dvclive/${item}/cv_results.json
       metrics:
       - ../../../dvclive/${item}/metrics.json:
           cache: false
