@@ -5,42 +5,61 @@ stages:
     deps:
     - path: data/data.csv
       hash: md5
-      md5: 62594eb52e65c03d334c16e347e4dcfb
-      size: 602132
+      md5: d6ca8be1642022c83d9d6679bcfc66f7
+      size: 2936388
       isexec: true
     - path: src/feature_extraction/
       hash: md5
-      md5: 8b3f74291f032557708ea9f180ef9778.dir
-      size: 78992
+      md5: 0b506b32fbfb620e81dd2e0e6958f1b4.dir
+      size: 85447
       nfiles: 8
     - path: src/featurize.py
       hash: md5
-      md5: 53de9237d3df698d08aaa3c5d51eb90c
-      size: 1012
+      md5: 178f93ffdfa0d91a59eb5b00418f16db
+      size: 7788
       isexec: true
     outs:
     - path: data/data_with_features.csv
       hash: md5
-      md5: 2e2f2c9a64f2d703b50ccfaeeb35a2a2
-      size: 1468562
+      md5: e5f4a47ed665f32bdd29e3a52a99964e
+      size: 7114898
   prepare:
     cmd: uv run python src/prepare.py
     deps:
     - path: data/data_with_features.csv
       hash: md5
-      md5: 2e2f2c9a64f2d703b50ccfaeeb35a2a2
-      size: 1468562
+      md5: e5f4a47ed665f32bdd29e3a52a99964e
+      size: 7114898
     - path: src/prepare.py
       hash: md5
-      md5: 2e386586d3caadc2d5f1b4193160b6ff
-      size: 5852
+      md5: 8c8fcf799bb1852871cb8a7b9e83293b
+      size: 14109
       isexec: true
     outs:
-    - path: data/processed
+    - path: data/processed/front/test.csv
       hash: md5
-      md5: 1a2640393c2285ce36038d232642b95a.dir
-      size: 1865332
-      nfiles: 9
+      md5: 1e3eb9bd8714850c670dfaa6b5aa0f8e
+      size: 600015
+    - path: data/processed/front/train.csv
+      hash: md5
+      md5: f02ea1b560cd37ef6a8b01ee6ffde054
+      size: 2395549
+    - path: data/processed/left/test.csv
+      hash: md5
+      md5: 379090115e714555c7aa1e8eea1a38c2
+      size: 622512
+    - path: data/processed/left/train.csv
+      hash: md5
+      md5: 0a57f41a988a53cdd44fdf09a4cd5152
+      size: 2481988
+    - path: data/processed/right/test.csv
+      hash: md5
+      md5: 9d61371478767b2c95ab8abda89ac68a
+      size: 620726
+    - path: data/processed/right/train.csv
+      hash: md5
+      md5: a58f3036ba91138b52fd074bdeb13fd9
+      size: 2476760
   train@nn:
     cmd: uv run python train.py
     deps:
@@ -512,30 +531,32 @@ stages:
   extract_keypoints:
     cmd: uv run python src/extract_keypoints.py
     deps:
-    - path: data/original
+    - path: 
+        /teamspace/studios/01-data-download-kaggle/.cache/kagglehub/datasets/zeerafle/sitting-posture/versions/6
       hash: md5
-      md5: 2e48746054b3065a5dcb4c7da98abc9e.dir
-      size: 4410730947
-      nfiles: 1620
+      md5: 1150fe1ce4cfe5cea488d192792c3fe2.dir
+      size: 12435185764
+      nfiles: 8041
     - path: src/extract_keypoints.py
       hash: md5
-      md5: 87577b0e1ac8745068c9948240489796
-      size: 694
+      md5: 5bb4d62b693d72cf380441a809dfb21c
+      size: 3031
+      isexec: true
     - path: src/keypoints_extraction/
       hash: md5
-      md5: e8f6af95126bdaa5465dc04d871baf36.dir
-      size: 33389
+      md5: 80476de91ccefc31ad0bbb65115add4e.dir
+      size: 44663
       nfiles: 4
     outs:
     - path: data/data.csv
       hash: md5
-      md5: 62594eb52e65c03d334c16e347e4dcfb
-      size: 602132
+      md5: d6ca8be1642022c83d9d6679bcfc66f7
+      size: 2936388
     - path: data/poses_images_out
       hash: md5
-      md5: 34b689bb07e49240cb14a4c08a2befed.dir
-      size: 4273367908
-      nfiles: 1620
+      md5: 9087cbbff599049857b5cc0fccfbf014.dir
+      size: 990679736
+      nfiles: 16083
   summarize:
     cmd: uv run python src/model_comparison.py && uv run python 
       src/hyperparameter_analysis.py
@@ -707,3 +728,3214 @@ stages:
       hash: md5
       md5: ebac31083e533be9e48374dfc7ba5d57
       size: 329654
+  prepare_combined:
+    cmd: uv run python src/prepare.py --combined
+    deps:
+    - path: data/data_with_features.csv
+      hash: md5
+      md5: e5f4a47ed665f32bdd29e3a52a99964e
+      size: 7114898
+      isexec: true
+    - path: src/data_preparation/saver.py
+      hash: md5
+      md5: 8dd8a697a72186ab9c504d2983a696e3
+      size: 922
+      isexec: true
+    - path: src/prepare.py
+      hash: md5
+      md5: c41c02ce3ce7f71f82edd1f2cdfd5621
+      size: 6280
+      isexec: true
+    outs:
+    - path: data/processed/all_all_features/combined/test.csv
+      hash: md5
+      md5: 24253d984e119b9ccda508f3dbbfcbf8
+      size: 1852810
+    - path: data/processed/all_all_features/combined/train.csv
+      hash: md5
+      md5: ada259afbaff1040670cb22b9144cf05
+      size: 7404171
+  train_combined@nn:
+    cmd: uv run python train.py --combined
+    deps:
+    - path: ../../../data/processed/combined
+      hash: md5
+      md5: 73269a2461bb2974015ed539faaf8667.dir
+      size: 9187569
+      nfiles: 6
+    - path: ../base_trainer.py
+      hash: md5
+      md5: 4f2165ccad843bc2c3af58117e35c6ab
+      size: 5564
+    - path: ../evaluate.py
+      hash: md5
+      md5: 55ecc54d00625de2a41ed648d131bb60
+      size: 2783
+      isexec: true
+    - path: ../utils.py
+      hash: md5
+      md5: fadcde095187d68c2698b49dd67fa6ec
+      size: 2137
+      isexec: true
+    - path: train.py
+      hash: md5
+      md5: 6c09346f7e5e6ad17f7feedbf5804bf8
+      size: 2634
+    params:
+      ../../../params.yaml:
+        adaboost:
+          n_estimators_min: 10
+          n_estimators_max: 2000
+        cv: 5
+        n_iter: 30
+        nn:
+          first_hidden_layer_sizes_min: 128
+          first_hidden_layer_sizes_max: 512
+          second_hidden_layer_sizes_min: 256
+          second_hidden_layer_sizes_max: 1024
+          learning_rates:
+          - 0.0001
+          - 0.001
+          - 0.01
+          batch_size: 32
+          epochs: 50
+        random_state: 42
+        scoring: accuracy
+        xgb:
+          gamma_min: 5.0
+          gamma_max: 11.0
+          learning_rate_min: 0.07
+          learning_rate_max: 0.6
+          n_estimators:
+          - 50
+          - 100
+          - 150
+          regulation_alphas:
+          - 1e-05
+          - 0.01
+          - 0.75
+          regulation_lambdas:
+          - 1e-05
+          - 0.01
+          - 0.45
+          min_child_weights:
+          - 1.5
+          - 6
+          - 10
+          subsamples:
+          - 0.6
+          - 0.95
+          max_depths:
+          - 3
+          - 6
+          - 9
+    outs:
+    - path: ../../../dvclive/nn/combined/cv_results.json
+      hash: md5
+      md5: f5a61f44b7deb6a40928784a9755b9f9
+      size: 1172
+    - path: ../../../dvclive/nn/combined/htcv_results.json
+      hash: md5
+      md5: a201a11eeb32112bb5121e2f1fda7156
+      size: 13644
+    - path: ../../../dvclive/nn/combined/metrics.json
+      hash: md5
+      md5: 087037d5258349fccec141954966ae1a
+      size: 1236
+    - path: ../../../models/nn/nn_combined.joblib
+      hash: md5
+      md5: f861c1af6c3638fad9e866cc3a197f21
+      size: 548264
+  train_combined@adaboost:
+    cmd: uv run python train.py --combined
+    deps:
+    - path: ../../../data/processed/combined
+      hash: md5
+      md5: 73269a2461bb2974015ed539faaf8667.dir
+      size: 9187569
+      nfiles: 6
+    - path: ../base_trainer.py
+      hash: md5
+      md5: 4f2165ccad843bc2c3af58117e35c6ab
+      size: 5564
+    - path: ../evaluate.py
+      hash: md5
+      md5: 55ecc54d00625de2a41ed648d131bb60
+      size: 2783
+      isexec: true
+    - path: ../utils.py
+      hash: md5
+      md5: fadcde095187d68c2698b49dd67fa6ec
+      size: 2137
+      isexec: true
+    - path: train.py
+      hash: md5
+      md5: 0a786685d324be7d88a9f284fbe2a065
+      size: 1406
+    params:
+      ../../../params.yaml:
+        adaboost:
+          n_estimators_min: 10
+          n_estimators_max: 2000
+        cv: 5
+        n_iter: 30
+        nn:
+          first_hidden_layer_sizes_min: 128
+          first_hidden_layer_sizes_max: 512
+          second_hidden_layer_sizes_min: 256
+          second_hidden_layer_sizes_max: 1024
+          learning_rates:
+          - 0.0001
+          - 0.001
+          - 0.01
+          batch_size: 32
+          epochs: 50
+        random_state: 42
+        scoring: accuracy
+        xgb:
+          gamma_min: 5.0
+          gamma_max: 11.0
+          learning_rate_min: 0.07
+          learning_rate_max: 0.6
+          n_estimators:
+          - 50
+          - 100
+          - 150
+          regulation_alphas:
+          - 1e-05
+          - 0.01
+          - 0.75
+          regulation_lambdas:
+          - 1e-05
+          - 0.01
+          - 0.45
+          min_child_weights:
+          - 1.5
+          - 6
+          - 10
+          subsamples:
+          - 0.6
+          - 0.95
+          max_depths:
+          - 3
+          - 6
+          - 9
+    outs:
+    - path: ../../../dvclive/adaboost/combined/cv_results.json
+      hash: md5
+      md5: 821fe1fc11f3446810c5a43c8fe35145
+      size: 1149
+    - path: ../../../dvclive/adaboost/combined/htcv_results.json
+      hash: md5
+      md5: a30df092a6489d2e886b872aede48a9f
+      size: 12096
+    - path: ../../../dvclive/adaboost/combined/metrics.json
+      hash: md5
+      md5: 8436778882771c1cef7ad085383d432d
+      size: 1261
+    - path: ../../../models/adaboost/adaboost_combined.joblib
+      hash: md5
+      md5: b85bd9f9df8baeb2bb4a06d6edd59e97
+      size: 1282148
+  train_combined@xgb:
+    cmd: uv run python train.py --combined
+    deps:
+    - path: ../../../data/processed/combined
+      hash: md5
+      md5: 73269a2461bb2974015ed539faaf8667.dir
+      size: 9187569
+      nfiles: 6
+    - path: ../base_trainer.py
+      hash: md5
+      md5: 4f2165ccad843bc2c3af58117e35c6ab
+      size: 5564
+    - path: ../evaluate.py
+      hash: md5
+      md5: 55ecc54d00625de2a41ed648d131bb60
+      size: 2783
+      isexec: true
+    - path: ../utils.py
+      hash: md5
+      md5: fadcde095187d68c2698b49dd67fa6ec
+      size: 2137
+      isexec: true
+    - path: train.py
+      hash: md5
+      md5: 8d426ac92d698295413bb302f8daa62a
+      size: 1715
+    params:
+      ../../../params.yaml:
+        adaboost:
+          n_estimators_min: 10
+          n_estimators_max: 2000
+        cv: 5
+        n_iter: 30
+        nn:
+          first_hidden_layer_sizes_min: 128
+          first_hidden_layer_sizes_max: 512
+          second_hidden_layer_sizes_min: 256
+          second_hidden_layer_sizes_max: 1024
+          learning_rates:
+          - 0.0001
+          - 0.001
+          - 0.01
+          batch_size: 32
+          epochs: 50
+        random_state: 42
+        scoring: accuracy
+        xgb:
+          gamma_min: 5.0
+          gamma_max: 11.0
+          learning_rate_min: 0.07
+          learning_rate_max: 0.6
+          n_estimators:
+          - 50
+          - 100
+          - 150
+          regulation_alphas:
+          - 1e-05
+          - 0.01
+          - 0.75
+          regulation_lambdas:
+          - 1e-05
+          - 0.01
+          - 0.45
+          min_child_weights:
+          - 1.5
+          - 6
+          - 10
+          subsamples:
+          - 0.6
+          - 0.95
+          max_depths:
+          - 3
+          - 6
+          - 9
+    outs:
+    - path: ../../../dvclive/xgb/combined/cv_results.json
+      hash: md5
+      md5: 95705f51a0b587a8a73c94105f653e7d
+      size: 1172
+    - path: ../../../dvclive/xgb/combined/htcv_results.json
+      hash: md5
+      md5: 1371489add8233cc0c2d40bc947cd7ca
+      size: 22990
+    - path: ../../../dvclive/xgb/combined/metrics.json
+      hash: md5
+      md5: 21a434836a06ac965495b07afd5b22a9
+      size: 1214
+    - path: ../../../models/xgb/xgb_combined.joblib
+      hash: md5
+      md5: 11a0f247ffa2d25150b4b3ad8100615b
+      size: 227125
+  summarize_combined:
+    cmd: uv run python src/model_comparison.py --combined
+    deps:
+    - path: dvclive/adaboost/combined/metrics.json
+      hash: md5
+      md5: 8436778882771c1cef7ad085383d432d
+      size: 1261
+    - path: dvclive/nn/combined/metrics.json
+      hash: md5
+      md5: 087037d5258349fccec141954966ae1a
+      size: 1236
+    - path: dvclive/xgb/combined/metrics.json
+      hash: md5
+      md5: 21a434836a06ac965495b07afd5b22a9
+      size: 1214
+    - path: src/model_comparison.py
+      hash: md5
+      md5: 9e08072e0f86074fd6569b310fb639ae
+      size: 12611
+    outs:
+    - path: dvclive/detailed_model_view_combined_comparison.csv
+      hash: md5
+      md5: 57943015e89102201187de016ebf5584
+      size: 788
+  visualize_combined:
+    cmd: uv run python src/roc_visualization.py --combined
+    deps:
+    - path: dvclive/adaboost/combined/y_pred.csv
+      hash: md5
+      md5: 1e1ed9b958a015cb2ec28168a39cfdce
+      size: 39301
+      isexec: true
+    - path: dvclive/nn/combined/y_pred.csv
+      hash: md5
+      md5: 376a21cd17b2a97b568a82c3c3a5b8a1
+      size: 36200
+      isexec: true
+    - path: dvclive/xgb/combined/y_pred.csv
+      hash: md5
+      md5: c41a1a5ee3964d10ac5dab95b5cb914f
+      size: 24059
+      isexec: true
+    - path: src/roc_visualization.py
+      hash: md5
+      md5: c5fdedbb137dc5ef210d48f13342dde0
+      size: 7035
+      isexec: true
+    outs:
+    - path: dvclive/plots/roc_curve_combined_comparison.png
+      hash: md5
+      md5: 0b1b26b96ae38a1ae59e9807f757cd5b
+      size: 254991
+  analyze_friedman_combined:
+    cmd: uv run python src/analysis/friedman_test.py --models adaboost nn xgb 
+      --metric accuracy --combined
+    deps:
+    - path: dvclive/adaboost/combined/cv_results.json
+      hash: md5
+      md5: 821fe1fc11f3446810c5a43c8fe35145
+      size: 1149
+      isexec: true
+    - path: dvclive/nn/combined/cv_results.json
+      hash: md5
+      md5: f5a61f44b7deb6a40928784a9755b9f9
+      size: 1172
+      isexec: true
+    - path: dvclive/xgb/combined/cv_results.json
+      hash: md5
+      md5: 95705f51a0b587a8a73c94105f653e7d
+      size: 1172
+      isexec: true
+    - path: src/analysis/friedman_test.py
+      hash: md5
+      md5: cb934d9245e0d9b467460d0258f7abc5
+      size: 14101
+    outs:
+    - path: dvclive/analysis/friedman_combined_adaboost_nn_xgb_accuracy.json
+      hash: md5
+      md5: 8764d2d88748f870dfa8d6414815b85b
+      size: 1635
+  prepare_loso_combined:
+    cmd: uv run python src/prepare.py --loso --combined
+    deps:
+    - path: data/data_with_features.csv
+      hash: md5
+      md5: e5f4a47ed665f32bdd29e3a52a99964e
+      size: 7114898
+    - path: src/prepare.py
+      hash: md5
+      md5: 8c8fcf799bb1852871cb8a7b9e83293b
+      size: 14109
+      isexec: true
+    outs:
+    - path: data/processed/combined/data.csv
+      hash: md5
+      md5: a18e30845d496b25443b81b9ae0fb60e
+      size: 9294544
+  train_loso_combined@adaboost:
+    cmd: uv run python src/models/adaboost/train.py --combined --loso 
+      --data-config all_all_features
+    deps:
+    - path: data/processed/all_all_features/combined/data.csv
+      hash: md5
+      md5: f5220acc8d7d4e660ccacca73c27d267
+      size: 9821342
+      isexec: true
+    - path: src/models/adaboost/train.py
+      hash: md5
+      md5: 10e8544323b5a1fef69a46c123500a20
+      size: 1632
+      isexec: true
+    - path: src/models/base_trainer.py
+      hash: md5
+      md5: b4baa34b5a9617f915e42ec6706ad00a
+      size: 2039
+      isexec: true
+    - path: src/models/evaluate.py
+      hash: md5
+      md5: 28205306d098d1e8af69835dde06c3b8
+      size: 4604
+      isexec: true
+    - path: src/models/utils.py
+      hash: md5
+      md5: c51d309800e3542813508b9671af8ba2
+      size: 5480
+      isexec: true
+    params:
+      params.yaml:
+        adaboost:
+          n_estimators_min: 10
+          n_estimators_max: 2000
+        cv: 5
+        n_iter: 30
+        nn:
+          first_hidden_layer_sizes_min: 128
+          first_hidden_layer_sizes_max: 512
+          second_hidden_layer_sizes_min: 256
+          second_hidden_layer_sizes_max: 1024
+          learning_rates:
+          - 0.0001
+          - 0.001
+          - 0.01
+          batch_size: 32
+          epochs: 50
+        random_state: 42
+        scoring: accuracy
+        xgb:
+          gamma_min: 5.0
+          gamma_max: 11.0
+          learning_rate_min: 0.07
+          learning_rate_max: 0.6
+          n_estimators:
+          - 50
+          - 100
+          - 150
+          regulation_alphas:
+          - 1e-05
+          - 0.01
+          - 0.75
+          regulation_lambdas:
+          - 1e-05
+          - 0.01
+          - 0.45
+          min_child_weights:
+          - 1.5
+          - 6
+          - 10
+          subsamples:
+          - 0.6
+          - 0.95
+          max_depths:
+          - 3
+          - 6
+          - 9
+    outs:
+    - path: dvclive/adaboost/combined_loso/loso_metrics.json
+      hash: md5
+      md5: bafe2ea1b6ee62877d001abf9cd507d4
+      size: 689
+    - path: dvclive/adaboost/combined_loso/metrics.json
+      hash: md5
+      md5: 8a80554c91d9fca8acb82f023de02f11
+      size: 3
+    - path: models/adaboost/adaboost_combined_all_all_features_loso.joblib
+      hash: md5
+      md5: 18bb91271689a5d795436735e919ac93
+      size: 34052
+  train_loso_combined@nn:
+    cmd: uv run python src/models/nn/train.py --combined --loso --data-config 
+      all_all_features
+    deps:
+    - path: data/processed/all_all_features/combined/data.csv
+      hash: md5
+      md5: f5220acc8d7d4e660ccacca73c27d267
+      size: 9821342
+      isexec: true
+    - path: src/models/base_trainer.py
+      hash: md5
+      md5: b4baa34b5a9617f915e42ec6706ad00a
+      size: 2039
+      isexec: true
+    - path: src/models/evaluate.py
+      hash: md5
+      md5: 28205306d098d1e8af69835dde06c3b8
+      size: 4604
+      isexec: true
+    - path: src/models/nn/train.py
+      hash: md5
+      md5: 66ebc494d0e941c803590cbd4619d300
+      size: 2936
+      isexec: true
+    - path: src/models/utils.py
+      hash: md5
+      md5: c51d309800e3542813508b9671af8ba2
+      size: 5480
+      isexec: true
+    params:
+      params.yaml:
+        adaboost:
+          n_estimators_min: 10
+          n_estimators_max: 2000
+        cv: 5
+        n_iter: 30
+        nn:
+          first_hidden_layer_sizes_min: 128
+          first_hidden_layer_sizes_max: 512
+          second_hidden_layer_sizes_min: 256
+          second_hidden_layer_sizes_max: 1024
+          learning_rates:
+          - 0.0001
+          - 0.001
+          - 0.01
+          batch_size: 32
+          epochs: 50
+        random_state: 42
+        scoring: accuracy
+        xgb:
+          gamma_min: 5.0
+          gamma_max: 11.0
+          learning_rate_min: 0.07
+          learning_rate_max: 0.6
+          n_estimators:
+          - 50
+          - 100
+          - 150
+          regulation_alphas:
+          - 1e-05
+          - 0.01
+          - 0.75
+          regulation_lambdas:
+          - 1e-05
+          - 0.01
+          - 0.45
+          min_child_weights:
+          - 1.5
+          - 6
+          - 10
+          subsamples:
+          - 0.6
+          - 0.95
+          max_depths:
+          - 3
+          - 6
+          - 9
+    outs:
+    - path: dvclive/nn/combined_loso/loso_metrics.json
+      hash: md5
+      md5: bea28f458d0cfd6af5c64da9df860580
+      size: 684
+    - path: dvclive/nn/combined_loso/metrics.json
+      hash: md5
+      md5: 4c041bb21394271e99b996c1a83bf134
+      size: 449
+    - path: models/nn/nn_combined_all_all_features_loso.joblib
+      hash: md5
+      md5: 31646ad46cc560117ecbe2a9f20fee7f
+      size: 27699
+  train_loso_combined@xgb:
+    cmd: uv run python src/models/xgb/train.py --combined --loso --data-config 
+      all_all_features
+    deps:
+    - path: data/processed/all_all_features/combined/data.csv
+      hash: md5
+      md5: f5220acc8d7d4e660ccacca73c27d267
+      size: 9821342
+      isexec: true
+    - path: src/models/base_trainer.py
+      hash: md5
+      md5: b4baa34b5a9617f915e42ec6706ad00a
+      size: 2039
+      isexec: true
+    - path: src/models/evaluate.py
+      hash: md5
+      md5: 28205306d098d1e8af69835dde06c3b8
+      size: 4604
+      isexec: true
+    - path: src/models/utils.py
+      hash: md5
+      md5: c51d309800e3542813508b9671af8ba2
+      size: 5480
+      isexec: true
+    - path: src/models/xgb/train.py
+      hash: md5
+      md5: feaac9da16de5f1630ee5ebb2ed28b47
+      size: 2078
+      isexec: true
+    params:
+      params.yaml:
+        adaboost:
+          n_estimators_min: 10
+          n_estimators_max: 2000
+        cv: 5
+        n_iter: 30
+        nn:
+          first_hidden_layer_sizes_min: 128
+          first_hidden_layer_sizes_max: 512
+          second_hidden_layer_sizes_min: 256
+          second_hidden_layer_sizes_max: 1024
+          learning_rates:
+          - 0.0001
+          - 0.001
+          - 0.01
+          batch_size: 32
+          epochs: 50
+        random_state: 42
+        scoring: accuracy
+        xgb:
+          gamma_min: 5.0
+          gamma_max: 11.0
+          learning_rate_min: 0.07
+          learning_rate_max: 0.6
+          n_estimators:
+          - 50
+          - 100
+          - 150
+          regulation_alphas:
+          - 1e-05
+          - 0.01
+          - 0.75
+          regulation_lambdas:
+          - 1e-05
+          - 0.01
+          - 0.45
+          min_child_weights:
+          - 1.5
+          - 6
+          - 10
+          subsamples:
+          - 0.6
+          - 0.95
+          max_depths:
+          - 3
+          - 6
+          - 9
+    outs:
+    - path: dvclive/xgb/combined_loso/loso_metrics.json
+      hash: md5
+      md5: c6ec3b1bbd78b65d8b674ac06721b703
+      size: 690
+    - path: dvclive/xgb/combined_loso/metrics.json
+      hash: md5
+      md5: 40b27a36a039bb40a13958661aa8ac6b
+      size: 447
+    - path: models/xgb/xgb_combined_all_all_features_loso.joblib
+      hash: md5
+      md5: d9214771ee96e711f548094d35a05973
+      size: 113929
+  analyze_friedman_loso:
+    cmd: uv run python src/analysis/friedman_test.py --models adaboost nn xgb 
+      --metric accuracy --loso
+    deps:
+    - path: dvclive/adaboost/combined_loso/loso_metrics.json
+      hash: md5
+      md5: bafe2ea1b6ee62877d001abf9cd507d4
+      size: 689
+    - path: dvclive/nn/combined_loso/loso_metrics.json
+      hash: md5
+      md5: bea28f458d0cfd6af5c64da9df860580
+      size: 684
+    - path: dvclive/xgb/combined_loso/loso_metrics.json
+      hash: md5
+      md5: c6ec3b1bbd78b65d8b674ac06721b703
+      size: 690
+    - path: src/analysis/friedman_test.py
+      hash: md5
+      md5: aaecda33df65fcbd3587c77b115818ec
+      size: 13309
+      isexec: true
+    outs:
+    - path: dvclive/analysis/friedman_loso_adaboost_nn_xgb_accuracy.json
+      hash: md5
+      md5: 0c3e49a5644a9da10a20d5ec4cabb213
+      size: 1289
+  analyze_friedman_f1_loso:
+    cmd: uv run python src/analysis/friedman_test.py --models adaboost nn xgb 
+      --metric f1 --loso
+    deps:
+    - path: dvclive/adaboost/combined_loso/loso_metrics.json
+      hash: md5
+      md5: bafe2ea1b6ee62877d001abf9cd507d4
+      size: 689
+    - path: dvclive/nn/combined_loso/loso_metrics.json
+      hash: md5
+      md5: bea28f458d0cfd6af5c64da9df860580
+      size: 684
+    - path: dvclive/xgb/combined_loso/loso_metrics.json
+      hash: md5
+      md5: c6ec3b1bbd78b65d8b674ac06721b703
+      size: 690
+    - path: src/analysis/friedman_test.py
+      hash: md5
+      md5: aaecda33df65fcbd3587c77b115818ec
+      size: 13309
+      isexec: true
+    outs:
+    - path: dvclive/analysis/friedman_loso_adaboost_nn_xgb_f1.json
+      hash: md5
+      md5: 1ea3916fcf4d24346a14675c5aff3b8f
+      size: 1280
+  train_cnn_loso:
+    cmd: uv run python src/models/cnn/train_loso.py
+    deps:
+    - path: data/processed/loso/
+      hash: md5
+      md5: a463c4f1663c8f1f943bbf944862b984.dir
+      size: 9810560
+      nfiles: 2
+    - path: src/models/base_trainer.py
+      hash: md5
+      md5: a57f8eb114a0cc63aa652596546a1b48
+      size: 2372
+      isexec: true
+    - path: src/models/cnn/train_loso.py
+      hash: md5
+      md5: c53b4aa141ec4d51bd4e4beff998f25e
+      size: 16237
+      isexec: true
+    - path: src/models/cnn/trainer.py
+      hash: md5
+      md5: d38babf803f7d4ab2c5fea08fcd03093
+      size: 3570
+      isexec: true
+    - path: src/models/evaluate.py
+      hash: md5
+      md5: c901aed098fd676775dd31cba4ebf8bb
+      size: 5198
+      isexec: true
+    - path: src/models/loso_workflow.py
+      hash: md5
+      md5: c6c841edd45159be41132b71d7b3df83
+      size: 12074
+      isexec: true
+    - path: src/models/utils.py
+      hash: md5
+      md5: c51d309800e3542813508b9671af8ba2
+      size: 5480
+      isexec: true
+    outs:
+    - path: dvclive/cnn/loso/aggregated_metrics.json
+      hash: md5
+      md5: 9a08d06d0a8807cea4fe783f7ddbde89
+      size: 378
+    - path: dvclive/cnn/loso/fold_metrics.json
+      hash: md5
+      md5: cd1703fdb8780234eb4cf5642dbdee74
+      size: 3980
+  prepare_ablation_combined@all-all_features:
+    cmd: uv run python src/prepare.py --loso --combined --data-mode all 
+      --feature-mode all_features
+    deps:
+    - path: data/data_with_features.csv
+      hash: md5
+      md5: e5f4a47ed665f32bdd29e3a52a99964e
+      size: 7114898
+      isexec: true
+    - path: src/data_preparation/data_filter.py
+      hash: md5
+      md5: 36922b468d897b8a35f43f0dd8e90b3e
+      size: 2816
+      isexec: true
+    - path: src/prepare.py
+      hash: md5
+      md5: c41c02ce3ce7f71f82edd1f2cdfd5621
+      size: 6280
+      isexec: true
+    outs:
+    - path: data/processed/all_all_features/combined/data.csv
+      hash: md5
+      md5: f5220acc8d7d4e660ccacca73c27d267
+      size: 9821342
+  prepare_ablation_combined@synthetic-keypoints_only:
+    cmd: uv run python src/prepare.py --loso --combined --data-mode synthetic 
+      --feature-mode keypoints_only
+    deps:
+    - path: data/data_with_features.csv
+      hash: md5
+      md5: 3139a3f7bfbb61a033166318af7f27b6
+      size: 7115533
+      isexec: true
+    - path: src/data_preparation/data_filter.py
+      hash: md5
+      md5: f8f33449d4762f099be6e593e74f6532
+      size: 3133
+      isexec: true
+    - path: src/prepare.py
+      hash: md5
+      md5: 04372e50ec4750f4d65002072b17cb66
+      size: 6067
+      isexec: true
+    outs:
+    - path: data/processed/synthetic_keypoints_only/combined_full/data.csv
+      hash: md5
+      md5: a96bc2c6ee55de59d2d42008ab79c678
+      size: 3211579
+  prepare_ablation_combined@real-all_features:
+    cmd: uv run python src/prepare.py --loso --combined --data-mode real 
+      --feature-mode all_features
+    deps:
+    - path: data/data_with_features.csv
+      hash: md5
+      md5: 3139a3f7bfbb61a033166318af7f27b6
+      size: 7115533
+      isexec: true
+    - path: src/data_preparation/data_filter.py
+      hash: md5
+      md5: f8f33449d4762f099be6e593e74f6532
+      size: 3133
+      isexec: true
+    - path: src/prepare.py
+      hash: md5
+      md5: 04372e50ec4750f4d65002072b17cb66
+      size: 6067
+      isexec: true
+    outs:
+    - path: data/processed/real_all_features/combined_full/data.csv
+      hash: md5
+      md5: 11d43777323b56d50447db07fbe78df8
+      size: 3310109
+  prepare_ablation_combined@all-keypoints_only:
+    cmd: uv run python src/prepare.py --loso --combined --data-mode all 
+      --feature-mode keypoints_only
+    deps:
+    - path: data/data_with_features.csv
+      hash: md5
+      md5: e5f4a47ed665f32bdd29e3a52a99964e
+      size: 7114898
+      isexec: true
+    - path: src/data_preparation/data_filter.py
+      hash: md5
+      md5: 36922b468d897b8a35f43f0dd8e90b3e
+      size: 2816
+      isexec: true
+    - path: src/prepare.py
+      hash: md5
+      md5: c41c02ce3ce7f71f82edd1f2cdfd5621
+      size: 6280
+      isexec: true
+    outs:
+    - path: data/processed/all_keypoints_only/combined/data.csv
+      hash: md5
+      md5: c7f5523dc33c097e81750b21cb28e1c9
+      size: 4923378
+  prepare_ablation_combined@real-keypoints_only:
+    cmd: uv run python src/prepare.py --loso --combined --data-mode real 
+      --feature-mode keypoints_only
+    deps:
+    - path: data/data_with_features.csv
+      hash: md5
+      md5: e5f4a47ed665f32bdd29e3a52a99964e
+      size: 7114898
+      isexec: true
+    - path: src/data_preparation/data_filter.py
+      hash: md5
+      md5: 36922b468d897b8a35f43f0dd8e90b3e
+      size: 2816
+      isexec: true
+    - path: src/prepare.py
+      hash: md5
+      md5: c41c02ce3ce7f71f82edd1f2cdfd5621
+      size: 6280
+      isexec: true
+    outs:
+    - path: data/processed/real_keypoints_only/combined/data.csv
+      hash: md5
+      md5: e3966a0b7970188a3a3a22362562f87b
+      size: 1672027
+  train_ablation_combined@all-keypoints_only:
+    cmd: uv run python src/models/xgb/train.py --loso --combined --data-config 
+      all_keypoints_only
+    deps:
+    - path: data/processed/all_keypoints_only/combined_full/data.csv
+      hash: md5
+      md5: 5c712bcb7897c620e3b7a2591bff6d3d
+      size: 4861486
+    - path: src/models/base_trainer.py
+      hash: md5
+      md5: eba977da206d72d453e153c3278067d8
+      size: 2008
+      isexec: true
+    - path: src/models/loso_workflow.py
+      hash: md5
+      md5: 9983f8fd8664186371a3dd336561b912
+      size: 6150
+      isexec: true
+    - path: src/models/training_workflow.py
+      hash: md5
+      md5: 0df216578bf6020fc11fdbac0eb4f9c3
+      size: 3415
+      isexec: true
+    - path: src/models/utils.py
+      hash: md5
+      md5: 9e51036f3b4532028dfc210aa666cfa3
+      size: 4691
+      isexec: true
+    - path: src/models/xgb/train.py
+      hash: md5
+      md5: feaac9da16de5f1630ee5ebb2ed28b47
+      size: 2078
+      isexec: true
+    params:
+      params.yaml:
+        adaboost:
+          n_estimators_min: 10
+          n_estimators_max: 2000
+        cv: 5
+        n_iter: 30
+        nn:
+          first_hidden_layer_sizes_min: 128
+          first_hidden_layer_sizes_max: 512
+          second_hidden_layer_sizes_min: 256
+          second_hidden_layer_sizes_max: 1024
+          learning_rates:
+          - 0.0001
+          - 0.001
+          - 0.01
+          batch_size: 32
+          epochs: 50
+        random_state: 42
+        scoring: accuracy
+        xgb:
+          gamma_min: 5.0
+          gamma_max: 11.0
+          learning_rate_min: 0.07
+          learning_rate_max: 0.6
+          n_estimators:
+          - 50
+          - 100
+          - 150
+          regulation_alphas:
+          - 1e-05
+          - 0.01
+          - 0.75
+          regulation_lambdas:
+          - 1e-05
+          - 0.01
+          - 0.45
+          min_child_weights:
+          - 1.5
+          - 6
+          - 10
+          subsamples:
+          - 0.6
+          - 0.95
+          max_depths:
+          - 3
+          - 6
+          - 9
+    outs:
+    - path: dvclive/xgb/combined_full_all_keypoints_only_loso/loso_metrics.json
+      hash: md5
+      md5: 2b5c6bdd6f8d1f6c9a350e58e59406bd
+      size: 677
+    - path: models/xgb/xgb_combined_full_all_keypoints_only.joblib
+      hash: md5
+      md5: 5dd95ad6adec82051d7a6601ea904f35
+      size: 217974
+  train_ablation_combined@synthetic-keypoints_only:
+    cmd: uv run python src/models/xgb/train.py --loso --combined --data-config 
+      synthetic_keypoints_only
+    deps:
+    - path: data/processed/synthetic_keypoints_only/combined_full/data.csv
+      hash: md5
+      md5: a96bc2c6ee55de59d2d42008ab79c678
+      size: 3211579
+    - path: src/models/base_trainer.py
+      hash: md5
+      md5: eba977da206d72d453e153c3278067d8
+      size: 2008
+      isexec: true
+    - path: src/models/loso_workflow.py
+      hash: md5
+      md5: 9983f8fd8664186371a3dd336561b912
+      size: 6150
+      isexec: true
+    - path: src/models/training_workflow.py
+      hash: md5
+      md5: 0df216578bf6020fc11fdbac0eb4f9c3
+      size: 3415
+      isexec: true
+    - path: src/models/utils.py
+      hash: md5
+      md5: 9e51036f3b4532028dfc210aa666cfa3
+      size: 4691
+      isexec: true
+    - path: src/models/xgb/train.py
+      hash: md5
+      md5: feaac9da16de5f1630ee5ebb2ed28b47
+      size: 2078
+      isexec: true
+    params:
+      params.yaml:
+        adaboost:
+          n_estimators_min: 10
+          n_estimators_max: 2000
+        cv: 5
+        n_iter: 30
+        nn:
+          first_hidden_layer_sizes_min: 128
+          first_hidden_layer_sizes_max: 512
+          second_hidden_layer_sizes_min: 256
+          second_hidden_layer_sizes_max: 1024
+          learning_rates:
+          - 0.0001
+          - 0.001
+          - 0.01
+          batch_size: 32
+          epochs: 50
+        random_state: 42
+        scoring: accuracy
+        xgb:
+          gamma_min: 5.0
+          gamma_max: 11.0
+          learning_rate_min: 0.07
+          learning_rate_max: 0.6
+          n_estimators:
+          - 50
+          - 100
+          - 150
+          regulation_alphas:
+          - 1e-05
+          - 0.01
+          - 0.75
+          regulation_lambdas:
+          - 1e-05
+          - 0.01
+          - 0.45
+          min_child_weights:
+          - 1.5
+          - 6
+          - 10
+          subsamples:
+          - 0.6
+          - 0.95
+          max_depths:
+          - 3
+          - 6
+          - 9
+    outs:
+    - path: 
+        dvclive/xgb/combined_full_synthetic_keypoints_only_loso/loso_metrics.json
+      hash: md5
+      md5: 8e6c597b31b0eb833e9b36c5c8c4ca47
+      size: 667
+    - path: models/xgb/xgb_combined_full_synthetic_keypoints_only.joblib
+      hash: md5
+      md5: aae4bc5789b5d2a79d0e9b729f1a2193
+      size: 185265
+  prepare_ablation_combined@synthetic-all_features:
+    cmd: uv run python src/prepare.py --loso --combined --data-mode synthetic 
+      --feature-mode all_features
+    deps:
+    - path: data/data_with_features.csv
+      hash: md5
+      md5: 3139a3f7bfbb61a033166318af7f27b6
+      size: 7115533
+      isexec: true
+    - path: src/data_preparation/data_filter.py
+      hash: md5
+      md5: f8f33449d4762f099be6e593e74f6532
+      size: 3133
+      isexec: true
+    - path: src/prepare.py
+      hash: md5
+      md5: 04372e50ec4750f4d65002072b17cb66
+      size: 6067
+      isexec: true
+    outs:
+    - path: data/processed/synthetic_all_features/combined_full/data.csv
+      hash: md5
+      md5: af8af066434fdd61fc006d57e2fe081e
+      size: 6452659
+  train_ablation_combined@all-all_features:
+    cmd: uv run python src/models/xgb/train.py --loso --combined --data-config 
+      all_all_features
+    deps:
+    - path: data/processed/all_all_features/combined_full/data.csv
+      hash: md5
+      md5: ae54f020c6a6f1e7ec8111825670d1ec
+      size: 9759364
+    - path: src/models/base_trainer.py
+      hash: md5
+      md5: eba977da206d72d453e153c3278067d8
+      size: 2008
+      isexec: true
+    - path: src/models/loso_workflow.py
+      hash: md5
+      md5: 9983f8fd8664186371a3dd336561b912
+      size: 6150
+      isexec: true
+    - path: src/models/training_workflow.py
+      hash: md5
+      md5: 0df216578bf6020fc11fdbac0eb4f9c3
+      size: 3415
+      isexec: true
+    - path: src/models/utils.py
+      hash: md5
+      md5: 9e51036f3b4532028dfc210aa666cfa3
+      size: 4691
+      isexec: true
+    - path: src/models/xgb/train.py
+      hash: md5
+      md5: feaac9da16de5f1630ee5ebb2ed28b47
+      size: 2078
+      isexec: true
+    params:
+      params.yaml:
+        adaboost:
+          n_estimators_min: 10
+          n_estimators_max: 2000
+        cv: 5
+        n_iter: 30
+        nn:
+          first_hidden_layer_sizes_min: 128
+          first_hidden_layer_sizes_max: 512
+          second_hidden_layer_sizes_min: 256
+          second_hidden_layer_sizes_max: 1024
+          learning_rates:
+          - 0.0001
+          - 0.001
+          - 0.01
+          batch_size: 32
+          epochs: 50
+        random_state: 42
+        scoring: accuracy
+        xgb:
+          gamma_min: 5.0
+          gamma_max: 11.0
+          learning_rate_min: 0.07
+          learning_rate_max: 0.6
+          n_estimators:
+          - 50
+          - 100
+          - 150
+          regulation_alphas:
+          - 1e-05
+          - 0.01
+          - 0.75
+          regulation_lambdas:
+          - 1e-05
+          - 0.01
+          - 0.45
+          min_child_weights:
+          - 1.5
+          - 6
+          - 10
+          subsamples:
+          - 0.6
+          - 0.95
+          max_depths:
+          - 3
+          - 6
+          - 9
+    outs:
+    - path: dvclive/xgb/combined_full_all_all_features_loso/loso_metrics.json
+      hash: md5
+      md5: 50124f6082209b59e22f534b37891f4f
+      size: 690
+    - path: models/xgb/xgb_combined_full_all_all_features.joblib
+      hash: md5
+      md5: 7fc54324254a65820e68a92883569ca3
+      size: 220767
+  train_ablation_combined@real-keypoints_only:
+    cmd: uv run python src/models/xgb/train.py --loso --combined --data-config 
+      real_keypoints_only
+    deps:
+    - path: data/processed/real_keypoints_only/combined_full/data.csv
+      hash: md5
+      md5: 03495ef5d291854f5d87c7b7a3b82af3
+      size: 1650016
+    - path: src/models/base_trainer.py
+      hash: md5
+      md5: eba977da206d72d453e153c3278067d8
+      size: 2008
+      isexec: true
+    - path: src/models/loso_workflow.py
+      hash: md5
+      md5: 9983f8fd8664186371a3dd336561b912
+      size: 6150
+      isexec: true
+    - path: src/models/training_workflow.py
+      hash: md5
+      md5: 0df216578bf6020fc11fdbac0eb4f9c3
+      size: 3415
+      isexec: true
+    - path: src/models/utils.py
+      hash: md5
+      md5: 9e51036f3b4532028dfc210aa666cfa3
+      size: 4691
+      isexec: true
+    - path: src/models/xgb/train.py
+      hash: md5
+      md5: feaac9da16de5f1630ee5ebb2ed28b47
+      size: 2078
+      isexec: true
+    params:
+      params.yaml:
+        adaboost:
+          n_estimators_min: 10
+          n_estimators_max: 2000
+        cv: 5
+        n_iter: 30
+        nn:
+          first_hidden_layer_sizes_min: 128
+          first_hidden_layer_sizes_max: 512
+          second_hidden_layer_sizes_min: 256
+          second_hidden_layer_sizes_max: 1024
+          learning_rates:
+          - 0.0001
+          - 0.001
+          - 0.01
+          batch_size: 32
+          epochs: 50
+        random_state: 42
+        scoring: accuracy
+        xgb:
+          gamma_min: 5.0
+          gamma_max: 11.0
+          learning_rate_min: 0.07
+          learning_rate_max: 0.6
+          n_estimators:
+          - 50
+          - 100
+          - 150
+          regulation_alphas:
+          - 1e-05
+          - 0.01
+          - 0.75
+          regulation_lambdas:
+          - 1e-05
+          - 0.01
+          - 0.45
+          min_child_weights:
+          - 1.5
+          - 6
+          - 10
+          subsamples:
+          - 0.6
+          - 0.95
+          max_depths:
+          - 3
+          - 6
+          - 9
+    outs:
+    - path: dvclive/xgb/combined_full_real_keypoints_only_loso/loso_metrics.json
+      hash: md5
+      md5: 8dded9f2d74ab785c9b816dcdb276c7e
+      size: 667
+    - path: models/xgb/xgb_combined_full_real_keypoints_only.joblib
+      hash: md5
+      md5: 4725ae4290c1caf92bce46e6ba3abeac
+      size: 150498
+  train_ablation_combined@real-all_features:
+    cmd: uv run python src/models/xgb/train.py --loso --combined --data-config 
+      real_all_features
+    deps:
+    - path: data/processed/real_all_features/combined_full/data.csv
+      hash: md5
+      md5: 11d43777323b56d50447db07fbe78df8
+      size: 3310109
+    - path: src/models/base_trainer.py
+      hash: md5
+      md5: eba977da206d72d453e153c3278067d8
+      size: 2008
+      isexec: true
+    - path: src/models/loso_workflow.py
+      hash: md5
+      md5: 9983f8fd8664186371a3dd336561b912
+      size: 6150
+      isexec: true
+    - path: src/models/training_workflow.py
+      hash: md5
+      md5: 0df216578bf6020fc11fdbac0eb4f9c3
+      size: 3415
+      isexec: true
+    - path: src/models/utils.py
+      hash: md5
+      md5: 9e51036f3b4532028dfc210aa666cfa3
+      size: 4691
+      isexec: true
+    - path: src/models/xgb/train.py
+      hash: md5
+      md5: feaac9da16de5f1630ee5ebb2ed28b47
+      size: 2078
+      isexec: true
+    params:
+      params.yaml:
+        adaboost:
+          n_estimators_min: 10
+          n_estimators_max: 2000
+        cv: 5
+        n_iter: 30
+        nn:
+          first_hidden_layer_sizes_min: 128
+          first_hidden_layer_sizes_max: 512
+          second_hidden_layer_sizes_min: 256
+          second_hidden_layer_sizes_max: 1024
+          learning_rates:
+          - 0.0001
+          - 0.001
+          - 0.01
+          batch_size: 32
+          epochs: 50
+        random_state: 42
+        scoring: accuracy
+        xgb:
+          gamma_min: 5.0
+          gamma_max: 11.0
+          learning_rate_min: 0.07
+          learning_rate_max: 0.6
+          n_estimators:
+          - 50
+          - 100
+          - 150
+          regulation_alphas:
+          - 1e-05
+          - 0.01
+          - 0.75
+          regulation_lambdas:
+          - 1e-05
+          - 0.01
+          - 0.45
+          min_child_weights:
+          - 1.5
+          - 6
+          - 10
+          subsamples:
+          - 0.6
+          - 0.95
+          max_depths:
+          - 3
+          - 6
+          - 9
+    outs:
+    - path: dvclive/xgb/combined_full_real_all_features_loso/loso_metrics.json
+      hash: md5
+      md5: 3e79c20af8c00f98ca5d5245b0ea1a31
+      size: 667
+    - path: models/xgb/xgb_combined_full_real_all_features.joblib
+      hash: md5
+      md5: da15d301cf846e8d52e4a2d439682af7
+      size: 153288
+  train_ablation_combined@synthetic-all_features:
+    cmd: uv run python src/models/xgb/train.py --loso --combined --data-config 
+      synthetic_all_features
+    deps:
+    - path: data/processed/synthetic_all_features/combined_full/data.csv
+      hash: md5
+      md5: af8af066434fdd61fc006d57e2fe081e
+      size: 6452659
+    - path: src/models/base_trainer.py
+      hash: md5
+      md5: eba977da206d72d453e153c3278067d8
+      size: 2008
+      isexec: true
+    - path: src/models/loso_workflow.py
+      hash: md5
+      md5: 9983f8fd8664186371a3dd336561b912
+      size: 6150
+      isexec: true
+    - path: src/models/training_workflow.py
+      hash: md5
+      md5: 0df216578bf6020fc11fdbac0eb4f9c3
+      size: 3415
+      isexec: true
+    - path: src/models/utils.py
+      hash: md5
+      md5: 9e51036f3b4532028dfc210aa666cfa3
+      size: 4691
+      isexec: true
+    - path: src/models/xgb/train.py
+      hash: md5
+      md5: feaac9da16de5f1630ee5ebb2ed28b47
+      size: 2078
+      isexec: true
+    params:
+      params.yaml:
+        adaboost:
+          n_estimators_min: 10
+          n_estimators_max: 2000
+        cv: 5
+        n_iter: 30
+        nn:
+          first_hidden_layer_sizes_min: 128
+          first_hidden_layer_sizes_max: 512
+          second_hidden_layer_sizes_min: 256
+          second_hidden_layer_sizes_max: 1024
+          learning_rates:
+          - 0.0001
+          - 0.001
+          - 0.01
+          batch_size: 32
+          epochs: 50
+        random_state: 42
+        scoring: accuracy
+        xgb:
+          gamma_min: 5.0
+          gamma_max: 11.0
+          learning_rate_min: 0.07
+          learning_rate_max: 0.6
+          n_estimators:
+          - 50
+          - 100
+          - 150
+          regulation_alphas:
+          - 1e-05
+          - 0.01
+          - 0.75
+          regulation_lambdas:
+          - 1e-05
+          - 0.01
+          - 0.45
+          min_child_weights:
+          - 1.5
+          - 6
+          - 10
+          subsamples:
+          - 0.6
+          - 0.95
+          max_depths:
+          - 3
+          - 6
+          - 9
+    outs:
+    - path: 
+        dvclive/xgb/combined_full_synthetic_all_features_loso/loso_metrics.json
+      hash: md5
+      md5: f4a93d039c03a56d17dbd978ceb2ae43
+      size: 692
+    - path: models/xgb/xgb_combined_full_synthetic_all_features.joblib
+      hash: md5
+      md5: 96b915b36da5afc0d98f1d5b1ef8e588
+      size: 189955
+  analyze_ablation:
+    cmd: uv run python src/run_ablation.py --combined --model xgb
+    deps:
+    - path: dvclive/xgb/combined_full_all_all_features_loso/loso_metrics.json
+      hash: md5
+      md5: 50124f6082209b59e22f534b37891f4f
+      size: 690
+    - path: dvclive/xgb/combined_full_all_keypoints_only_loso/loso_metrics.json
+      hash: md5
+      md5: 2b5c6bdd6f8d1f6c9a350e58e59406bd
+      size: 677
+    - path: dvclive/xgb/combined_full_real_all_features_loso/loso_metrics.json
+      hash: md5
+      md5: 3e79c20af8c00f98ca5d5245b0ea1a31
+      size: 667
+    - path: dvclive/xgb/combined_full_real_keypoints_only_loso/loso_metrics.json
+      hash: md5
+      md5: 8dded9f2d74ab785c9b816dcdb276c7e
+      size: 667
+    - path: 
+        dvclive/xgb/combined_full_synthetic_all_features_loso/loso_metrics.json
+      hash: md5
+      md5: f4a93d039c03a56d17dbd978ceb2ae43
+      size: 692
+    - path: 
+        dvclive/xgb/combined_full_synthetic_keypoints_only_loso/loso_metrics.json
+      hash: md5
+      md5: 8e6c597b31b0eb833e9b36c5c8c4ca47
+      size: 667
+    - path: src/run_ablation.py
+      hash: md5
+      md5: bbf42aff0f3e3de3d5187d1df86159e3
+      size: 10282
+      isexec: true
+    outs:
+    - path: dvclive/analysis/ablation
+      hash: md5
+      md5: 3d4d3b20c347245c0632378b67096f6b.dir
+      size: 484197
+      nfiles: 23
+  analyze_friedman_ablation_full:
+    cmd: uv run python src/analysis/friedman_test.py --models 
+      real_keypoints_only real_all_features synthetic_keypoints_only 
+      synthetic_all_features all_keypoints_only all_all_features --metric 
+      accuracy --ablation
+    deps:
+    - path: dvclive/xgb/combined_full_all_all_features_loso/loso_metrics.json
+      hash: md5
+      md5: 50124f6082209b59e22f534b37891f4f
+      size: 690
+      isexec: true
+    - path: dvclive/xgb/combined_full_all_keypoints_only_loso/loso_metrics.json
+      hash: md5
+      md5: 2b5c6bdd6f8d1f6c9a350e58e59406bd
+      size: 677
+      isexec: true
+    - path: dvclive/xgb/combined_full_real_all_features_loso/loso_metrics.json
+      hash: md5
+      md5: 3e79c20af8c00f98ca5d5245b0ea1a31
+      size: 667
+      isexec: true
+    - path: dvclive/xgb/combined_full_real_keypoints_only_loso/loso_metrics.json
+      hash: md5
+      md5: 8dded9f2d74ab785c9b816dcdb276c7e
+      size: 667
+      isexec: true
+    - path: 
+        dvclive/xgb/combined_full_synthetic_all_features_loso/loso_metrics.json
+      hash: md5
+      md5: f4a93d039c03a56d17dbd978ceb2ae43
+      size: 692
+      isexec: true
+    - path: 
+        dvclive/xgb/combined_full_synthetic_keypoints_only_loso/loso_metrics.json
+      hash: md5
+      md5: 8e6c597b31b0eb833e9b36c5c8c4ca47
+      size: 667
+      isexec: true
+    - path: src/analysis/friedman_test.py
+      hash: md5
+      md5: 06f1c310219535d9a182c87e32a310c9
+      size: 3247
+      isexec: true
+    - path: src/analysis/statistical/
+      hash: md5
+      md5: 6bc84d957da348bb4508f809c70554db.dir
+      size: 27088
+      nfiles: 8
+    outs:
+    - path: 
+        dvclive/analysis/friedman_ablation_real_keypoints_only_real_all_features_synthetic_keypoints_only_synthetic_all_features_all_keypoints_only_all_all_features_accuracy.json
+      hash: md5
+      md5: 1fb62cbc82ac3c390d7dc52d26756158
+      size: 2744
+  analyze_stats_loso@accuracy:
+    cmd: uv run python src/analysis/statistical_test.py --models adaboost nn xgb
+      --metric accuracy --loso --force_pairwise --bayesian --posthoc nemenyi 
+      --cd_diagram
+    deps:
+    - path: dvclive/adaboost/combined_loso/loso_metrics.json
+      hash: md5
+      md5: bafe2ea1b6ee62877d001abf9cd507d4
+      size: 689
+    - path: dvclive/nn/combined_loso/loso_metrics.json
+      hash: md5
+      md5: bea28f458d0cfd6af5c64da9df860580
+      size: 684
+    - path: dvclive/xgb/combined_loso/loso_metrics.json
+      hash: md5
+      md5: c6ec3b1bbd78b65d8b674ac06721b703
+      size: 690
+    - path: src/analysis/statistical/
+      hash: md5
+      md5: 191c86395e6c0e32d54bcaa8b59f1711.dir
+      size: 61179
+      nfiles: 10
+    - path: src/analysis/statistical_test.py
+      hash: md5
+      md5: 25e389f38c02c58889b3cfd294635f4d
+      size: 7875
+      isexec: true
+    outs:
+    - path: dvclive/analysis/cd_diagram_loso_adaboost_nn_xgb_accuracy.png
+      hash: md5
+      md5: bafb95c84fb57e87675547c7a91550a9
+      size: 12434
+    - path: 
+        dvclive/analysis/friedman_bayesian_loso_adaboost_nn_xgb_accuracy.json
+      hash: md5
+      md5: bf29979502c61fa279476e392ce00ef1
+      size: 3567
+  analyze_stats_loso@f1:
+    cmd: uv run python src/analysis/statistical_test.py --models adaboost nn xgb
+      --metric f1 --loso --force_pairwise --bayesian --posthoc nemenyi 
+      --cd_diagram
+    deps:
+    - path: dvclive/adaboost/combined_loso/loso_metrics.json
+      hash: md5
+      md5: bafe2ea1b6ee62877d001abf9cd507d4
+      size: 689
+    - path: dvclive/nn/combined_loso/loso_metrics.json
+      hash: md5
+      md5: bea28f458d0cfd6af5c64da9df860580
+      size: 684
+    - path: dvclive/xgb/combined_loso/loso_metrics.json
+      hash: md5
+      md5: c6ec3b1bbd78b65d8b674ac06721b703
+      size: 690
+    - path: src/analysis/statistical/
+      hash: md5
+      md5: 191c86395e6c0e32d54bcaa8b59f1711.dir
+      size: 61179
+      nfiles: 10
+    - path: src/analysis/statistical_test.py
+      hash: md5
+      md5: 25e389f38c02c58889b3cfd294635f4d
+      size: 7875
+      isexec: true
+    outs:
+    - path: dvclive/analysis/cd_diagram_loso_adaboost_nn_xgb_f1.png
+      hash: md5
+      md5: bafb95c84fb57e87675547c7a91550a9
+      size: 12434
+    - path: dvclive/analysis/friedman_bayesian_loso_adaboost_nn_xgb_f1.json
+      hash: md5
+      md5: 1ee33d95b35e6347664e46091aa8369e
+      size: 3552
+  prepare_standard_split:
+    cmd: uv run python src/prepare_standard.py
+    deps:
+    - path: data/data_with_features.csv
+      hash: md5
+      md5: e5f4a47ed665f32bdd29e3a52a99964e
+      size: 7114898
+      isexec: true
+    - path: src/data_preparation/
+      hash: md5
+      md5: 8b323f0f9516243fe4a8554fa9bd6318.dir
+      size: 26426
+      nfiles: 16
+    - path: src/prepare_standard.py
+      hash: md5
+      md5: f6abfa135aaf30e8f6b9fa295ae472c8
+      size: 5846
+      isexec: true
+    outs:
+    - path: data/processed/standard_split/preprocessors.joblib
+      hash: md5
+      md5: c5f8410f0c8d43f7879101bb83183086
+      size: 5615
+    - path: data/processed/standard_split/test.csv
+      hash: md5
+      md5: d3868e4aab48b2567617c6a1f97fd52c
+      size: 1972864
+    - path: data/processed/standard_split/train.csv
+      hash: md5
+      md5: 6cef974418df66dabb239a857359d270
+      size: 7693573
+  prepare_loso:
+    cmd: uv run python src/prepare_loso.py
+    deps:
+    - path: data/data_with_features.csv
+      hash: md5
+      md5: e5f4a47ed665f32bdd29e3a52a99964e
+      size: 7114898
+      isexec: true
+    - path: src/data_preparation/
+      hash: md5
+      md5: 8b323f0f9516243fe4a8554fa9bd6318.dir
+      size: 26426
+      nfiles: 16
+    - path: src/prepare_loso.py
+      hash: md5
+      md5: a704242914836232430514ef27ab57ba
+      size: 5704
+      isexec: true
+    outs:
+    - path: data/processed/loso/data.csv
+      hash: md5
+      md5: 5765d651ac37804795180ad1d5899fba
+      size: 9804945
+    - path: data/processed/loso/preprocessors.joblib
+      hash: md5
+      md5: 7ccd0e5fd71b7bb06a726cb13c178b97
+      size: 5615
+  train_standard_split@adaboost:
+    cmd: uv run python src/models/adaboost/train_standard.py
+    deps:
+    - path: data/processed/standard_split/
+      hash: md5
+      md5: 0c5c4c739d2862d908bda4120cfc2500.dir
+      size: 9225584
+      nfiles: 3
+    - path: src/models/adaboost/train_standard.py
+      hash: md5
+      md5: 5a850ed120a17a8ee90027e8a3854634
+      size: 2101
+      isexec: true
+    - path: src/models/base_trainer.py
+      hash: md5
+      md5: a57f8eb114a0cc63aa652596546a1b48
+      size: 2372
+      isexec: true
+    - path: src/models/evaluate.py
+      hash: md5
+      md5: c901aed098fd676775dd31cba4ebf8bb
+      size: 5198
+      isexec: true
+    - path: src/models/standard_workflow.py
+      hash: md5
+      md5: 0eb24f8b14b7a4997a0a0a7fa367024d
+      size: 7027
+      isexec: true
+    - path: src/models/utils.py
+      hash: md5
+      md5: c51d309800e3542813508b9671af8ba2
+      size: 5480
+      isexec: true
+    params:
+      params.yaml:
+        adaboost:
+          n_estimators_min: 10
+          n_estimators_max: 2000
+        cv: 2
+        cv_folds: 5
+        n_iter: 2
+        nn:
+          first_hidden_layer_sizes_min: 128
+          first_hidden_layer_sizes_max: 512
+          second_hidden_layer_sizes_min: 256
+          second_hidden_layer_sizes_max: 1024
+          learning_rates:
+          - 0.0001
+          - 0.001
+          - 0.01
+          batch_size: 32
+          epochs: 50
+        random_state: 42
+        scoring: accuracy
+        xgb:
+          gamma_min: 5.0
+          gamma_max: 11.0
+          learning_rate_min: 0.07
+          learning_rate_max: 0.6
+          n_estimators:
+          - 50
+          - 100
+          - 150
+          regulation_alphas:
+          - 1e-05
+          - 0.01
+          - 0.75
+          regulation_lambdas:
+          - 1e-05
+          - 0.01
+          - 0.45
+          min_child_weights:
+          - 1.5
+          - 6
+          - 10
+          subsamples:
+          - 0.6
+          - 0.95
+          max_depths:
+          - 3
+          - 6
+          - 9
+    outs:
+    - path: dvclive/adaboost/standard/hyperparameter_results.json
+      hash: md5
+      md5: f0e8ae8e448a120653e73ea7c6b7bbf5
+      size: 1198
+    - path: dvclive/adaboost/standard/metrics.json
+      hash: md5
+      md5: 47aeaddf51fea65657967423fefb27a5
+      size: 1056
+    - path: dvclive/adaboost/standard/test_predictions.csv
+      hash: md5
+      md5: d4e035705ee9a6300b1e3363973b5e1f
+      size: 37972
+    - path: dvclive/adaboost/standard/y_pred.csv
+      hash: md5
+      md5: e92bd1fa9787bfeb318b167751df5ced
+      size: 37977
+    - path: models/adaboost/adaboost_standard.joblib
+      hash: md5
+      md5: 7f9acf31a0d6461705f82db3e734b980
+      size: 937188
+  train_standard_split@xgb:
+    cmd: uv run python src/models/xgb/train_standard.py
+    deps:
+    - path: data/processed/standard_split/
+      hash: md5
+      md5: 0c5c4c739d2862d908bda4120cfc2500.dir
+      size: 9225584
+      nfiles: 3
+    - path: src/models/base_trainer.py
+      hash: md5
+      md5: a57f8eb114a0cc63aa652596546a1b48
+      size: 2372
+      isexec: true
+    - path: src/models/evaluate.py
+      hash: md5
+      md5: c901aed098fd676775dd31cba4ebf8bb
+      size: 5198
+      isexec: true
+    - path: src/models/standard_workflow.py
+      hash: md5
+      md5: 0eb24f8b14b7a4997a0a0a7fa367024d
+      size: 7027
+      isexec: true
+    - path: src/models/utils.py
+      hash: md5
+      md5: c51d309800e3542813508b9671af8ba2
+      size: 5480
+      isexec: true
+    - path: src/models/xgb/train_standard.py
+      hash: md5
+      md5: 40c0e70eea2ae88d81cf3f8e2c85c85d
+      size: 2392
+      isexec: true
+    params:
+      params.yaml:
+        adaboost:
+          n_estimators_min: 10
+          n_estimators_max: 2000
+        cv: 2
+        cv_folds: 5
+        n_iter: 2
+        nn:
+          first_hidden_layer_sizes_min: 128
+          first_hidden_layer_sizes_max: 512
+          second_hidden_layer_sizes_min: 256
+          second_hidden_layer_sizes_max: 1024
+          learning_rates:
+          - 0.0001
+          - 0.001
+          - 0.01
+          batch_size: 32
+          epochs: 50
+        random_state: 42
+        scoring: accuracy
+        xgb:
+          gamma_min: 5.0
+          gamma_max: 11.0
+          learning_rate_min: 0.07
+          learning_rate_max: 0.6
+          n_estimators:
+          - 50
+          - 100
+          - 150
+          regulation_alphas:
+          - 1e-05
+          - 0.01
+          - 0.75
+          regulation_lambdas:
+          - 1e-05
+          - 0.01
+          - 0.45
+          min_child_weights:
+          - 1.5
+          - 6
+          - 10
+          subsamples:
+          - 0.6
+          - 0.95
+          max_depths:
+          - 3
+          - 6
+          - 9
+    outs:
+    - path: dvclive/xgb/standard/hyperparameter_results.json
+      hash: md5
+      md5: a8c46e370e5b64b2cbd77ac953d0c42e
+      size: 2028
+    - path: dvclive/xgb/standard/metrics.json
+      hash: md5
+      md5: d8af1d957384e3528da65979f72dd6ba
+      size: 525
+    - path: dvclive/xgb/standard/test_predictions.csv
+      hash: md5
+      md5: 6bfaf4d1fc41c329f85f9c300cc712a7
+      size: 24637
+    - path: dvclive/xgb/standard/y_pred.csv
+      hash: md5
+      md5: c4b57110fdf7b5a3a1234ad6cf3644f4
+      size: 24642
+    - path: models/xgb/xgb_standard.joblib
+      hash: md5
+      md5: 98ffe91d3bdcc3deddefc3e3a7441c97
+      size: 49914
+  train_standard_split@nn:
+    cmd: uv run python src/models/nn/train_standard.py
+    deps:
+    - path: data/processed/standard_split/
+      hash: md5
+      md5: 0c5c4c739d2862d908bda4120cfc2500.dir
+      size: 9225584
+      nfiles: 3
+    - path: src/models/base_trainer.py
+      hash: md5
+      md5: a57f8eb114a0cc63aa652596546a1b48
+      size: 2372
+      isexec: true
+    - path: src/models/evaluate.py
+      hash: md5
+      md5: c901aed098fd676775dd31cba4ebf8bb
+      size: 5198
+      isexec: true
+    - path: src/models/nn/train_standard.py
+      hash: md5
+      md5: 6084bd0c2e889fb4cb43e9f0146a3460
+      size: 4214
+      isexec: true
+    - path: src/models/standard_workflow.py
+      hash: md5
+      md5: 0eb24f8b14b7a4997a0a0a7fa367024d
+      size: 7027
+      isexec: true
+    - path: src/models/utils.py
+      hash: md5
+      md5: c51d309800e3542813508b9671af8ba2
+      size: 5480
+      isexec: true
+    params:
+      params.yaml:
+        adaboost:
+          n_estimators_min: 10
+          n_estimators_max: 2000
+        cv: 2
+        cv_folds: 5
+        n_iter: 2
+        nn:
+          first_hidden_layer_sizes_min: 128
+          first_hidden_layer_sizes_max: 512
+          second_hidden_layer_sizes_min: 256
+          second_hidden_layer_sizes_max: 1024
+          learning_rates:
+          - 0.0001
+          - 0.001
+          - 0.01
+          batch_size: 32
+          epochs: 50
+        random_state: 42
+        scoring: accuracy
+        xgb:
+          gamma_min: 5.0
+          gamma_max: 11.0
+          learning_rate_min: 0.07
+          learning_rate_max: 0.6
+          n_estimators:
+          - 50
+          - 100
+          - 150
+          regulation_alphas:
+          - 1e-05
+          - 0.01
+          - 0.75
+          regulation_lambdas:
+          - 1e-05
+          - 0.01
+          - 0.45
+          min_child_weights:
+          - 1.5
+          - 6
+          - 10
+          subsamples:
+          - 0.6
+          - 0.95
+          max_depths:
+          - 3
+          - 6
+          - 9
+    outs:
+    - path: dvclive/nn/standard/hyperparameter_results.json
+      hash: md5
+      md5: 9050679d90f7a5ae245535964d9875c8
+      size: 1454
+    - path: dvclive/nn/standard/metrics.json
+      hash: md5
+      md5: 3afe625bbddefe9e6eee5915144f9318
+      size: 542
+    - path: dvclive/nn/standard/test_predictions.csv
+      hash: md5
+      md5: 6ae50838cba18d0f9959d00bfcc4ff2b
+      size: 38797
+    - path: dvclive/nn/standard/y_pred.csv
+      hash: md5
+      md5: b65090663f521939e92836afe57da64f
+      size: 38802
+    - path: models/nn/nn_standard.joblib
+      hash: md5
+      md5: 17a2241e820847b3e2f9b9b8995c7693
+      size: 151626
+  train_loso@adaboost:
+    cmd: uv run python src/models/adaboost/train_loso.py
+    deps:
+    - path: data/processed/loso/
+      hash: md5
+      md5: a463c4f1663c8f1f943bbf944862b984.dir
+      size: 9810560
+      nfiles: 2
+    - path: src/models/adaboost/train_loso.py
+      hash: md5
+      md5: 178db9d471a24f00c91caa211c45f5a1
+      size: 1937
+      isexec: true
+    - path: src/models/base_trainer.py
+      hash: md5
+      md5: a57f8eb114a0cc63aa652596546a1b48
+      size: 2372
+      isexec: true
+    - path: src/models/evaluate.py
+      hash: md5
+      md5: c901aed098fd676775dd31cba4ebf8bb
+      size: 5198
+      isexec: true
+    - path: src/models/loso_workflow.py
+      hash: md5
+      md5: c6c841edd45159be41132b71d7b3df83
+      size: 12074
+      isexec: true
+    - path: src/models/utils.py
+      hash: md5
+      md5: c51d309800e3542813508b9671af8ba2
+      size: 5480
+      isexec: true
+    params:
+      params.yaml:
+        adaboost:
+          n_estimators_min: 10
+          n_estimators_max: 2000
+        cv: 5
+        cv_folds: 5
+        n_iter: 30
+        nn:
+          first_hidden_layer_sizes_min: 128
+          first_hidden_layer_sizes_max: 512
+          second_hidden_layer_sizes_min: 256
+          second_hidden_layer_sizes_max: 1024
+          learning_rates:
+          - 0.0001
+          - 0.001
+          - 0.01
+          batch_size: 32
+          epochs: 50
+        random_state: 42
+        scoring: accuracy
+        xgb:
+          gamma_min: 5.0
+          gamma_max: 11.0
+          learning_rate_min: 0.07
+          learning_rate_max: 0.6
+          n_estimators:
+          - 50
+          - 100
+          - 150
+          regulation_alphas:
+          - 1e-05
+          - 0.01
+          - 0.75
+          regulation_lambdas:
+          - 1e-05
+          - 0.01
+          - 0.45
+          min_child_weights:
+          - 1.5
+          - 6
+          - 10
+          subsamples:
+          - 0.6
+          - 0.95
+          max_depths:
+          - 3
+          - 6
+          - 9
+    outs:
+    - path: dvclive/adaboost/loso/aggregated_metrics.json
+      hash: md5
+      md5: 7f95d294abfca44fe8376d5299a66f68
+      size: 379
+    - path: dvclive/adaboost/loso/fold_metrics.json
+      hash: md5
+      md5: 2a6bf5478d928042d1925403ded3f9ce
+      size: 3976
+    - path: models/adaboost/adaboost_loso.joblib
+      hash: md5
+      md5: 1def940d69b7e152f0c97e4fa4b0d60b
+      size: 1280820
+  train_loso@nn:
+    cmd: uv run python src/models/nn/train_loso.py
+    deps:
+    - path: data/processed/loso/
+      hash: md5
+      md5: a463c4f1663c8f1f943bbf944862b984.dir
+      size: 9810560
+      nfiles: 2
+    - path: src/models/base_trainer.py
+      hash: md5
+      md5: a57f8eb114a0cc63aa652596546a1b48
+      size: 2372
+      isexec: true
+    - path: src/models/evaluate.py
+      hash: md5
+      md5: c901aed098fd676775dd31cba4ebf8bb
+      size: 5198
+      isexec: true
+    - path: src/models/loso_workflow.py
+      hash: md5
+      md5: c6c841edd45159be41132b71d7b3df83
+      size: 12074
+      isexec: true
+    - path: src/models/nn/train_loso.py
+      hash: md5
+      md5: 959b22bea58bbde6b161d6bf38120edb
+      size: 4115
+      isexec: true
+    - path: src/models/utils.py
+      hash: md5
+      md5: c51d309800e3542813508b9671af8ba2
+      size: 5480
+      isexec: true
+    params:
+      params.yaml:
+        adaboost:
+          n_estimators_min: 10
+          n_estimators_max: 2000
+        cv: 5
+        cv_folds: 5
+        n_iter: 30
+        nn:
+          first_hidden_layer_sizes_min: 128
+          first_hidden_layer_sizes_max: 512
+          second_hidden_layer_sizes_min: 256
+          second_hidden_layer_sizes_max: 1024
+          learning_rates:
+          - 0.0001
+          - 0.001
+          - 0.01
+          batch_size: 32
+          epochs: 50
+        random_state: 42
+        scoring: accuracy
+        xgb:
+          gamma_min: 5.0
+          gamma_max: 11.0
+          learning_rate_min: 0.07
+          learning_rate_max: 0.6
+          n_estimators:
+          - 50
+          - 100
+          - 150
+          regulation_alphas:
+          - 1e-05
+          - 0.01
+          - 0.75
+          regulation_lambdas:
+          - 1e-05
+          - 0.01
+          - 0.45
+          min_child_weights:
+          - 1.5
+          - 6
+          - 10
+          subsamples:
+          - 0.6
+          - 0.95
+          max_depths:
+          - 3
+          - 6
+          - 9
+    outs:
+    - path: dvclive/nn/loso/aggregated_metrics.json
+      hash: md5
+      md5: 5405dc3e4469f8e561db439017f08748
+      size: 377
+    - path: dvclive/nn/loso/fold_metrics.json
+      hash: md5
+      md5: 4aec6e990a548836ea0aaa2739ea9cb1
+      size: 3978
+    - path: models/nn/nn_loso.joblib
+      hash: md5
+      md5: bc365f302ee588d18535a0c1df51fa7a
+      size: 150007
+  train_loso@xgb:
+    cmd: uv run python src/models/xgb/train_loso.py
+    deps:
+    - path: data/processed/loso/
+      hash: md5
+      md5: a463c4f1663c8f1f943bbf944862b984.dir
+      size: 9810560
+      nfiles: 2
+    - path: src/models/base_trainer.py
+      hash: md5
+      md5: a57f8eb114a0cc63aa652596546a1b48
+      size: 2372
+      isexec: true
+    - path: src/models/evaluate.py
+      hash: md5
+      md5: c901aed098fd676775dd31cba4ebf8bb
+      size: 5198
+      isexec: true
+    - path: src/models/loso_workflow.py
+      hash: md5
+      md5: c6c841edd45159be41132b71d7b3df83
+      size: 12074
+      isexec: true
+    - path: src/models/utils.py
+      hash: md5
+      md5: c51d309800e3542813508b9671af8ba2
+      size: 5480
+      isexec: true
+    - path: src/models/xgb/train_loso.py
+      hash: md5
+      md5: 3ac0abb28687143235f3e27a9867466b
+      size: 2296
+      isexec: true
+    params:
+      params.yaml:
+        adaboost:
+          n_estimators_min: 10
+          n_estimators_max: 2000
+        cv: 5
+        cv_folds: 5
+        n_iter: 30
+        nn:
+          first_hidden_layer_sizes_min: 128
+          first_hidden_layer_sizes_max: 512
+          second_hidden_layer_sizes_min: 256
+          second_hidden_layer_sizes_max: 1024
+          learning_rates:
+          - 0.0001
+          - 0.001
+          - 0.01
+          batch_size: 32
+          epochs: 50
+        random_state: 42
+        scoring: accuracy
+        xgb:
+          gamma_min: 5.0
+          gamma_max: 11.0
+          learning_rate_min: 0.07
+          learning_rate_max: 0.6
+          n_estimators:
+          - 50
+          - 100
+          - 150
+          regulation_alphas:
+          - 1e-05
+          - 0.01
+          - 0.75
+          regulation_lambdas:
+          - 1e-05
+          - 0.01
+          - 0.45
+          min_child_weights:
+          - 1.5
+          - 6
+          - 10
+          subsamples:
+          - 0.6
+          - 0.95
+          max_depths:
+          - 3
+          - 6
+          - 9
+    outs:
+    - path: dvclive/xgb/loso/aggregated_metrics.json
+      hash: md5
+      md5: f84fb4b088456da2331e716e3920d801
+      size: 378
+    - path: dvclive/xgb/loso/fold_metrics.json
+      hash: md5
+      md5: 0340618081a0ddae96a3c980706a7985
+      size: 3979
+    - path: models/xgb/xgb_loso.joblib
+      hash: md5
+      md5: b89dff06173613068e6e15512597703f
+      size: 246346
+  train_cnn_standard:
+    cmd: uv run python src/models/cnn/train_standard.py
+    deps:
+    - path: data/processed/standard_split/
+      hash: md5
+      md5: c8600c5947e532d270eca80ca4fc031e.dir
+      size: 9672052
+      nfiles: 3
+    - path: src/models/base_trainer.py
+      hash: md5
+      md5: a57f8eb114a0cc63aa652596546a1b48
+      size: 2372
+      isexec: true
+    - path: src/models/cnn/train_standard.py
+      hash: md5
+      md5: a05b64dbe2790c9a414a4db971018f88
+      size: 16074
+      isexec: true
+    - path: src/models/cnn/trainer.py
+      hash: md5
+      md5: d38babf803f7d4ab2c5fea08fcd03093
+      size: 3570
+      isexec: true
+    - path: src/models/evaluate.py
+      hash: md5
+      md5: c901aed098fd676775dd31cba4ebf8bb
+      size: 5198
+      isexec: true
+    - path: src/models/standard_workflow.py
+      hash: md5
+      md5: 9388d8233ad529cc962521bfde254ce2
+      size: 7060
+      isexec: true
+    - path: src/models/utils.py
+      hash: md5
+      md5: c51d309800e3542813508b9671af8ba2
+      size: 5480
+      isexec: true
+    outs:
+    - path: dvclive/cnn/standard/metrics.json
+      hash: md5
+      md5: dfb026e11dd0139490fcd5dae7990a77
+      size: 2358
+    - path: dvclive/cnn/standard/test_predictions.csv
+      hash: md5
+      md5: 7e6641e9cd3122deb9a4badfd36b2582
+      size: 23730
+    - path: models/cnn/cnn_standard.keras
+      hash: md5
+      md5: c50e279b585404e132e69304f5a65c73
+      size: 18077323
+  statistical_analysis_loso_features@accuracy:
+    cmd: uv run src/analysis/statistical_analysis.py --models adaboost nn xgb 
+      --metric accuracy --analysis-type loso --output-dir 
+      dvclive/analysis/loso_features --approach bayesian
+    deps:
+    - path: dvclive/adaboost/loso/fold_metrics.json
+      hash: md5
+      md5: 2a6bf5478d928042d1925403ded3f9ce
+      size: 3976
+      isexec: true
+    - path: dvclive/nn/loso/fold_metrics.json
+      hash: md5
+      md5: 4aec6e990a548836ea0aaa2739ea9cb1
+      size: 3978
+      isexec: true
+    - path: dvclive/xgb/loso/fold_metrics.json
+      hash: md5
+      md5: 0340618081a0ddae96a3c980706a7985
+      size: 3979
+      isexec: true
+    - path: src/analysis/statistical/
+      hash: md5
+      md5: 8f4bede6229a9bd04e0a62365d60e504.dir
+      size: 69071
+      nfiles: 15
+    - path: src/analysis/statistical_analysis.py
+      hash: md5
+      md5: b37dda7f94cc0b8dd109e28b74f7f798
+      size: 8432
+      isexec: true
+    outs:
+    - path: dvclive/analysis/loso_features/model_rankings_accuracy.csv
+      hash: md5
+      md5: eb168146a270e8f0e515f047826efe9d
+      size: 671
+    - path: dvclive/analysis/loso_features/statistical_results_accuracy.json
+      hash: md5
+      md5: 802462f1af247d2ecf45ed193eb06bdb
+      size: 1598
+  statistical_analysis_loso_features@f1:
+    cmd: uv run src/analysis/statistical_analysis.py --models adaboost nn xgb 
+      --metric f1 --analysis-type loso --output-dir 
+      dvclive/analysis/loso_features --approach bayesian
+    deps:
+    - path: dvclive/adaboost/loso/fold_metrics.json
+      hash: md5
+      md5: 2a6bf5478d928042d1925403ded3f9ce
+      size: 3976
+      isexec: true
+    - path: dvclive/nn/loso/fold_metrics.json
+      hash: md5
+      md5: 4aec6e990a548836ea0aaa2739ea9cb1
+      size: 3978
+      isexec: true
+    - path: dvclive/xgb/loso/fold_metrics.json
+      hash: md5
+      md5: 0340618081a0ddae96a3c980706a7985
+      size: 3979
+      isexec: true
+    - path: src/analysis/statistical/
+      hash: md5
+      md5: 8f4bede6229a9bd04e0a62365d60e504.dir
+      size: 69071
+      nfiles: 15
+    - path: src/analysis/statistical_analysis.py
+      hash: md5
+      md5: b37dda7f94cc0b8dd109e28b74f7f798
+      size: 8432
+      isexec: true
+    outs:
+    - path: dvclive/analysis/loso_features/model_rankings_f1.csv
+      hash: md5
+      md5: 2cdbea0a1a833db86f4bdf943fe876b0
+      size: 670
+    - path: dvclive/analysis/loso_features/statistical_results_f1.json
+      hash: md5
+      md5: b964e707a2f2eb74407568d5b0a549b1
+      size: 1591
+  statistical_analysis_loso_all@accuracy:
+    cmd: uv run python src/analysis/statistical_analysis.py --models adaboost nn
+      xgb cnn --metric accuracy --analysis-type loso --output-dir 
+      dvclive/analysis/loso_all --approach bayesian
+    deps:
+    - path: dvclive/adaboost/loso/fold_metrics.json
+      hash: md5
+      md5: 2a6bf5478d928042d1925403ded3f9ce
+      size: 3976
+      isexec: true
+    - path: dvclive/cnn/loso/fold_metrics.json
+      hash: md5
+      md5: cd1703fdb8780234eb4cf5642dbdee74
+      size: 3980
+      isexec: true
+    - path: dvclive/nn/loso/fold_metrics.json
+      hash: md5
+      md5: 4aec6e990a548836ea0aaa2739ea9cb1
+      size: 3978
+      isexec: true
+    - path: dvclive/xgb/loso/fold_metrics.json
+      hash: md5
+      md5: 0340618081a0ddae96a3c980706a7985
+      size: 3979
+      isexec: true
+    - path: src/analysis/statistical/
+      hash: md5
+      md5: 8f4bede6229a9bd04e0a62365d60e504.dir
+      size: 69071
+      nfiles: 15
+    - path: src/analysis/statistical_analysis.py
+      hash: md5
+      md5: b37dda7f94cc0b8dd109e28b74f7f798
+      size: 8432
+      isexec: true
+    outs:
+    - path: dvclive/analysis/loso_all/model_rankings_accuracy.csv
+      hash: md5
+      md5: 6426be4fbaf22d517907f5a5f0b79b62
+      size: 847
+    - path: dvclive/analysis/loso_all/statistical_results_accuracy.json
+      hash: md5
+      md5: 0c9877c85170cec06c4834da7956159f
+      size: 2726
+  statistical_analysis_loso_all@f1:
+    cmd: uv run python src/analysis/statistical_analysis.py --models adaboost nn
+      xgb cnn --metric f1 --analysis-type loso --output-dir 
+      dvclive/analysis/loso_all --approach bayesian
+    deps:
+    - path: dvclive/adaboost/loso/fold_metrics.json
+      hash: md5
+      md5: 2a6bf5478d928042d1925403ded3f9ce
+      size: 3976
+      isexec: true
+    - path: dvclive/cnn/loso/fold_metrics.json
+      hash: md5
+      md5: cd1703fdb8780234eb4cf5642dbdee74
+      size: 3980
+      isexec: true
+    - path: dvclive/nn/loso/fold_metrics.json
+      hash: md5
+      md5: 4aec6e990a548836ea0aaa2739ea9cb1
+      size: 3978
+      isexec: true
+    - path: dvclive/xgb/loso/fold_metrics.json
+      hash: md5
+      md5: 0340618081a0ddae96a3c980706a7985
+      size: 3979
+      isexec: true
+    - path: src/analysis/statistical/
+      hash: md5
+      md5: 8f4bede6229a9bd04e0a62365d60e504.dir
+      size: 69071
+      nfiles: 15
+    - path: src/analysis/statistical_analysis.py
+      hash: md5
+      md5: b37dda7f94cc0b8dd109e28b74f7f798
+      size: 8432
+      isexec: true
+    outs:
+    - path: dvclive/analysis/loso_all/model_rankings_f1.csv
+      hash: md5
+      md5: 69b383955ab6a7080ef39e28120802d4
+      size: 849
+    - path: dvclive/analysis/loso_all/statistical_results_f1.json
+      hash: md5
+      md5: 4a3230689be41799c1dabd9723ea95d2
+      size: 2721
+  prepare_ablation@all-all_features:
+    cmd: uv run python src/prepare_ablation.py --data-mode all --feature-mode 
+      all_features
+    deps:
+    - path: data/data_with_features.csv
+      hash: md5
+      md5: e5f4a47ed665f32bdd29e3a52a99964e
+      size: 7114898
+      isexec: true
+    - path: src/data_preparation/
+      hash: md5
+      md5: 8b323f0f9516243fe4a8554fa9bd6318.dir
+      size: 26426
+      nfiles: 16
+    - path: src/prepare_ablation.py
+      hash: md5
+      md5: ad030d415041c10249bc5a6da74e9219
+      size: 6738
+      isexec: true
+    outs:
+    - path: data/processed/ablation/all_all_features/data.csv
+      hash: md5
+      md5: 5765d651ac37804795180ad1d5899fba
+      size: 9804945
+    - path: data/processed/ablation/all_all_features/preprocessors.joblib
+      hash: md5
+      md5: 7b7aaa4a4e4c5a1af53df3624aa8d868
+      size: 5663
+  prepare_ablation@synthetic-all_features:
+    cmd: uv run python src/prepare_ablation.py --data-mode synthetic 
+      --feature-mode all_features
+    deps:
+    - path: data/data_with_features.csv
+      hash: md5
+      md5: e5f4a47ed665f32bdd29e3a52a99964e
+      size: 7114898
+      isexec: true
+    - path: src/data_preparation/
+      hash: md5
+      md5: 8b323f0f9516243fe4a8554fa9bd6318.dir
+      size: 26426
+      nfiles: 16
+    - path: src/prepare_ablation.py
+      hash: md5
+      md5: ad030d415041c10249bc5a6da74e9219
+      size: 6738
+      isexec: true
+    outs:
+    - path: data/processed/ablation/synthetic_all_features/data.csv
+      hash: md5
+      md5: cf3ce5695ac68cd3b8fb6fc7e2cea10c
+      size: 6483469
+    - path: data/processed/ablation/synthetic_all_features/preprocessors.joblib
+      hash: md5
+      md5: f990267b468ae73d872d23f04745077f
+      size: 5669
+  prepare_ablation@real-keypoints_only:
+    cmd: uv run python src/prepare_ablation.py --data-mode real --feature-mode 
+      keypoints_only
+    deps:
+    - path: data/data_with_features.csv
+      hash: md5
+      md5: e5f4a47ed665f32bdd29e3a52a99964e
+      size: 7114898
+      isexec: true
+    - path: src/data_preparation/
+      hash: md5
+      md5: 8b323f0f9516243fe4a8554fa9bd6318.dir
+      size: 26426
+      nfiles: 16
+    - path: src/prepare_ablation.py
+      hash: md5
+      md5: ad030d415041c10249bc5a6da74e9219
+      size: 6738
+      isexec: true
+    outs:
+    - path: data/processed/ablation/real_keypoints_only/data.csv
+      hash: md5
+      md5: 8309454d1ba439a78970ab3aa2418d5e
+      size: 1666584
+    - path: data/processed/ablation/real_keypoints_only/preprocessors.joblib
+      hash: md5
+      md5: 3fcfe58cfac9af8dda2739e661caa207
+      size: 744
+  prepare_ablation@all-keypoints_only:
+    cmd: uv run python src/prepare_ablation.py --data-mode all --feature-mode 
+      keypoints_only
+    deps:
+    - path: data/data_with_features.csv
+      hash: md5
+      md5: e5f4a47ed665f32bdd29e3a52a99964e
+      size: 7114898
+      isexec: true
+    - path: src/data_preparation/
+      hash: md5
+      md5: 8b323f0f9516243fe4a8554fa9bd6318.dir
+      size: 26426
+      nfiles: 16
+    - path: src/prepare_ablation.py
+      hash: md5
+      md5: ad030d415041c10249bc5a6da74e9219
+      size: 6738
+      isexec: true
+    outs:
+    - path: data/processed/ablation/all_keypoints_only/data.csv
+      hash: md5
+      md5: 7a0ef1b1a3aec9d3e2a003f66052b3e5
+      size: 4907287
+    - path: data/processed/ablation/all_keypoints_only/preprocessors.joblib
+      hash: md5
+      md5: 0093509a76cc3a839b082c695d2d841c
+      size: 743
+  prepare_ablation@real-all_features:
+    cmd: uv run python src/prepare_ablation.py --data-mode real --feature-mode 
+      all_features
+    deps:
+    - path: data/data_with_features.csv
+      hash: md5
+      md5: e5f4a47ed665f32bdd29e3a52a99964e
+      size: 7114898
+      isexec: true
+    - path: src/data_preparation/
+      hash: md5
+      md5: 8b323f0f9516243fe4a8554fa9bd6318.dir
+      size: 26426
+      nfiles: 16
+    - path: src/prepare_ablation.py
+      hash: md5
+      md5: ad030d415041c10249bc5a6da74e9219
+      size: 6738
+      isexec: true
+    outs:
+    - path: data/processed/ablation/real_all_features/data.csv
+      hash: md5
+      md5: 41239fd54ca32647acacd4e43b96ce36
+      size: 3326971
+    - path: data/processed/ablation/real_all_features/preprocessors.joblib
+      hash: md5
+      md5: 37e753dd449377ce47a4dcc2d23ed71c
+      size: 5664
+  prepare_ablation@synthetic-keypoints_only:
+    cmd: uv run python src/prepare_ablation.py --data-mode synthetic 
+      --feature-mode keypoints_only
+    deps:
+    - path: data/data_with_features.csv
+      hash: md5
+      md5: e5f4a47ed665f32bdd29e3a52a99964e
+      size: 7114898
+      isexec: true
+    - path: src/data_preparation/
+      hash: md5
+      md5: 8b323f0f9516243fe4a8554fa9bd6318.dir
+      size: 26426
+      nfiles: 16
+    - path: src/prepare_ablation.py
+      hash: md5
+      md5: ad030d415041c10249bc5a6da74e9219
+      size: 6738
+      isexec: true
+    outs:
+    - path: data/processed/ablation/synthetic_keypoints_only/data.csv
+      hash: md5
+      md5: 3f1800500e6ba8fb2be4ab9ced2cb610
+      size: 3241078
+    - path: 
+        data/processed/ablation/synthetic_keypoints_only/preprocessors.joblib
+      hash: md5
+      md5: b38df9e13969bf5093787cdcae8703ce
+      size: 749
+  select_best_model:
+    cmd: uv run src/analysis/select_best_model.py --metric accuracy 
+      --analysis-dir dvclive/analysis/loso_features
+    deps:
+    - path: dvclive/analysis/loso_features/model_rankings_accuracy.csv
+      hash: md5
+      md5: eb168146a270e8f0e515f047826efe9d
+      size: 671
+      isexec: true
+    - path: dvclive/analysis/loso_features/statistical_results_accuracy.json
+      hash: md5
+      md5: 802462f1af247d2ecf45ed193eb06bdb
+      size: 1598
+      isexec: true
+    - path: src/analysis/select_best_model.py
+      hash: md5
+      md5: 733cf83a5044c003a31dc1b208810f17
+      size: 9397
+      isexec: true
+    outs:
+    - path: dvclive/analysis/best_model.json
+      hash: md5
+      md5: ce23e4b8c419c62d028d23371315d731
+      size: 2192
+  train_ablation@real-keypoints_only:
+    cmd: uv run python src/models/train_ablation.py --data-mode real 
+      --feature-mode keypoints_only --best-model-config 
+      dvclive/analysis/best_model.json
+    deps:
+    - path: data/processed/ablation/real_keypoints_only/
+      hash: md5
+      md5: 6619e1fe749b79662c0696a895695ea1.dir
+      size: 1667328
+      nfiles: 2
+    - path: dvclive/analysis/best_model.json
+      hash: md5
+      md5: ce23e4b8c419c62d028d23371315d731
+      size: 2192
+    - path: src/models/base_trainer.py
+      hash: md5
+      md5: a57f8eb114a0cc63aa652596546a1b48
+      size: 2372
+      isexec: true
+    - path: src/models/evaluate.py
+      hash: md5
+      md5: c901aed098fd676775dd31cba4ebf8bb
+      size: 5198
+      isexec: true
+    - path: src/models/loso_workflow.py
+      hash: md5
+      md5: e2640cb988452355a18e5ecf23c1a859
+      size: 12685
+      isexec: true
+    - path: src/models/train_ablation.py
+      hash: md5
+      md5: 29fe09e6526bd976132b919e2e61075f
+      size: 7400
+      isexec: true
+    - path: src/models/utils.py
+      hash: md5
+      md5: c51d309800e3542813508b9671af8ba2
+      size: 5480
+      isexec: true
+    outs:
+    - path: dvclive/ablation/real_keypoints_only/ablation_info.json
+      hash: md5
+      md5: 48afbfc92b4caa01b88cca3924964366
+      size: 2910
+    - path: models/ablation/xgb_loso.joblib
+      hash: md5
+      md5: e1697a4b50600ec36f68cff3060b29e9
+      size: 158875
+  train_ablation@real-all_features:
+    cmd: uv run python src/models/train_ablation.py --data-mode real 
+      --feature-mode all_features --best-model-config 
+      dvclive/analysis/best_model.json
+    deps:
+    - path: data/processed/ablation/real_all_features/
+      hash: md5
+      md5: 67368e30fdc6bc99ed71bb10a51b49fe.dir
+      size: 3332635
+      nfiles: 2
+    - path: dvclive/analysis/best_model.json
+      hash: md5
+      md5: ce23e4b8c419c62d028d23371315d731
+      size: 2192
+    - path: src/models/base_trainer.py
+      hash: md5
+      md5: a57f8eb114a0cc63aa652596546a1b48
+      size: 2372
+      isexec: true
+    - path: src/models/evaluate.py
+      hash: md5
+      md5: c901aed098fd676775dd31cba4ebf8bb
+      size: 5198
+      isexec: true
+    - path: src/models/loso_workflow.py
+      hash: md5
+      md5: e2640cb988452355a18e5ecf23c1a859
+      size: 12685
+      isexec: true
+    - path: src/models/train_ablation.py
+      hash: md5
+      md5: 29fe09e6526bd976132b919e2e61075f
+      size: 7400
+      isexec: true
+    - path: src/models/utils.py
+      hash: md5
+      md5: c51d309800e3542813508b9671af8ba2
+      size: 5480
+      isexec: true
+    outs:
+    - path: dvclive/ablation/real_all_features/ablation_info.json
+      hash: md5
+      md5: d377228926f8f9cdae0e9718826261df
+      size: 2908
+    - path: models/ablation/xgb_loso.joblib
+      hash: md5
+      md5: 1b461826e6c8a5946ee4bb2890cd3d35
+      size: 160714
+  train_ablation@synthetic-keypoints_only:
+    cmd: uv run python src/models/train_ablation.py --data-mode synthetic 
+      --feature-mode keypoints_only --best-model-config 
+      dvclive/analysis/best_model.json
+    deps:
+    - path: data/processed/ablation/synthetic_keypoints_only/
+      hash: md5
+      md5: 35790a8ae64f362baf152d8910a4094f.dir
+      size: 3241827
+      nfiles: 2
+    - path: dvclive/analysis/best_model.json
+      hash: md5
+      md5: ce23e4b8c419c62d028d23371315d731
+      size: 2192
+    - path: src/models/base_trainer.py
+      hash: md5
+      md5: a57f8eb114a0cc63aa652596546a1b48
+      size: 2372
+      isexec: true
+    - path: src/models/evaluate.py
+      hash: md5
+      md5: c901aed098fd676775dd31cba4ebf8bb
+      size: 5198
+      isexec: true
+    - path: src/models/loso_workflow.py
+      hash: md5
+      md5: e2640cb988452355a18e5ecf23c1a859
+      size: 12685
+      isexec: true
+    - path: src/models/train_ablation.py
+      hash: md5
+      md5: 29fe09e6526bd976132b919e2e61075f
+      size: 7400
+      isexec: true
+    - path: src/models/utils.py
+      hash: md5
+      md5: c51d309800e3542813508b9671af8ba2
+      size: 5480
+      isexec: true
+    outs:
+    - path: dvclive/ablation/synthetic_keypoints_only/ablation_info.json
+      hash: md5
+      md5: 85210641c90c4e3d33132c4131fce951
+      size: 2916
+    - path: models/ablation/xgb_loso.joblib
+      hash: md5
+      md5: c9892db7c84f5685fc6978e9fef6577c
+      size: 198196
+  train_ablation@synthetic-all_features:
+    cmd: uv run python src/models/train_ablation.py --data-mode synthetic 
+      --feature-mode all_features --best-model-config 
+      dvclive/analysis/best_model.json
+    deps:
+    - path: data/processed/ablation/synthetic_all_features/
+      hash: md5
+      md5: a70009d587b209bb93d93ffc84788880.dir
+      size: 6489138
+      nfiles: 2
+    - path: dvclive/analysis/best_model.json
+      hash: md5
+      md5: ce23e4b8c419c62d028d23371315d731
+      size: 2192
+    - path: src/models/base_trainer.py
+      hash: md5
+      md5: a57f8eb114a0cc63aa652596546a1b48
+      size: 2372
+      isexec: true
+    - path: src/models/evaluate.py
+      hash: md5
+      md5: c901aed098fd676775dd31cba4ebf8bb
+      size: 5198
+      isexec: true
+    - path: src/models/loso_workflow.py
+      hash: md5
+      md5: e2640cb988452355a18e5ecf23c1a859
+      size: 12685
+      isexec: true
+    - path: src/models/train_ablation.py
+      hash: md5
+      md5: 29fe09e6526bd976132b919e2e61075f
+      size: 7400
+      isexec: true
+    - path: src/models/utils.py
+      hash: md5
+      md5: c51d309800e3542813508b9671af8ba2
+      size: 5480
+      isexec: true
+    outs:
+    - path: dvclive/ablation/synthetic_all_features/ablation_info.json
+      hash: md5
+      md5: d0b1a91946b3faa4705d9cf31273e637
+      size: 2915
+    - path: models/ablation/xgb_loso.joblib
+      hash: md5
+      md5: ec754b0ec9c94854e09ec02db1ac97de
+      size: 202205
+  train_ablation@all-keypoints_only:
+    cmd: uv run python src/models/train_ablation.py --data-mode all 
+      --feature-mode keypoints_only --best-model-config 
+      dvclive/analysis/best_model.json
+    deps:
+    - path: data/processed/ablation/all_keypoints_only/
+      hash: md5
+      md5: 21ced0d4ee8ff14b9a3ba8c22baf715f.dir
+      size: 4908030
+      nfiles: 2
+    - path: dvclive/analysis/best_model.json
+      hash: md5
+      md5: ce23e4b8c419c62d028d23371315d731
+      size: 2192
+    - path: src/models/base_trainer.py
+      hash: md5
+      md5: a57f8eb114a0cc63aa652596546a1b48
+      size: 2372
+      isexec: true
+    - path: src/models/evaluate.py
+      hash: md5
+      md5: c901aed098fd676775dd31cba4ebf8bb
+      size: 5198
+      isexec: true
+    - path: src/models/loso_workflow.py
+      hash: md5
+      md5: e2640cb988452355a18e5ecf23c1a859
+      size: 12685
+      isexec: true
+    - path: src/models/train_ablation.py
+      hash: md5
+      md5: 29fe09e6526bd976132b919e2e61075f
+      size: 7400
+      isexec: true
+    - path: src/models/utils.py
+      hash: md5
+      md5: c51d309800e3542813508b9671af8ba2
+      size: 5480
+      isexec: true
+    outs:
+    - path: dvclive/ablation/all_keypoints_only/ablation_info.json
+      hash: md5
+      md5: ac76998d5b470decd5eab8d4743b8bbe
+      size: 2909
+    - path: models/ablation/xgb_loso.joblib
+      hash: md5
+      md5: 174bf6a1963b2911e007264de29cfe95
+      size: 237165
+  train_ablation@all-all_features:
+    cmd: uv run python src/models/train_ablation.py --data-mode all 
+      --feature-mode all_features --best-model-config 
+      dvclive/analysis/best_model.json
+    deps:
+    - path: data/processed/ablation/all_all_features/
+      hash: md5
+      md5: 52c1b98b1b2e4b8a77b1a6cc1f9086ba.dir
+      size: 9810608
+      nfiles: 2
+    - path: dvclive/analysis/best_model.json
+      hash: md5
+      md5: ce23e4b8c419c62d028d23371315d731
+      size: 2192
+    - path: src/models/base_trainer.py
+      hash: md5
+      md5: a57f8eb114a0cc63aa652596546a1b48
+      size: 2372
+      isexec: true
+    - path: src/models/evaluate.py
+      hash: md5
+      md5: c901aed098fd676775dd31cba4ebf8bb
+      size: 5198
+      isexec: true
+    - path: src/models/loso_workflow.py
+      hash: md5
+      md5: e2640cb988452355a18e5ecf23c1a859
+      size: 12685
+      isexec: true
+    - path: src/models/train_ablation.py
+      hash: md5
+      md5: 29fe09e6526bd976132b919e2e61075f
+      size: 7400
+      isexec: true
+    - path: src/models/utils.py
+      hash: md5
+      md5: c51d309800e3542813508b9671af8ba2
+      size: 5480
+      isexec: true
+    outs:
+    - path: dvclive/ablation/all_all_features/ablation_info.json
+      hash: md5
+      md5: cfaafa516e89c3fe633b354b9fccf5cd
+      size: 2907
+    - path: models/ablation/xgb_loso.joblib
+      hash: md5
+      md5: b89dff06173613068e6e15512597703f
+      size: 246346
+  statistical_analysis_ablation_data_modes@accuracy:
+    cmd: uv run src/analysis/statistical_analysis.py --models 
+      real_keypoints_only synthetic_keypoints_only all_keypoints_only --metric 
+      accuracy --analysis-type ablation --experiment-type data_modes 
+      --output-dir dvclive/analysis/ablation/data_modes --approach bayesian
+    deps:
+    - path: dvclive/ablation/all_keypoints_only/loso/fold_metrics.json
+      hash: md5
+      md5: 60f99fcd9363c3a4807d54950401d474
+      size: 3977
+    - path: dvclive/ablation/real_keypoints_only/loso/fold_metrics.json
+      hash: md5
+      md5: fc7aa9ce047b2e8d69450d9cc37acdef
+      size: 3974
+    - path: dvclive/ablation/synthetic_keypoints_only/loso/fold_metrics.json
+      hash: md5
+      md5: b85ce3c0523cd754e386261fc3b236f5
+      size: 3974
+    - path: src/analysis/statistical/
+      hash: md5
+      md5: 725239508df5526e87c9a866773882e2.dir
+      size: 69095
+      nfiles: 15
+    - path: src/analysis/statistical_analysis.py
+      hash: md5
+      md5: 002edfaae4b9848198fde8f1a1987859
+      size: 8376
+      isexec: true
+    outs:
+    - path: dvclive/analysis/ablation/data_modes/model_rankings_accuracy.csv
+      hash: md5
+      md5: 238d009e222338204078c0b13c716750
+      size: 712
+    - path: 
+        dvclive/analysis/ablation/data_modes/statistical_results_accuracy.json
+      hash: md5
+      md5: 7976379128aaf40379e064a644f2655b
+      size: 1980
+  statistical_analysis_ablation_data_modes@f1:
+    cmd: uv run src/analysis/statistical_analysis.py --models 
+      real_keypoints_only synthetic_keypoints_only all_keypoints_only --metric 
+      f1 --analysis-type ablation --experiment-type data_modes --output-dir 
+      dvclive/analysis/ablation/data_modes --approach bayesian
+    deps:
+    - path: dvclive/ablation/all_keypoints_only/loso/fold_metrics.json
+      hash: md5
+      md5: 60f99fcd9363c3a4807d54950401d474
+      size: 3977
+    - path: dvclive/ablation/real_keypoints_only/loso/fold_metrics.json
+      hash: md5
+      md5: fc7aa9ce047b2e8d69450d9cc37acdef
+      size: 3974
+    - path: dvclive/ablation/synthetic_keypoints_only/loso/fold_metrics.json
+      hash: md5
+      md5: b85ce3c0523cd754e386261fc3b236f5
+      size: 3974
+    - path: src/analysis/statistical/
+      hash: md5
+      md5: 725239508df5526e87c9a866773882e2.dir
+      size: 69095
+      nfiles: 15
+    - path: src/analysis/statistical_analysis.py
+      hash: md5
+      md5: 002edfaae4b9848198fde8f1a1987859
+      size: 8376
+      isexec: true
+    outs:
+    - path: dvclive/analysis/ablation/data_modes/model_rankings_f1.csv
+      hash: md5
+      md5: b62effac2c43c78db9cacea7119e0344
+      size: 718
+    - path: dvclive/analysis/ablation/data_modes/statistical_results_f1.json
+      hash: md5
+      md5: a18d82265b7f2e84722ac55359a1ff08
+      size: 1972
+  statistical_analysis_ablation_feature_modes@accuracy:
+    cmd: uv run src/analysis/statistical_analysis.py --models all_keypoints_only
+      all_all_features --metric accuracy --analysis-type ablation 
+      --experiment-type feature_modes --output-dir 
+      dvclive/analysis/ablation/feature_modes --approach bayesian
+    deps:
+    - path: dvclive/ablation/all_all_features/loso/fold_metrics.json
+      hash: md5
+      md5: 0340618081a0ddae96a3c980706a7985
+      size: 3979
+    - path: dvclive/ablation/all_keypoints_only/loso/fold_metrics.json
+      hash: md5
+      md5: 60f99fcd9363c3a4807d54950401d474
+      size: 3977
+    - path: src/analysis/statistical/
+      hash: md5
+      md5: 725239508df5526e87c9a866773882e2.dir
+      size: 69095
+      nfiles: 15
+    - path: src/analysis/statistical_analysis.py
+      hash: md5
+      md5: 002edfaae4b9848198fde8f1a1987859
+      size: 8376
+      isexec: true
+    outs:
+    - path: dvclive/analysis/ablation/feature_modes/model_rankings_accuracy.csv
+      hash: md5
+      md5: 7959a1005512ca8e0347bd1a029a5424
+      size: 505
+    - path: 
+        dvclive/analysis/ablation/feature_modes/statistical_results_accuracy.json
+      hash: md5
+      md5: e9808587ec235f2b7f03dc536ca89c84
+      size: 1226
+  statistical_analysis_ablation_feature_modes@f1:
+    cmd: uv run src/analysis/statistical_analysis.py --models all_keypoints_only
+      all_all_features --metric f1 --analysis-type ablation --experiment-type 
+      feature_modes --output-dir dvclive/analysis/ablation/feature_modes 
+      --approach bayesian
+    deps:
+    - path: dvclive/ablation/all_all_features/loso/fold_metrics.json
+      hash: md5
+      md5: 0340618081a0ddae96a3c980706a7985
+      size: 3979
+    - path: dvclive/ablation/all_keypoints_only/loso/fold_metrics.json
+      hash: md5
+      md5: 60f99fcd9363c3a4807d54950401d474
+      size: 3977
+    - path: src/analysis/statistical/
+      hash: md5
+      md5: 725239508df5526e87c9a866773882e2.dir
+      size: 69095
+      nfiles: 15
+    - path: src/analysis/statistical_analysis.py
+      hash: md5
+      md5: 002edfaae4b9848198fde8f1a1987859
+      size: 8376
+      isexec: true
+    outs:
+    - path: dvclive/analysis/ablation/feature_modes/model_rankings_f1.csv
+      hash: md5
+      md5: 71337569e30f5d6899c62b256d81aeb8
+      size: 506
+    - path: dvclive/analysis/ablation/feature_modes/statistical_results_f1.json
+      hash: md5
+      md5: 2ea6486cd98f08293eb882aa55169370
+      size: 1219
+  statistical_analysis_ablation_full@accuracy:
+    cmd: uv run python src/analysis/statistical_analysis.py --models 
+      real_keypoints_only real_all_features synthetic_keypoints_only 
+      synthetic_all_features all_keypoints_only all_all_features --metric 
+      accuracy --analysis-type ablation --experiment-type full --output-dir 
+      dvclive/analysis/ablation/full --approach bayesian
+    deps:
+    - path: dvclive/ablation/all_all_features/loso/fold_metrics.json
+      hash: md5
+      md5: 0340618081a0ddae96a3c980706a7985
+      size: 3979
+    - path: dvclive/ablation/all_keypoints_only/loso/fold_metrics.json
+      hash: md5
+      md5: 60f99fcd9363c3a4807d54950401d474
+      size: 3977
+    - path: dvclive/ablation/real_all_features/loso/fold_metrics.json
+      hash: md5
+      md5: 97332c0c3fc06a7aafc270f20a2f6fc1
+      size: 3970
+    - path: dvclive/ablation/real_keypoints_only/loso/fold_metrics.json
+      hash: md5
+      md5: fc7aa9ce047b2e8d69450d9cc37acdef
+      size: 3974
+    - path: dvclive/ablation/synthetic_all_features/loso/fold_metrics.json
+      hash: md5
+      md5: 196c3f300682a1ce78e5643d7a337fb4
+      size: 3963
+    - path: dvclive/ablation/synthetic_keypoints_only/loso/fold_metrics.json
+      hash: md5
+      md5: b85ce3c0523cd754e386261fc3b236f5
+      size: 3974
+    - path: src/analysis/statistical/
+      hash: md5
+      md5: 725239508df5526e87c9a866773882e2.dir
+      size: 69095
+      nfiles: 15
+    - path: src/analysis/statistical_analysis.py
+      hash: md5
+      md5: 002edfaae4b9848198fde8f1a1987859
+      size: 8376
+      isexec: true
+    outs:
+    - path: dvclive/analysis/ablation/full/model_rankings_accuracy.csv
+      hash: md5
+      md5: 9dd5c9dd003991850100721dc46cbdc7
+      size: 1328
+    - path: dvclive/analysis/ablation/full/statistical_results_accuracy.json
+      hash: md5
+      md5: bd543d72335d274112ab1267c16191ae
+      size: 4166
+  statistical_analysis_ablation_full@f1:
+    cmd: uv run python src/analysis/statistical_analysis.py --models 
+      real_keypoints_only real_all_features synthetic_keypoints_only 
+      synthetic_all_features all_keypoints_only all_all_features --metric f1 
+      --analysis-type ablation --experiment-type full --output-dir 
+      dvclive/analysis/ablation/full --approach bayesian
+    deps:
+    - path: dvclive/ablation/all_all_features/loso/fold_metrics.json
+      hash: md5
+      md5: 0340618081a0ddae96a3c980706a7985
+      size: 3979
+    - path: dvclive/ablation/all_keypoints_only/loso/fold_metrics.json
+      hash: md5
+      md5: 60f99fcd9363c3a4807d54950401d474
+      size: 3977
+    - path: dvclive/ablation/real_all_features/loso/fold_metrics.json
+      hash: md5
+      md5: 97332c0c3fc06a7aafc270f20a2f6fc1
+      size: 3970
+    - path: dvclive/ablation/real_keypoints_only/loso/fold_metrics.json
+      hash: md5
+      md5: fc7aa9ce047b2e8d69450d9cc37acdef
+      size: 3974
+    - path: dvclive/ablation/synthetic_all_features/loso/fold_metrics.json
+      hash: md5
+      md5: 196c3f300682a1ce78e5643d7a337fb4
+      size: 3963
+    - path: dvclive/ablation/synthetic_keypoints_only/loso/fold_metrics.json
+      hash: md5
+      md5: b85ce3c0523cd754e386261fc3b236f5
+      size: 3974
+    - path: src/analysis/statistical/
+      hash: md5
+      md5: 725239508df5526e87c9a866773882e2.dir
+      size: 69095
+      nfiles: 15
+    - path: src/analysis/statistical_analysis.py
+      hash: md5
+      md5: 002edfaae4b9848198fde8f1a1987859
+      size: 8376
+      isexec: true
+    outs:
+    - path: dvclive/analysis/ablation/full/model_rankings_f1.csv
+      hash: md5
+      md5: c97892b99ae6e0c363bfbe07b65a12a2
+      size: 1323
+    - path: dvclive/analysis/ablation/full/statistical_results_f1.json
+      hash: md5
+      md5: ba933016b0973627e8ae1e51fcecec03
+      size: 4157

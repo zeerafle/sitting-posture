@@ -1,0 +1,3 @@
+learning_rate: 0.08783376731568662
+n_estimators: 1460
+cv_strategy: StratifiedKFold

@@ -81,7 +81,7 @@ def visualize(
         # Draw all the landmarks
         for i in range(len(keypoints)):
             if keypoints[i].score >= keypoint_threshold:
-                cv2.circle(image, keypoints[i].coordinate, 17, person_color, 4)
+                cv2.circle(image, keypoints[i].coordinate, 1, person_color, 1)
 
         # Draw all the edges
         for edge_pair, edge_color in KEYPOINT_EDGE_INDS_TO_COLOR.items():
@@ -94,7 +94,7 @@ def visualize(
                     keypoints[edge_pair[0]].coordinate,
                     keypoints[edge_pair[1]].coordinate,
                     edge_color,
-                    15,
+                    1,
                 )
 
     return image
@@ -115,16 +115,16 @@ def draw_prediction_on_image(image, person, close_figure=True, keep_input_size=F
       image overlaid with keypoint predictions.
     """
     # Draw the detection result on top of the image.
-    image_np = visualize(image, [person], keypoint_color=None)
+    image_np = visualize(image, [person], keypoint_color=None, keypoint_threshold=0)
 
     # Plot the image with detection results.
-    height, width, _ = image.shape
-    aspect_ratio = float(width) / height
-    display_height = 512
-    display_width = int(display_height * aspect_ratio)
-    resized_image = cv2.resize(image_np, (display_width, display_height))
-    fig, ax = plt.subplots(figsize=(12 * aspect_ratio, 12))
-    _ = ax.imshow(resized_image)
+    # height, width, _ = image.shape
+    # aspect_ratio = float(width) / height
+    # display_height = 512
+    # display_width = int(display_height * aspect_ratio)
+    # resized_image = cv2.resize(image_np, (display_width, display_height))
+    fig, ax = plt.subplots(figsize=(12,12))
+    _ = ax.imshow(image_np)
 
     if close_figure:
         plt.close(fig)
@@ -138,6 +138,9 @@ def draw_prediction_on_image(image, person, close_figure=True, keep_input_size=F
 def load_image(image_path):
     img = tf.io.read_file(image_path)
     img = tf.image.decode_image(img, channels=3)
+    img = tf.cast(
+        tf.image.resize_with_pad(img, 256, 256), dtype=tf.int32
+    )
     return img
 
 
@@ -154,10 +157,6 @@ def detect(model, input_tensor: tf.Tensor) -> Person:
       A Person entity detected by the MoveNet.SinglePose.
     """
     image_height, image_width, _ = input_tensor.shape
-    # Resize with pad to keep the aspect ratio and fit the expected size.
-    input_tensor = tf.cast(
-        tf.image.resize_with_pad(input_tensor, 256, 256), dtype=tf.int32
-    )
     # Add a batch dimension.
     input_tensor = tf.expand_dims(input_tensor, axis=0)
     keypoints_with_scores = model(input_tensor)["output_0"]
